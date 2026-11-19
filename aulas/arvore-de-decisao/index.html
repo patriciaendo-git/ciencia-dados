@@ -128,6 +128,27 @@ footer ol{padding-left:1.2em}
 .carregar-status{font-size:.88rem;color:var(--tinta2);margin-top:8px}
 @media (max-width:560px){body{font-size:15.5px}figure{padding:14px}.pilhas{grid-template-columns:1fr}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.nota-comp{background:var(--papel);border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:18px 20px;margin:30px 0 8px}
+.etq-nc{display:block;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta2);margin-bottom:4px}
+.nota-comp h3{margin:0 0 12px;font-size:1.05rem}
+.nota-comp p{margin:12px 0 0;font-size:.95rem}
+.tab-scroll{overflow-x:auto}
+table.cmp{width:100%;min-width:520px;border-collapse:collapse;font-size:.85rem;line-height:1.45;background:var(--fundo)}
+table.cmp thead th{background:var(--tinta);color:var(--fundo);text-align:left;padding:8px 10px;vertical-align:bottom;font-weight:600}
+table.cmp thead th span{display:block;font-weight:400;font-size:.75rem;opacity:.75}
+table.cmp tbody th{text-align:left;padding:8px 10px;vertical-align:top;font-weight:700;width:24%}
+table.cmp td{padding:8px 10px;vertical-align:top;border-top:1px solid var(--linha)}
+table.cmp tbody th{border-top:1px solid var(--linha)}
+.arv-larga{overflow-x:auto;margin-top:6px}
+figure.larga-fig{width:min(1060px,calc(100vw - 32px));position:relative;left:50%;margin-left:calc(-1*min(1060px,calc(100vw - 32px))/2)}
+.arv-svg{min-width:720px}
+.arv-svg svg{display:block}
+.pergunta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;min-height:42px}
+.pergunta .pq{font-weight:700;font-size:1.05rem;margin-right:4px}
+.bt{font:inherit;font-weight:600;font-size:.95rem;border-radius:8px;padding:6px 18px;cursor:pointer;border:2px solid var(--tinta);background:var(--fundo);color:var(--tinta)}
+.bt.sim{background:var(--tinta);color:var(--fundo)}
+.bt.rec{font-size:.85rem;border-color:var(--linha);color:var(--tinta2);padding:5px 12px}
 </style>
 </head>
 <body>
@@ -154,6 +175,13 @@ footer ol{padding-left:1.2em}
   </figure>
 
   <p class="destaque">Um detalhe antes de começar: na base completa, 67% dos registros com desfecho são de dengue confirmada, um caso de <strong>desbalanceamento de classes</strong> (<em>class imbalance</em>). Um <strong>classificador da classe majoritária</strong> (<em>majority-class baseline</em>), que responde sempre “dengue”, já tem 67% de <strong>acurácia</strong> (<em>accuracy</em>), a proporção de acertos, sem aprender nada. Por isso, aqui usamos uma <strong>amostra balanceada</strong>, obtida por <strong>subamostragem</strong> (<em>undersampling</em>) da classe majoritária: assim, qualquer acurácia acima de 50% vem dos sinais clínicos do paciente.</p>
+
+  <aside class="nota-comp" aria-labelledby="notaComp">
+    <span class="etq-nc">Nota complementar</span>
+    <h3 id="notaComp">Árvore de busca binária × árvore de decisão</h3>
+    <div class="tab-scroll"><table class="cmp"><thead><tr><th></th><th>Árvore de busca binária<span>Estrutura de Dados</span></th><th class="ad">Árvore de decisão<span>Aprendizado de Máquina</span></th></tr></thead><tbody><tr><th scope="row">Para que serve</th><td>Guardar chaves e encontrar uma chave exata rapidamente</td><td class="ad">Prever a classe de uma instância nova</td></tr><tr><th scope="row">Em cada nó</th><td>Uma chave</td><td class="ad">Uma pergunta sobre um atributo (o paciente tem febre?)</td></tr><tr><th scope="row">Como é construída</th><td>Pela ordem de inserção, com uma regra fixa: menor à esquerda, maior à direita</td><td class="ad">A partir de dados rotulados: em cada divisão, o algoritmo calcula a impureza de cada atributo e escolhe a melhor pergunta</td></tr><tr><th scope="row">Como é percorrida</th><td>Compara a chave com a do nó e desce para um lado</td><td class="ad">Responde à pergunta do nó com os dados do registro e desce</td></tr><tr><th scope="row">Nas folhas</th><td>Fim da busca</td><td class="ad">A classe prevista e a proporção de cada classe</td></tr><tr><th scope="row">Resultado</th><td>Encontrou ou não encontrou</td><td class="ad">Uma previsão, que pode errar</td></tr></tbody></table></div>
+    <p>Percorrer as duas árvores é parecido. O que torna a árvore de decisão um modelo de aprendizado de máquina é <strong>como as perguntas são escolhidas</strong>: elas são aprendidas a partir dos dados.</p>
+  </aside>
 </section>
 
 <section class="col">
@@ -227,7 +255,7 @@ footer ol{padding-left:1.2em}
   <p>As saídas antecipadas do pseudocódigo são critérios de parada naturais: o nó é puro, não há mais atributos para testar ou a partição ficou vazia. Há ainda um caso comum em dados reais: o nó continua impuro, mas nenhum atributo traz ganho. Registros com exatamente os mesmos sinais e desfechos diferentes não podem ser separadas por regra nenhuma, e o nó vira folha com a classe majoritária. Nos nossos dados, isso acontece o tempo todo.</p>
   <p>Um dos critérios de parada mais usados é a <strong>profundidade máxima</strong> (<code>max_depth</code>), um <strong>hiperparâmetro</strong> (<em>hyperparameter</em>): um valor escolhido antes do treinamento, e não aprendido com os dados. Use o controle para aumentar a profundidade e acompanhe a acurácia em dois conjuntos: o <strong>conjunto de treinamento</strong> (<em>training set</em>), usado para construir a árvore, e o <strong>conjunto de teste</strong> (<em>test set</em>), com instâncias que ela nunca viu. A acurácia no teste estima o <strong>desempenho de generalização</strong> (<em>generalization performance</em>). Com a amostra real, a divisão é <strong>temporal</strong>: o treinamento usa as semanas epidemiológicas mais antigas e o teste, as seguintes.</p>
 
-  <figure>
+  <figure class="larga-fig">
     <div class="controle">
       <label for="prof">Profundidade da árvore</label>
       <input type="range" id="prof" min="0" max="8" value="1" step="1">
@@ -237,7 +265,7 @@ footer ol{padding-left:1.2em}
     <svg id="curvaAcerto" viewBox="0 0 640 280" width="100%" role="img" aria-label="Acerto no treino e no teste conforme a profundidade da árvore"></svg>
     <div class="legenda"><span><i class="sw" style="background:var(--tinta)"></i>Treinamento</span><span><i class="sw" style="background:var(--vermelho)"></i>Teste</span></div>
     <h3 id="tituloArvore">A árvore com profundidade 1</h3>
-    <ul class="arvore" id="arvore"></ul>
+    <div class="arv-larga"><div class="arv-svg" id="arvore"></div></div>
     <figcaption id="legendaDados"></figcaption>
     <div class="controle" style="margin-top:14px">
       <label class="botao" for="arquivoCsv">Usar a amostra real da base dot</label>
@@ -253,11 +281,11 @@ footer ol{padding-left:1.2em}
 
 <section class="col">
   <h2>Seguindo um registro</h2>
-  <p>A grande vantagem das árvores é a <strong>interpretabilidade</strong> (<em>interpretability</em>): são modelos de <strong>caixa-branca</strong> (<em>white-box</em>), cuja decisão pode ser lida e auditada. Cada <strong>caminho da raiz à folha</strong> (<em>root-to-leaf path</em>) equivale a uma <strong>regra de decisão</strong> (<em>decision rule</em>), uma conjunção de condições do tipo “se A e não B, então dengue”. Marque os sinais de um registro imaginário e veja o caminho que ela percorre numa árvore de profundidade 3.</p>
+  <p>A grande vantagem das árvores é a <strong>interpretabilidade</strong> (<em>interpretability</em>): são modelos de <strong>caixa-branca</strong> (<em>white-box</em>), cuja decisão pode ser lida e auditada. Cada <strong>caminho da raiz à folha</strong> (<em>root-to-leaf path</em>) equivale a uma <strong>regra de decisão</strong> (<em>decision rule</em>), uma conjunção de condições do tipo “se A e não B, então dengue”. Imagine um registro e responda às perguntas da árvore de profundidade 3, uma de cada vez, começando pela raiz. A cada resposta, o caminho avança um nível.</p>
 
-  <figure>
-    <div class="ficha" id="ficha"></div>
-    <ul class="arvore" id="arvoreCaminho"></ul>
+  <figure class="larga-fig">
+    <div class="pergunta" id="pergunta"></div>
+    <div class="arv-larga"><div class="arv-svg" id="arvoreCaminho"></div></div>
     <div class="veredito" id="veredito" aria-live="polite"></div>
   </figure>
 
@@ -465,6 +493,28 @@ function recalcular(){
 function folhaHTML(no,ativo){
   return `<span class="folha"><span class="barra"><i style="width:${no.pD*100}%;background:var(--dengue)"></i><i style="width:${(1-no.pD)*100}%;background:var(--outro)"></i></span><span class="pv">${pct(no.pD)} dengue em ${no.rows} ${no.rows===1?'registro':'registros'}: prevê <span class="${classe(no)==='D'?'d':'o'}">${classe(no)==='D'?'dengue':'descartado'}</span></span></span>`;
 }
+
+function arvoreSVG(raiz,caminho,neutro,atual){
+ const folhas=[];(function f(n,d){n._d=d;if(!n.k){folhas.push(n);return;}f(n.sim,d+1);f(n.nao,d+1);})(raiz,0);
+ const prof=Math.max(...folhas.map(n=>n._d)),nF=folhas.length,W=1060,bw=Math.min(230,W/nF-12),bh=84;
+ folhas.forEach((n,i)=>{n._x=(i+.5)*W/nF;});
+ (function px(n){if(!n.k){n._f=1;return n._x;}n._x=(px(n.sim)+px(n.nao))/2;n._f=n.sim._f+n.nao._f;return n._x;})(raiz);
+ const BW=n=>Math.min(230,n._f*W/nF-12);
+ const gapY=132,Y=d=>4+d*gapY,fs=bw<150?15:17,fs2=bw<150?13:15;
+ let ed='',nd='';
+ (function draw(n){
+  if(n.k){for(const [c,l] of [[n.sim,'sim'],[n.nao,'não']]){const con=!!caminho&&caminho.has(n)&&caminho.has(c);
+    const x1=n._x,y1=Y(n._d)+bh,x2=c._x,y2=Y(c._d);
+    ed+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${con?'var(--vermelho)':(caminho?'var(--linha)':'var(--tinta2)')}" stroke-width="${con?4:1.6}"/>`;
+    ed+=`<text x="${(x1+x2)/2+(x2<x1?-10:10)}" y="${(y1+y2)/2+4}" text-anchor="${x2<x1?'end':'start'}" font-size="14" font-weight="${con?700:400}" fill="${con?'var(--dengue-t)':'var(--tinta2)'}">${l}</text>`;draw(c);}}
+  const desab=!!caminho&&!caminho.has(n);
+  const cor=desab?'var(--fundo)':((n.k||neutro)?'#282425':(classe(n)==='D'?'#F72120':'#9C9496'));const tc=desab?'var(--tinta2)':'#fff';
+  const t1=n.k?NOME[n.k]+'?':(classe(n)==='D'?'dengue':'descartado');
+  const linhas=n.k?[[t1,fs,700],[`${n.rows} registros`,fs2,400]]:[[t1,fs,700],[`${pct(n.pD)} dengue`,fs2,400],[`${n.rows} ${n.rows===1?'registro':'registros'}`,fs2,400]];
+  const y0=Y(n._d)+(linhas.length===2?36:28),dy=linhas.length===2?26:22;
+  nd+=`<g opacity="${desab?.75:1}"><rect x="${n._x-BW(n)/2}" y="${Y(n._d)}" width="${BW(n)}" height="${bh}" rx="10" fill="${cor}"${desab?' stroke="var(--linha)" stroke-width="2"':''}${n===atual?' stroke="#F72120" stroke-width="5"':''}/>`+linhas.map(([t,f,w],i)=>`<text x="${n._x}" y="${y0+i*dy}" text-anchor="middle" font-size="${f}" font-weight="${w}" fill="${tc}">${t}</text>`).join('')+`</g>`;})(raiz);
+ return `<svg viewBox="0 0 ${W} ${Y(prof)+bh+6}" width="100%" role="img" aria-label="Árvore de decisão">${ed}${nd}</svg>`;}
+
 function arvoreHTML(no,caminho,ramo){
   const cls=caminho?(caminho.has(no)?'no-ativo':'inativo'):'';
   const r=ramo?`<span class="ramo">${ramo}</span>`:'';
@@ -490,25 +540,31 @@ function desenharAcerto(){
   document.getElementById('profV').textContent=d;
   const a=ARVORES[d],nf=contarFolhas(a);
   document.getElementById('tituloArvore').textContent=`A árvore com profundidade ${d}: ${nf} ${nf===1?'folha':'folhas'}`;
-  document.getElementById('arvore').innerHTML=d<=3?arvoreHTML(a):`<li class="nota">Com ${nf} folhas, a árvore fica grande demais para ler aqui. Esse é outro custo da profundidade: além de decorar o treino, a árvore deixa de ser explicável.</li>`;
+  document.getElementById('arvore').innerHTML=d<=3?arvoreSVG(a,null,false,null):`<p class="nota" style="max-width:640px;margin:0 auto">Com ${nf} folhas, a árvore fica grande demais para ler aqui. Esse é outro custo da profundidade: além de decorar o treino, a árvore deixa de ser explicável.</p>`;
 }
 prof.addEventListener('input',desenharAcerto);
 document.getElementById('chipsTam').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b&&!b.disabled){TAM=+b.dataset.n;tudo();}});
 
-/* seguir uma ficha */
-const marcados={};
-function desenharFicha(){
-  const a=ARVORES[3],usados=new Set();(function f(n){if(n.k){usados.add(n.k);f(n.sim);f(n.nao);}})(a);
-  const lista=SINAIS.filter(s=>usados.has(s.k));
-  document.getElementById('ficha').innerHTML=lista.map(s=>`<label><input type="checkbox" data-k="${s.k}" ${marcados[s.k]?'checked':''}> ${s.n}</label>`).join('')||'<p class="nota">A árvore não encontrou nenhuma pergunta útil.</p>';
-  const caminho=new Set();let n=a;caminho.add(n);while(n.k){n=marcados[n.k]?n.sim:n.nao;caminho.add(n);}
-  document.getElementById('arvoreCaminho').innerHTML=arvoreHTML(a,caminho);
-  const c=classe(n);
-  document.getElementById('veredito').innerHTML=`A árvore responde <strong class="${c==='D'?'d':'o'}">${c==='D'?'dengue':'descartado'}</strong>. Probabilidade estimada de dengue: ${pct(n.pD)}, a proporção entre as ${n.rows} instâncias de treinamento desta folha.`;
-}
-document.getElementById('ficha').addEventListener('change',e=>{const k=e.target.dataset.k;if(k){marcados[k]=e.target.checked;desenharFicha();}});
+/* seguir um registro, uma pergunta de cada vez */
+let regCam=null,regAtual=null;
+function recomecarRegistro(){const a=ARVORES[3];regAtual=a;regCam=new Set([a]);}
+function desenharFicha(){const a=ARVORES[3];if(!regCam||!regCam.has(a))recomecarRegistro();
+ const pg=document.getElementById('pergunta'),ver=document.getElementById('veredito');
+ if(!a.k){pg.innerHTML='';document.getElementById('arvoreCaminho').innerHTML='';ver.textContent='A árvore não encontrou nenhuma pergunta útil.';return;}
+ if(regAtual.k){
+  pg.innerHTML=`<span class="pq">${NOME[regAtual.k]}?</span><button type="button" class="bt sim" data-r="sim">Sim</button><button type="button" class="bt" data-r="nao">Não</button>`+(regCam.size>1?`<button type="button" class="bt rec" data-r="rec">Recomeçar</button>`:'');
+  document.getElementById('arvoreCaminho').innerHTML=arvoreSVG(a,regCam,true,regAtual);
+  ver.innerHTML=regCam.size>1?`Responda à próxima pergunta: o paciente tem <strong>${NOME[regAtual.k].toLowerCase()}</strong>?`:`Comece pela raiz: o paciente tem <strong>${NOME[regAtual.k].toLowerCase()}</strong>?`;
+ } else {
+  pg.innerHTML=`<button type="button" class="bt rec" data-r="rec">Recomeçar</button>`;
+  document.getElementById('arvoreCaminho').innerHTML=arvoreSVG(a,regCam,false,null);
+  const c=classe(regAtual);
+  ver.innerHTML=`A árvore responde <strong class="${c==='D'?'d':'o'}">${c==='D'?'dengue':'descartado'}</strong>. Probabilidade estimada de dengue: ${pct(regAtual.pD)}, a proporção entre as ${regAtual.rows} instâncias de treinamento desta folha.`;}}
+document.getElementById('pergunta').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.r==='rec')recomecarRegistro();else if(regAtual.k){regAtual=b.dataset.r==='sim'?regAtual.sim:regAtual.nao;regCam.add(regAtual);}
+ desenharFicha();});
 
-function tudo(){recalcular();desenharAcerto();desenharFicha();}
+function tudo(){recalcular();desenharAcerto();regCam=null;desenharFicha();}
 tudo();
 
 /* amostra real */
