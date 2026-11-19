@@ -41,7 +41,8 @@ button,input{font:inherit;color:inherit}
 .larga{max-width:880px;margin:0 auto;padding:0 20px}
 header.abertura{padding:40px 0 28px;border-bottom:2px solid var(--vermelho);margin-bottom:8px}
 .topo{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px}
-.topo img{height:52px;width:auto;display:block}
+.topo img{height:64px;width:auto;display:block;background:#fff;border-radius:6px}
+.topo .logos{display:flex;align-items:center;gap:16px}.topo .logos .sep{width:1px;height:46px;background:var(--linha)}.topo img.dotl{height:56px;padding:3px}
 .topo .volta{font-size:.82rem;font-weight:600;color:var(--tinta2);text-decoration:none}
 .topo .volta:hover{color:var(--dengue-t)}
 .selo{display:block;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:14px}
@@ -132,27 +133,27 @@ footer ol{padding-left:1.2em}
 <body>
 
 <header class="abertura col">
-  <div class="topo"><img src="../../logo.png" alt="dotLAB"><a class="volta" href="../../index.html">Todas as aulas</a></div>
+  <div class="topo"><div class="logos"><img src="../../upe.png" alt="Universidade de Pernambuco (UPE)"><span class="sep"></span><img src="../../logo.png" alt="dotLAB" class="dotl"></div><a class="volta" href="../../index.html">Todas as aulas</a></div>
   <span class="selo">Ciência de Dados · Aula 06 · Árvore de decisão</span>
   <h1>Diagnóstico diferencial de <em>dengue</em> com dados clínicos</h1>
-  <p class="lead">Uma introdução às árvores de decisão com fichas de notificação do SINAN.</p>
+  <p class="lead">Uma introdução às árvores de decisão com registros de notificação do SINAN.</p>
   <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">No dotLAB · VALERIA</span></div>
 </header>
 
 <main>
 <section class="col">
   <p>Quando alguém chega a uma unidade de saúde com febre e/ou dor no corpo durante uma epidemia de dengue, a equipe preenche uma ficha de notificação: quais sinais a pessoa tem, quando começaram, se tem alguma doença prévia. Só depois, às vezes, vem o exame laboratorial que confirma ou descarta a dengue.</p>
-  <p>E esse “às vezes” pesa. Segundo o Ministério da Saúde, citado no <em>data paper</em> da base de arboviroses do dotLAB<sup><a href="#ref1">1</a></sup>, apenas cerca de 23% dos casos foram testados em laboratórios de referência. No resto, a decisão depende das informações clínicas que estão na ficha do paciente.</p>
-  <p>Então, nossa pergunta é: <strong>considerando apenas os sinais clínicos, uma máquina consegue classificar quem tem dengue de quem não tem?</strong> Em termos de aprendizado de máquina, queremos um <strong>classificador binário</strong> (<em>binary classifier</em>) treinado por <strong>aprendizado supervisionado</strong> (<em>supervised learning</em>): o modelo aprende com fichas cujo desfecho já é conhecido. Para responder, vamos construir uma árvore de decisão, passo a passo.</p>
-  <p>Cada ficha é uma <strong>instância</strong> (<em>instance</em>), descrita por <strong>atributos</strong> (<em>features</em>): os sinais clínicos. O desfecho, dengue confirmada ou caso descartado, é a <strong>classe</strong> ou <strong>rótulo</strong> (<em>label</em>), a <strong>variável-alvo</strong> (<em>target</em>) do modelo. Aqui, dengue é a <strong>classe positiva</strong>.</p>
+  <p>E esse “às vezes” pesa. Segundo o Ministério da Saúde, citado no <em>data paper</em> da base de arboviroses do dotLAB<sup><a href="#ref1">1</a></sup>, apenas cerca de 23% dos casos foram testados em laboratórios de referência. No resto, a decisão depende das informações clínicas que estão no registro do paciente.</p>
+  <p>Então, nossa pergunta é: <strong>considerando apenas os sinais clínicos, uma máquina consegue classificar quem tem dengue de quem não tem?</strong> Em termos de aprendizado de máquina, queremos um <strong>classificador binário</strong> (<em>binary classifier</em>) treinado por <strong>aprendizado supervisionado</strong> (<em>supervised learning</em>): o modelo aprende com registros cujo desfecho já é conhecido. Para responder, vamos construir uma árvore de decisão, passo a passo.</p>
+  <p>Cada registro é uma <strong>instância</strong> (<em>instance</em>), descrita por <strong>atributos</strong> (<em>features</em>): os sinais clínicos. O desfecho, dengue confirmada ou caso descartado, é a <strong>classe</strong> ou <strong>rótulo</strong> (<em>label</em>), a <strong>variável-alvo</strong> (<em>target</em>) do modelo. Aqui, dengue é a <strong>classe positiva</strong>.</p>
 
   <figure>
-    <div class="grade" id="grade" role="img" aria-label="100 fichas, 50 de dengue confirmada e 50 de casos descartados, misturadas"></div>
+    <div class="grade" id="grade" role="img" aria-label="100 registros, 50 de dengue confirmada e 50 de casos descartados, misturadas"></div>
     <div class="legenda"><span><i class="sw D"></i>Dengue confirmada</span><span><i class="sw O"></i>Caso descartado ou inconclusivo</span></div>
-    <figcaption>Cem instâncias de casos suspeitos, metade de cada classe. Sem usar nenhum atributo, um classificador aleatório acerta metade.</figcaption>
+    <figcaption>Cem registros de casos suspeitos, metade de cada classe. Sem usar nenhum atributo, um classificador aleatório acerta metade.</figcaption>
   </figure>
 
-  <p class="destaque">Um detalhe antes de começar: na base completa, 67% das fichas com desfecho são de dengue confirmada, um caso de <strong>desbalanceamento de classes</strong> (<em>class imbalance</em>). Um <strong>classificador da classe majoritária</strong> (<em>majority-class baseline</em>), que responde sempre “dengue”, já tem 67% de <strong>acurácia</strong> (<em>accuracy</em>), a proporção de acertos, sem aprender nada. Por isso, aqui usamos uma <strong>amostra balanceada</strong>, obtida por <strong>subamostragem</strong> (<em>undersampling</em>) da classe majoritária: assim, qualquer acurácia acima de 50% vem dos sinais clínicos do paciente.</p>
+  <p class="destaque">Um detalhe antes de começar: na base completa, 67% dos registros com desfecho são de dengue confirmada, um caso de <strong>desbalanceamento de classes</strong> (<em>class imbalance</em>). Um <strong>classificador da classe majoritária</strong> (<em>majority-class baseline</em>), que responde sempre “dengue”, já tem 67% de <strong>acurácia</strong> (<em>accuracy</em>), a proporção de acertos, sem aprender nada. Por isso, aqui usamos uma <strong>amostra balanceada</strong>, obtida por <strong>subamostragem</strong> (<em>undersampling</em>) da classe majoritária: assim, qualquer acurácia acima de 50% vem dos sinais clínicos do paciente.</p>
 </section>
 
 <section class="col">
@@ -178,7 +179,7 @@ footer ol{padding-left:1.2em}
   <p>Com duas classes, sendo <em>p</em> a proporção da classe positiva, elas ficam:</p>
   <p class="formula">H(p) = −p log₂ p − (1 − p) log₂ (1 − p)</p>
   <p class="formula">G(p) = 1 − p² − (1 − p)²</p>
-  <p>Daqui em diante usamos a entropia, mas o raciocínio é o mesmo com a impureza de Gini. No <code>DecisionTreeClassifier</code> do scikit-learn, a escolha é feita pelo parâmetro <code>criterion</code>, que aceita <code>"gini"</code> (o padrão) e <code>"entropy"</code>.</p>
+  <p>Daqui em diante usamos a entropia, e a divisão escolhida em cada nó é a de maior ganho de informação, como veremos a seguir; o raciocínio é o mesmo com a impureza de Gini. No <code>DecisionTreeClassifier</code> do scikit-learn, a escolha é feita pelo parâmetro <code>criterion</code>, que aceita <code>"gini"</code> (o padrão) e <code>"entropy"</code>.</p>
 </section>
 
 <section class="col">
@@ -197,7 +198,7 @@ footer ol{padding-left:1.2em}
   </figure>
 
   <p>O resultado é a primeira resposta à nossa pergunta. O atributo de maior ganho, a dor retro-orbital, reduz a entropia em cerca de 0,005 bit, menos de 1% do máximo possível. Ainda assim, ele carrega alguma informação: a <strong>probabilidade condicional</strong> (<em>conditional probability</em>) de dengue dado o sinal, P(dengue | dor retro-orbital), é de cerca de 61%, contra 48% quando o sinal está ausente.</p>
-  <p class="nota">Um cuidado de leitura: nessa tabela, “não” inclui as fichas em que o campo ficou em branco. Isso equivale a tratar os <strong>valores ausentes</strong> (<em>missing values</em>) como negativos, uma forma simples de <strong>imputação</strong> (<em>imputation</em>). Entre fichas totalmente preenchidas, as diferenças podem ser maiores.</p>
+  <p class="nota">Um cuidado de leitura: nessa tabela, “não” inclui os registros em que o campo ficou em branco. Isso equivale a tratar os <strong>valores ausentes</strong> (<em>missing values</em>) como negativos, uma forma simples de <strong>imputação</strong> (<em>imputation</em>). Entre registros totalmente preenchidos, as diferenças podem ser maiores.</p>
 </section>
 
 <section class="col">
@@ -223,7 +224,7 @@ footer ol{padding-left:1.2em}
           anexe a N o nó retornado por GerarArvore(Dj, atributos)
   retorne N</pre>
   <p class="nota">Adaptado de Han e Kamber (2006)<sup><a href="#ref3">3</a></sup>.</p>
-  <p>As saídas antecipadas do pseudocódigo são critérios de parada naturais: o nó é puro, não há mais atributos para testar ou a partição ficou vazia. Há ainda um caso comum em dados reais: o nó continua impuro, mas nenhum atributo traz ganho. Fichas com exatamente os mesmos sinais e desfechos diferentes não podem ser separadas por regra nenhuma, e o nó vira folha com a classe majoritária. Nos nossos dados, isso acontece o tempo todo.</p>
+  <p>As saídas antecipadas do pseudocódigo são critérios de parada naturais: o nó é puro, não há mais atributos para testar ou a partição ficou vazia. Há ainda um caso comum em dados reais: o nó continua impuro, mas nenhum atributo traz ganho. Registros com exatamente os mesmos sinais e desfechos diferentes não podem ser separadas por regra nenhuma, e o nó vira folha com a classe majoritária. Nos nossos dados, isso acontece o tempo todo.</p>
   <p>Um dos critérios de parada mais usados é a <strong>profundidade máxima</strong> (<code>max_depth</code>), um <strong>hiperparâmetro</strong> (<em>hyperparameter</em>): um valor escolhido antes do treinamento, e não aprendido com os dados. Use o controle para aumentar a profundidade e acompanhe a acurácia em dois conjuntos: o <strong>conjunto de treinamento</strong> (<em>training set</em>), usado para construir a árvore, e o <strong>conjunto de teste</strong> (<em>test set</em>), com instâncias que ela nunca viu. A acurácia no teste estima o <strong>desempenho de generalização</strong> (<em>generalization performance</em>). Com a amostra real, a divisão é <strong>temporal</strong>: o treinamento usa as semanas epidemiológicas mais antigas e o teste, as seguintes.</p>
 
   <figure>
@@ -251,8 +252,8 @@ footer ol{padding-left:1.2em}
 </section>
 
 <section class="col">
-  <h2>Seguindo uma ficha</h2>
-  <p>A grande vantagem das árvores é a <strong>interpretabilidade</strong> (<em>interpretability</em>): são modelos de <strong>caixa-branca</strong> (<em>white-box</em>), cuja decisão pode ser lida e auditada. Cada <strong>caminho da raiz à folha</strong> (<em>root-to-leaf path</em>) equivale a uma <strong>regra de decisão</strong> (<em>decision rule</em>), uma conjunção de condições do tipo “se A e não B, então dengue”. Marque os sinais de uma ficha imaginária e veja o caminho que ela percorre numa árvore de profundidade 3.</p>
+  <h2>Seguindo um registro</h2>
+  <p>A grande vantagem das árvores é a <strong>interpretabilidade</strong> (<em>interpretability</em>): são modelos de <strong>caixa-branca</strong> (<em>white-box</em>), cuja decisão pode ser lida e auditada. Cada <strong>caminho da raiz à folha</strong> (<em>root-to-leaf path</em>) equivale a uma <strong>regra de decisão</strong> (<em>decision rule</em>), uma conjunção de condições do tipo “se A e não B, então dengue”. Marque os sinais de um registro imaginário e veja o caminho que ela percorre numa árvore de profundidade 3.</p>
 
   <figure>
     <div class="ficha" id="ficha"></div>
@@ -260,7 +261,7 @@ footer ol{padding-left:1.2em}
     <div class="veredito" id="veredito" aria-live="polite"></div>
   </figure>
 
-  <p>A resposta vem acompanhada de uma <strong>probabilidade estimada</strong> (<em>predicted probability</em>) da classe positiva: a proporção de dengue entre as instâncias de treinamento que caíram na mesma folha. É o que o método <code>predict_proba</code> do scikit-learn retorna. Quando essa probabilidade fica perto de 50%, a árvore está dizendo que a ficha sozinha não basta. Saber se essas probabilidades correspondem às frequências observadas em dados novos é uma questão de <strong>calibração</strong> (<em>calibration</em>).</p>
+  <p>A resposta vem acompanhada de uma <strong>probabilidade estimada</strong> (<em>predicted probability</em>) da classe positiva: a proporção de dengue entre as instâncias de treinamento que caíram na mesma folha. É o que o método <code>predict_proba</code> do scikit-learn retorna. Quando essa probabilidade fica perto de 50%, a árvore está dizendo que os sinais clínicos, sozinhos, não bastam. Saber se essas probabilidades correspondem às frequências observadas em dados novos é uma questão de <strong>calibração</strong> (<em>calibration</em>).</p>
 </section>
 
 <section class="col">
@@ -285,14 +286,14 @@ footer ol{padding-left:1.2em}
 
 <section class="col">
   <h2>O que a árvore nos ensinou</h2>
-  <p>Nesta base, os atributos clínicos da ficha têm <strong>baixo poder discriminativo</strong> (<em>low discriminative power</em>) entre dengue confirmada e casos descartados. Nenhum atributo sozinho reduz muito a impureza, e uma árvore mais funda só melhora no conjunto de treinamento. Isso não é um defeito do método: é a árvore mostrando, de forma transparente, o que os dados permitem dizer.</p>
+  <p>Nesta base, os atributos clínicos dos registros têm <strong>baixo poder discriminativo</strong> (<em>low discriminative power</em>) entre dengue confirmada e casos descartados. Nenhum atributo sozinho reduz muito a impureza, e uma árvore mais funda só melhora no conjunto de treinamento. Isso não é um defeito do método: é a árvore mostrando, de forma transparente, o que os dados permitem dizer.</p>
   <p>Esse resultado conversa com o que a vigilância já sabe. Dengue, chikungunya e outras doenças febris começam de modo parecido, e o diagnóstico seguro depende de exame laboratorial. Um modelo útil, nesse cenário, talvez não seja o que dá a resposta final, mas o que apoia a <strong>triagem</strong> (<em>triage</em>), indicando quem testar primeiro. Para isso, em vez de classificar pela maioria da folha (um limiar de 50%), pode-se ajustar o <strong>limiar de decisão</strong> (<em>decision threshold</em>) aplicado à probabilidade estimada.</p>
   <p>E quando a árvore recebe atributos mais informativos? Tanner et al.<sup><a href="#ref5">5</a></sup> estudaram 1.200 pacientes que procuraram atendimento em até 72 horas após o início da febre, em Singapura e no Vietnã; 30,3% tinham dengue. Com um classificador C4.5 aplicado à temperatura corporal e a exames simples de sangue, a árvore distinguiu dengue de outras causas de febre com 84,7% de acurácia. O primeiro corte foi a contagem de plaquetas.</p>
-  <p>Vale ler esse número com o cuidado da abertura: com 69,7% de casos sem dengue, o classificador da classe majoritária já acertaria 69,7%, então a árvore acrescenta cerca de 15 pontos. Ainda assim, é muito mais do que os sinais da ficha conseguem nesta base. O método é o mesmo; o que muda é a informação contida nos atributos. Melhorar o modelo, muitas vezes, começa por melhorar os dados.</p>
+  <p>Vale ler esse número com o cuidado da abertura: com 69,7% de casos sem dengue, o classificador da classe majoritária já acertaria 69,7%, então a árvore acrescenta cerca de 15 pontos. Ainda assim, é muito mais do que os sinais clínicos conseguem nesta base. O método é o mesmo; o que muda é a informação contida nos atributos. Melhorar o modelo, muitas vezes, começa por melhorar os dados.</p>
   <p>Três perguntas para levar para a aula:</p>
   <ul>
-    <li><strong>Tratamento de valores ausentes:</strong> as fichas com campos em branco devem ser removidas, imputadas como “não” ou tratadas como uma categoria própria? Como cada escolha muda a árvore?</li>
-    <li><strong>Seleção de atributos</strong> (<em>feature selection</em>): que outras informações da ficha, como a semana epidemiológica ou a idade, poderiam ajudar? Quais delas causariam <strong>vazamento de dados</strong> (<em>data leakage</em>), entregando o desfecho ao modelo, como o resultado de um exame?</li>
+    <li><strong>Tratamento de valores ausentes:</strong> os registros com campos em branco devem ser removidas, imputadas como “não” ou tratadas como uma categoria própria? Como cada escolha muda a árvore?</li>
+    <li><strong>Seleção de atributos</strong> (<em>feature selection</em>): que outras informações do registro, como a semana epidemiológica ou a idade, poderiam ajudar? Quais delas causariam <strong>vazamento de dados</strong> (<em>data leakage</em>), entregando o desfecho ao modelo, como o resultado de um exame?</li>
     <li><strong>Custo assimétrico de erro:</strong> se o objetivo fosse priorizar exames, seria pior um <strong>falso negativo</strong> (dengue classificada como descartado) ou um <strong>falso positivo</strong> (caso descartado classificado como dengue)? Como isso se traduz em <strong>sensibilidade</strong> (<em>sensitivity</em>) e <strong>especificidade</strong> (<em>specificity</em>)?</li>
   </ul>
 </section>
@@ -324,7 +325,7 @@ footer ol{padding-left:1.2em}
     <dt>Impureza (<em>impurity</em>)</dt><dd>Medida de mistura de classes num nó.</dd>
     <dt>Impureza de Gini (<em>Gini impurity</em>)</dt><dd>Probabilidade de classificar errado uma instância sorteada do nó, rotulando-a ao acaso conforme as proporções do nó.</dd>
     <dt>Imputação (<em>imputation</em>)</dt><dd>Substituição de valores ausentes por valores estimados ou padronizados.</dd>
-    <dt>Instância (<em>instance</em>)</dt><dd>Uma observação do conjunto de dados; aqui, uma ficha.</dd>
+    <dt>Instância (<em>instance</em>)</dt><dd>Uma observação do conjunto de dados; aqui, um registro da tabela.</dd>
     <dt>Interpretabilidade (<em>interpretability</em>)</dt><dd>Facilidade de um ser humano entender como o modelo chega a uma decisão.</dd>
     <dt>Limiar de decisão (<em>decision threshold</em>)</dt><dd>Valor de probabilidade acima do qual a instância é atribuída à classe positiva.</dd>
     <dt>Medida de seleção de atributos (<em>attribute selection measure</em>)</dt><dd>Critério que ordena os atributos para escolher a divisão, como ganho de informação, razão de ganho ou impureza de Gini.</dd>
@@ -349,7 +350,7 @@ footer ol{padding-left:1.2em}
 </main>
 
 <footer class="col">
-  <p><strong>Dados.</strong> A seção “Uma regra de divisão de cada vez” usa as frequências publicadas na Tabela 6 de da Silva Neto et al. As seções seguintes usam, por padrão, fichas simuladas com essas mesmas frequências, sorteando cada sinal de forma independente; por isso, combinações de sinais não aparecem. Com o botão “Usar a amostra real da base dot”, elas passam a usar a amostra gerada pelo script <code>amostra_arvore_viva.py</code>.</p>
+  <p><strong>Dados.</strong> A seção “Uma regra de divisão de cada vez” usa as frequências publicadas na Tabela 6 de da Silva Neto et al. As seções seguintes usam, por padrão, registros simulados com essas mesmas frequências, sorteando cada sinal de forma independente; por isso, combinações de sinais não aparecem. Com o botão “Usar a amostra real da base dot”, elas passam a usar a amostra gerada pelo script <code>amostra_arvore_viva.py</code>.</p>
   <ol>
     <li id="ref1"><a href="https://doi.org/10.1038/s41597-022-01312-7">da Silva Neto, S. R. et al. Arboviral disease record data — Dengue and Chikungunya, Brazil, 2013–2020. <em>Scientific Data</em> 9, 198 (2022).</a></li>
     <li><a href="https://app.wiki.saude.es.gov.br/vigilancia/microdados/dic_dados_dengue.pdf">Ministério da Saúde. Dicionário de dados do SINAN Online: dengue e chikungunya.</a></li>
@@ -419,8 +420,8 @@ function desenharSinal(){
   document.getElementById('chipsSinais').innerHTML=SINAIS.map(s=>`<button type="button" class="chip" data-k="${s.k}" aria-pressed="${s.k===sel}">${s.n}</button>`).join('');
   const d=ganhos.find(g=>g.s.k===sel);
   document.getElementById('pilhas').innerHTML=`
-   <div class="pilha"><h4>Com ${d.s.n.toLowerCase()}: ${pct(d.ps)} das fichas</h4>${barra(d.dS)}<p><span class="d">${pct(d.dS)} dengue</span>, entropia ${fmt(H(d.dS))}</p></div>
-   <div class="pilha"><h4>Sem ${d.s.n.toLowerCase()}: ${pct(1-d.ps)} das fichas</h4>${barra(d.dN)}<p><span class="d">${pct(d.dN)} dengue</span>, entropia ${fmt(H(d.dN))}</p></div>`;
+   <div class="pilha"><h4>Com ${d.s.n.toLowerCase()}: ${pct(d.ps)} dos registros</h4>${barra(d.dS)}<p><span class="d">${pct(d.dS)} dengue</span>, entropia ${fmt(H(d.dS))}</p></div>
+   <div class="pilha"><h4>Sem ${d.s.n.toLowerCase()}: ${pct(1-d.ps)} dos registros</h4>${barra(d.dN)}<p><span class="d">${pct(d.dN)} dengue</span>, entropia ${fmt(H(d.dN))}</p></div>`;
   const svg=document.getElementById('ganhos'),l=170,r=70,t=8,rowH=32,W=640,max=ganhos[0].g;
   svg.innerHTML=ganhos.map((g,i)=>{const y=t+i*rowH,w=(W-l-r)*g.g/max,on=g.s.k===sel;
     return `<g><text class="rot" x="${l-10}" y="${y+18}" text-anchor="end" style="${on?'font-weight:700':''}">${g.s.n}</text>
@@ -457,18 +458,18 @@ function recalcular(){
   const tr=treino();for(let d=0;d<=8;d++){const a=construir(tr,d,[]);ARVORES.push(a);CURVA.push({tr:acerto(a,tr),te:acerto(a,DADOS.teste)});}
   document.getElementById('chipsTam').innerHTML=TAMS.map(n=>`<button type="button" class="chip" data-n="${n}" aria-pressed="${n===TAM}" ${DADOS.pool.length<n&&n!==TAMS[0]?'disabled':''}>${n.toLocaleString('pt-BR')}</button>`).join('');
   document.getElementById('legendaDados').textContent=DADOS.tipo==='sim'
-   ?`Fichas simuladas com as frequências da Tabela 6: ${treino().length.toLocaleString('pt-BR')} de treino e ${DADOS.teste.length.toLocaleString('pt-BR')} de teste, metade de cada tipo. Como os sinais foram sorteados de forma independente, combinações de sinais não carregam informação extra aqui.`
-   :`Amostra real da base de arboviroses do dotLAB: ${treino().length.toLocaleString('pt-BR')} fichas de treino (as semanas mais antigas) e ${DADOS.teste.length.toLocaleString('pt-BR')} de teste (as semanas seguintes).`;
+   ?`Registros simulados com as frequências da Tabela 6: ${treino().length.toLocaleString('pt-BR')} de treino e ${DADOS.teste.length.toLocaleString('pt-BR')} de teste, metade de cada tipo. Como os sinais foram sorteados de forma independente, combinações de sinais não carregam informação extra aqui.`
+   :`Amostra real da base de arboviroses do dotLAB: ${treino().length.toLocaleString('pt-BR')} registros de treino (as semanas mais antigas) e ${DADOS.teste.length.toLocaleString('pt-BR')} de teste (as semanas seguintes).`;
 }
 
 function folhaHTML(no,ativo){
-  return `<span class="folha"><span class="barra"><i style="width:${no.pD*100}%;background:var(--dengue)"></i><i style="width:${(1-no.pD)*100}%;background:var(--outro)"></i></span><span class="pv">${pct(no.pD)} dengue em ${no.rows} ${no.rows===1?'ficha':'fichas'}: prevê <span class="${classe(no)==='D'?'d':'o'}">${classe(no)==='D'?'dengue':'descartado'}</span></span></span>`;
+  return `<span class="folha"><span class="barra"><i style="width:${no.pD*100}%;background:var(--dengue)"></i><i style="width:${(1-no.pD)*100}%;background:var(--outro)"></i></span><span class="pv">${pct(no.pD)} dengue em ${no.rows} ${no.rows===1?'registro':'registros'}: prevê <span class="${classe(no)==='D'?'d':'o'}">${classe(no)==='D'?'dengue':'descartado'}</span></span></span>`;
 }
 function arvoreHTML(no,caminho,ramo){
   const cls=caminho?(caminho.has(no)?'no-ativo':'inativo'):'';
   const r=ramo?`<span class="ramo">${ramo}</span>`:'';
   if(!no.k)return `<li class="${cls}"><div class="linha-no">${r}${folhaHTML(no)}</div></li>`;
-  return `<li class="${cls}"><div class="linha-no">${r}<span class="no-q">${NOME[no.k]}?</span> <span class="nota">(${no.rows} fichas)</span></div><ul>${arvoreHTML(no.sim,caminho,'sim')}${arvoreHTML(no.nao,caminho,'não')}</ul></li>`;
+  return `<li class="${cls}"><div class="linha-no">${r}<span class="no-q">${NOME[no.k]}?</span> <span class="nota">(${no.rows} registros)</span></div><ul>${arvoreHTML(no.sim,caminho,'sim')}${arvoreHTML(no.nao,caminho,'não')}</ul></li>`;
 }
 function contarFolhas(no){return no.k?contarFolhas(no.sim)+contarFolhas(no.nao):1;}
 
@@ -523,10 +524,10 @@ document.getElementById('arquivoCsv').addEventListener('change',e=>{
     const iC=cab.indexOf('CLASSE'),iS=cab.indexOf('SEM'),idx=SINAIS.map(s=>cab.indexOf(s.k)),rows=[];
     for(let i=1;i<linhas.length;i++){const c=linhas[i].split(sep),y=(c[iC]||'').replace(/"/g,'').trim();if(y!=='D'&&y!=='O')continue;
       const f={};SINAIS.forEach((s,j)=>{f[s.k]=parseFloat(c[idx[j]])===1;});rows.push({y,f,sem:iS>=0?parseInt(c[iS],10)||0:i});}
-    if(rows.length<200)throw new Error('a amostra tem menos de 200 fichas de dengue ou descartadas.');
+    if(rows.length<200)throw new Error('a amostra tem menos de 200 registros de dengue ou descartados.');
     rows.sort((a,b)=>a.sem-b.sem);const nT=Math.floor(rows.length*.5);
     DADOS={tipo:'real',pool:rows.slice(0,nT),teste:rows.slice(nT)};if(TAM>nT)TAM=TAMS.filter(n=>n<=nT).pop()||TAMS[0];
-    status.textContent=`Amostra carregada: ${rows.length} fichas.`;tudo();
+    status.textContent=`Amostra carregada: ${rows.length} registros.`;tudo();
   }catch(err){status.textContent='Não foi possível carregar: '+err.message;}};
   fr.onerror=()=>{status.textContent='Não foi possível carregar: o navegador não conseguiu ler o arquivo.';};
   fr.readAsText(arq);e.target.value='';
