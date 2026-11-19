@@ -73,14 +73,14 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
     <div class="txt">
       <div class="eyebrow">Disciplina · Universidade de Pernambuco, Caruaru</div>
       <h1>Ciência de <em>Dados</em></h1>
-      <p class="lede">Os materiais da disciplina, aula por aula: páginas interativas, slides, apostilas e roteiros práticos no Google Colab. Profa. Patricia Takako Endo.</p>
+      <p class="lede">Os materiais da disciplina, aula por aula: páginas interativas, apostilas e roteiros práticos no Google Colab. Profa. Patricia Takako Endo.</p>
     </div>
   </header>
 
   <section aria-labelledby="aulas">
     <h2 id="aulas">Aulas</h2>
     <p class="sub">Cada material fica disponível aqui assim que é publicado pela professora.</p>
-    <div class="legend"><span><b>Material</b> a aula explicada numa página interativa</span><span><b>Slides</b> apresentação da aula</span><span><b>Apostila</b> o conteúdo explicado por escrito, com código</span><span><b>Colab</b> a prática com dados públicos do SUS</span></div>
+    <div class="legend"><span><b>Material</b> a aula explicada numa página interativa</span><span><b>Apostila</b> o conteúdo explicado por escrito, com código</span><span><b>Colab</b> a prática com dados públicos do SUS</span></div>
     <div class="grupos" id="lista"></div>
     <p class="note">Os exemplos e as práticas usam dados públicos do SUS e casos dos projetos do dotLAB.</p>
   </section>
@@ -89,22 +89,22 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
 </div>
 
 <script>
-/* Para publicar um material: preencha, dentro da aula, material / slides / apostila / colab com
+/* Para publicar um material: preencha, dentro da aula, material / apostila / colab com
    {arq:"aulas/<aula>/<arquivo>.pdf", pag:14, ver:"Versão 1.0 · novembro de 2026"}
    (página interativa: {pagina:"aulas/<aula>/index.html", ver:"..."})
    (no Colab, use {link:"https://colab.research.google.com/...", ver:"..."}).
    Material sem arquivo aparece como "Em preparação". Use null para "não se aplica". */
 const AULAS = [
-  {n:"01", t:"O que é ciência de dados", d:"Quem é a cientista de dados, o que dá para aprender com os dados e o processo de descoberta de conhecimento.", slides:{}, apostila:null, colab:null},
-  {n:"02", t:"Fontes de dados", d:"Onde encontrar bases públicas, com destaque para os dados do SUS, e como avaliar se uma base serve à pergunta.", slides:{}, apostila:null, colab:{}},
-  {n:"03", t:"Mineração de dados e CRISP-DM", d:"O que é mineração de dados e as fases de um projeto: CRISP-DM, KDD e SEMMA.", slides:{}, apostila:null, colab:null},
-  {n:"04", t:"Introdução ao aprendizado de máquina I", d:"Conceitos, tipos de aprendizado (supervisionado, não supervisionado e por reforço) e tipos de dados.", slides:{}, apostila:null, colab:null},
-  {n:"05", t:"Introdução ao aprendizado de máquina II", d:"Treino, validação e teste; validação cruzada; subajuste e sobreajuste.", slides:{}, apostila:null, colab:{}},
-  {n:"06", t:"Árvore de decisão", d:"Entropia, ganho de informação, construção da árvore passo a passo e poda.", material:{pagina:"aulas/arvore-de-decisao/index.html", ver:"Versão 1.0 · novembro de 2026"}, slides:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-slides.pptx", pag:28, ver:"Versão 1.0 · novembro de 2026"}, apostila:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-apostila.pdf", pag:14, ver:"Versão 1.0 · novembro de 2026"}, colab:{}},
-  {n:"07", t:"Random Forest e AdaBoost", d:"Comitês de modelos: bagging, boosting e stacking.", slides:{}, apostila:null, colab:null},
-  {n:"08", t:"kNN", d:"Classificação pelos vizinhos mais próximos: distâncias e escolha de k.", slides:{}, apostila:null, colab:null},
-  {n:"09", t:"SVM", d:"Hiperplano, margem, vetores de suporte e kernels.", slides:{}, apostila:null, colab:null},
-  {n:"10", t:"k-means", d:"Agrupamento passo a passo e escolha do número de grupos.", slides:{}, apostila:null, colab:null}
+  {n:"01", t:"O que é ciência de dados", d:"Quem é a cientista de dados, o que dá para aprender com os dados e o processo de descoberta de conhecimento.", apostila:{}, colab:null},
+  {n:"02", t:"Fontes de dados", d:"Onde encontrar bases públicas, com destaque para os dados do SUS, e como avaliar se uma base serve à pergunta.", apostila:{}, colab:{}},
+  {n:"03", t:"Mineração de dados e CRISP-DM", d:"O que é mineração de dados e as fases de um projeto: CRISP-DM, KDD e SEMMA.", apostila:{}, colab:null},
+  {n:"04", t:"Introdução ao aprendizado de máquina I", d:"Conceitos, tipos de aprendizado (supervisionado, não supervisionado e por reforço) e tipos de dados.", apostila:{}, colab:null},
+  {n:"05", t:"Introdução ao aprendizado de máquina II", d:"Treino, validação e teste; validação cruzada; subajuste e sobreajuste.", apostila:{}, colab:{}},
+  {n:"06", t:"Árvore de decisão", d:"Entropia, ganho de informação, construção da árvore passo a passo e poda.", material:{pagina:"aulas/arvore-de-decisao/index.html", ver:"Versão 1.0 · novembro de 2026"}, apostila:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-apostila.pdf", pag:14, ver:"Versão 1.0 · novembro de 2026"}, colab:{}},
+  {n:"07", t:"Random Forest e AdaBoost", d:"Comitês de modelos: bagging, boosting e stacking.", apostila:{}, colab:null},
+  {n:"08", t:"kNN", d:"Classificação pelos vizinhos mais próximos: distâncias e escolha de k.", apostila:{}, colab:null},
+  {n:"09", t:"SVM", d:"Hiperplano, margem, vetores de suporte e kernels.", apostila:{}, colab:null},
+  {n:"10", t:"k-means", d:"Agrupamento passo a passo e escolha do número de grupos.", apostila:{}, colab:null}
 ];
 const GRUPOS = [
   {t:"Fundamentos", d:"O que é ciência de dados, de onde vêm os dados e como se organiza um projeto.", ns:["01","02","03"]},
@@ -112,13 +112,13 @@ const GRUPOS = [
   {t:"Classificação", d:"Algoritmos de aprendizado supervisionado, do mais simples aos comitês de modelos.", ns:["06","07","08","09"]},
   {t:"Agrupamento", d:"Aprendizado não supervisionado: encontrar grupos nos dados.", ns:["10"]}
 ];
-const TIPOS = [["material","Material"],["slides","Slides"],["apostila","Apostila"],["colab","Colab"]];
+const TIPOS = [["material","Material"],["apostila","Apostila"],["colab","Colab"]];
 
 function preencher(box, m, tipo){
   if(m.pagina){
     const v=(m.ver||"").match(/Versão\s*([\d.]+)/);
     box.innerHTML=`<span class="meta2"></span><a class="btn pri">Abrir</a>`;
-    box.querySelector(".meta2").textContent="Página interativa"+(v?` · versão ${v[1]}`:"");
+    box.querySelector(".meta2").textContent=(tipo==="apresentacao"?"Slides interativos":"Página interativa")+(v?` · versão ${v[1]}`:"");
     box.querySelector("a").href=m.pagina;
     return true;
   }
