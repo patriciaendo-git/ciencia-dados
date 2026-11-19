@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aula 06 · Árvore de decisão · Ciência de Dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fundo:#FFFFFF; --papel:#F6F2F2; --tinta:#282425; --tinta2:#6A6365; --linha:#E6DEDE; --suave:#F6F2F2;
+  --dengue:#F72120; --dengue-t:#D11615; --outro:#9C9496; --destaque:#282425; --destaque-tinta:#282425; --alerta:#6A6365;
+  --treino:#9C9496; --teste:#F72120; --vermelho:#F72120;
+  --display:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --texto:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+    --dengue:#FF3B3A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+    --treino:#7D7578; --teste:#FF3B3A; --vermelho:#FF3B3A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+  --dengue:#FF3B3A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+  --treino:#7D7578; --teste:#FF3B3A; --vermelho:#FF3B3A;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--fundo);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.7;counter-reset:sec}
+:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
+button,input{font:inherit;color:inherit}
+
+.col{max-width:680px;margin:0 auto;padding:0 20px}
+.larga{max-width:880px;margin:0 auto;padding:0 20px}
+header.abertura{padding:40px 0 28px;border-bottom:2px solid var(--vermelho);margin-bottom:8px}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px}
+.topo img{height:52px;width:auto;display:block}
+.topo .volta{font-size:.82rem;font-weight:600;color:var(--tinta2);text-decoration:none}
+.topo .volta:hover{color:var(--dengue-t)}
+.selo{display:block;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:14px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,3.2rem);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;max-width:18ch;text-wrap:balance}
+h1 em{font-style:normal;color:var(--dengue-t)}
+.lead{font-size:1.1rem;color:var(--tinta2);margin:0 0 18px}
+.creditos{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:.85rem;color:var(--tinta2)}
+.creditos b{color:var(--tinta);font-weight:600}
+.etq{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:999px;border:1px solid var(--vermelho);color:var(--dengue-t)}
+main h2{counter-increment:sec}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,3.4vw,1.7rem);line-height:1.2;margin:64px 0 16px;display:flex;align-items:baseline;gap:14px;text-wrap:balance}
+h2::before{content:counter(sec,decimal-leading-zero);font-weight:800;font-size:1.5em;color:var(--dengue-t);font-variant-numeric:tabular-nums;flex:none}
+h3{font-size:1rem;margin:24px 0 8px}
+p{margin:0 0 16px}
+.nota{font-size:.9rem;color:var(--tinta2)}
+.d{color:var(--dengue-t);font-weight:700}
+.o{color:var(--outro);font-weight:700}
+figure{margin:26px 0 30px;padding:22px;background:var(--papel);border:0;border-radius:10px}
+figcaption{font-size:.88rem;color:var(--tinta2);margin-top:12px}
+.destaque{background:var(--papel);border-left:5px solid var(--vermelho);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0}
+.numero{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,9vw,4.2rem);line-height:1;color:var(--tinta)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;background:var(--suave);padding:1px 5px;border-radius:4px}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:1.05rem;text-align:center;margin:12px 0;overflow-x:auto;white-space:nowrap}
+
+/* grade de fichas */
+.grade{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;max-width:520px}
+.grade i{display:block;aspect-ratio:3/4;border-radius:2px}
+.grade i.D{background:var(--dengue)} .grade i.O{background:var(--outro)}
+.legenda{display:flex;flex-wrap:wrap;gap:16px;font-size:.9rem;margin-top:12px}
+.legenda span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}
+.sw.D{background:var(--dengue)} .sw.O{background:var(--outro)}
+
+/* controles */
+.controle{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+.controle label{font-weight:700}
+input[type=range]{flex:1;min-width:180px;accent-color:var(--vermelho)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.chip{border:1px solid var(--linha);background:var(--fundo);border-radius:999px;padding:5px 12px;font-size:.84rem;font-weight:500;cursor:pointer}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.chip[aria-pressed="true"]{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+.botao{border:1px solid var(--vermelho);background:var(--vermelho);color:#fff;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.88rem}
+.botao.primario{background:var(--tinta);color:var(--papel)}
+.leitura{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:.95rem}
+.leitura b{font-family:var(--display);font-size:1.25rem}
+
+svg text{font-family:var(--texto)}
+.eixo{stroke:var(--linha)} .eixo-t{fill:var(--tinta2);font-size:12px}
+.rot{fill:var(--tinta);font-size:13px} .rot-q{fill:var(--tinta2);font-size:12px}
+
+/* pilhas da divisão */
+.pilhas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pilha h4{margin:0 0 6px;font-size:.95rem}
+.barra{display:flex;height:22px;border-radius:3px;overflow:hidden;border:1px solid var(--linha)}
+.barra i{display:block;height:100%}
+.pilha p{font-size:.88rem;color:var(--tinta2);margin:6px 0 0}
+
+/* árvore em lista */
+.arvore{list-style:none;margin:0;padding:0;font-size:.95rem}
+.arvore ul{list-style:none;margin:0;padding-left:22px;border-left:2px solid var(--linha);margin-left:8px}
+.arvore li{margin:6px 0}
+.no-q{font-weight:700}
+.ramo{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.folha{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.folha .barra{width:90px;height:12px}
+.folha .pv{font-size:.88rem}
+.no-ativo>.linha-no{background:color-mix(in srgb,var(--vermelho) 14%,transparent);border-radius:4px;padding:2px 6px;margin-left:-6px}
+.inativo>.linha-no{opacity:.45}
+.ficha{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px 14px;margin-bottom:16px}
+.ficha label{display:flex;align-items:center;gap:8px;font-size:.92rem;cursor:pointer}
+.ficha input{width:18px;height:18px;accent-color:var(--vermelho)}
+.veredito{font-size:1rem;padding:12px 16px;background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;margin-top:14px}
+
+.glossario{margin:0}
+.glossario dt{font-weight:700;margin-top:14px}
+.glossario dd{margin:2px 0 0;color:var(--tinta2)}
+pre.algoritmo{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--papel);border:0;border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:16px;overflow-x:auto;font-size:.85rem;line-height:1.55;margin:16px 0 8px}
+footer{margin:80px 0 0;padding:28px 0 40px;border-top:2px solid var(--vermelho);font-size:.85rem;color:var(--tinta2)}
+footer a{color:inherit}
+.rodape{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:22px;padding-top:14px;border-top:1px solid var(--linha)}
+.glossario dt{font-weight:600}
+footer ol{padding-left:1.2em}
+.carregar-status{font-size:.88rem;color:var(--tinta2);margin-top:8px}
+@media (max-width:560px){body{font-size:15.5px}figure{padding:14px}.pilhas{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<header class="abertura col">
+  <div class="topo"><img src="../../logo.png" alt="dotLAB"><a class="volta" href="../../index.html">Todas as aulas</a></div>
+  <span class="selo">Ciência de Dados · Aula 06 · Árvore de decisão</span>
+  <h1>Diagnóstico diferencial de <em>dengue</em> com dados clínicos</h1>
+  <p class="lead">Uma introdução às árvores de decisão com fichas de notificação do SINAN.</p>
+  <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">No dotLAB · VALERIA</span></div>
+</header>
+
+<main>
+<section class="col">
+  <p>Quando alguém chega a uma unidade de saúde com febre e/ou dor no corpo durante uma epidemia de dengue, a equipe preenche uma ficha de notificação: quais sinais a pessoa tem, quando começaram, se tem alguma doença prévia. Só depois, às vezes, vem o exame laboratorial que confirma ou descarta a dengue.</p>
+  <p>E esse “às vezes” pesa. Segundo o Ministério da Saúde, citado no <em>data paper</em> da base de arboviroses do dotLAB<sup><a href="#ref1">1</a></sup>, apenas cerca de 23% dos casos foram testados em laboratórios de referência. No resto, a decisão depende das informações clínicas que estão na ficha do paciente.</p>
+  <p>Então, nossa pergunta é: <strong>considerando apenas os sinais clínicos, uma máquina consegue classificar quem tem dengue de quem não tem?</strong> Em termos de aprendizado de máquina, queremos um <strong>classificador binário</strong> (<em>binary classifier</em>) treinado por <strong>aprendizado supervisionado</strong> (<em>supervised learning</em>): o modelo aprende com fichas cujo desfecho já é conhecido. Para responder, vamos construir uma árvore de decisão, passo a passo.</p>
+  <p>Cada ficha é uma <strong>instância</strong> (<em>instance</em>), descrita por <strong>atributos</strong> (<em>features</em>): os sinais clínicos. O desfecho, dengue confirmada ou caso descartado, é a <strong>classe</strong> ou <strong>rótulo</strong> (<em>label</em>), a <strong>variável-alvo</strong> (<em>target</em>) do modelo. Aqui, dengue é a <strong>classe positiva</strong>.</p>
+
+  <figure>
+    <div class="grade" id="grade" role="img" aria-label="100 fichas, 50 de dengue confirmada e 50 de casos descartados, misturadas"></div>
+    <div class="legenda"><span><i class="sw D"></i>Dengue confirmada</span><span><i class="sw O"></i>Caso descartado ou inconclusivo</span></div>
+    <figcaption>Cem instâncias de casos suspeitos, metade de cada classe. Sem usar nenhum atributo, um classificador aleatório acerta metade.</figcaption>
+  </figure>
+
+  <p class="destaque">Um detalhe antes de começar: na base completa, 67% das fichas com desfecho são de dengue confirmada, um caso de <strong>desbalanceamento de classes</strong> (<em>class imbalance</em>). Um <strong>classificador da classe majoritária</strong> (<em>majority-class baseline</em>), que responde sempre “dengue”, já tem 67% de <strong>acurácia</strong> (<em>accuracy</em>), a proporção de acertos, sem aprender nada. Por isso, aqui usamos uma <strong>amostra balanceada</strong>, obtida por <strong>subamostragem</strong> (<em>undersampling</em>) da classe majoritária: assim, qualquer acurácia acima de 50% vem dos sinais clínicos do paciente.</p>
+</section>
+
+<section class="col">
+  <h2>Primeiro, medir a impureza</h2>
+  <p>Uma árvore de decisão realiza um <strong>particionamento recursivo binário</strong> (<em>recursive binary partitioning</em>) dos dados: em cada <strong>nó interno</strong> (<em>internal node</em>), aplica uma <strong>regra de divisão</strong> (<em>split</em>) sobre um atributo e separa as instâncias em dois <strong>nós filhos</strong> (<em>child nodes</em>). Para escolher a melhor regra, ela precisa medir o quanto as classes estão misturadas num nó: a <strong>impureza</strong> (<em>impurity</em>). Um nó só com dengue é um <strong>nó puro</strong> (<em>pure node</em>), com impureza zero; um nó meio a meio tem a impureza máxima.</p>
+  <p>As duas medidas de impureza mais usadas são a <strong>entropia de Shannon</strong> (<em>Shannon entropy</em>) e a <strong>impureza de Gini</strong> (<em>Gini impurity</em>). Arraste o controle e veja como as duas reagem.</p>
+
+  <figure>
+    <div class="controle">
+      <label for="pMistura">Proporção de dengue no nó</label>
+      <input type="range" id="pMistura" min="0" max="100" value="50" step="1">
+      <output id="pMisturaV" for="pMistura">50%</output>
+    </div>
+    <div class="grade" id="gradeMistura" aria-hidden="true" style="grid-template-columns:repeat(20,1fr);max-width:520px;margin-bottom:16px"></div>
+    <svg id="curva" viewBox="0 0 640 260" width="100%" role="img" aria-label="Curvas de entropia e índice de Gini em função da proporção de dengue no grupo"></svg>
+    <div class="leitura"><span>Entropia: <b id="vEnt">1,000</b></span><span>Impureza de Gini: <b id="vGini">0,500</b></span></div>
+    <figcaption>As duas medidas são zero num nó puro e máximas no meio a meio. Com duas classes, a entropia vai até 1 bit; a impureza de Gini, até 0,5.</figcaption>
+  </figure>
+
+  <p>Para um nó D com instâncias de <em>k</em> classes, sendo p<sub><em>i</em></sub> a proporção da classe <em>i</em>, as fórmulas gerais são:</p>
+  <p class="formula">H(D) = −Σ<sub><em>i</em>=1…<em>k</em></sub> p<sub><em>i</em></sub> log₂ p<sub><em>i</em></sub></p>
+  <p class="formula">G(D) = 1 − Σ<sub><em>i</em>=1…<em>k</em></sub> p<sub><em>i</em></sub>²</p>
+  <p>Com duas classes, sendo <em>p</em> a proporção da classe positiva, elas ficam:</p>
+  <p class="formula">H(p) = −p log₂ p − (1 − p) log₂ (1 − p)</p>
+  <p class="formula">G(p) = 1 − p² − (1 − p)²</p>
+  <p>Daqui em diante usamos a entropia, mas o raciocínio é o mesmo com a impureza de Gini. No <code>DecisionTreeClassifier</code> do scikit-learn, a escolha é feita pelo parâmetro <code>criterion</code>, que aceita <code>"gini"</code> (o padrão) e <code>"entropy"</code>.</p>
+</section>
+
+<section class="col">
+  <h2>Uma regra de divisão de cada vez</h2>
+  <p>Agora, a primeira divisão. Se testarmos o atributo exantema (“a pessoa tem exantema?”), as instâncias se dividem em dois nós filhos: o das que responderam sim e o das que responderam não. A divisão é boa se os nós filhos ficarem menos impuros que o <strong>nó pai</strong> (<em>parent node</em>).</p>
+  <p>Essa redução se chama <strong>ganho de informação</strong> (<em>information gain</em>): a impureza do nó pai menos a média das impurezas dos nós filhos, ponderada pelo número de instâncias em cada um.</p>
+  <p class="formula">IG = H(pai) − (n<sub>sim</sub> / n) H(sim) − (n<sub>não</sub> / n) H(não)</p>
+  <p>Escolha um atributo.</p>
+
+  <figure>
+    <div class="chips" id="chipsSinais" role="group" aria-label="Sinais clínicos"></div>
+    <div class="pilhas" id="pilhas"></div>
+    <h3>Ganho de informação de cada atributo</h3>
+    <svg id="ganhos" viewBox="0 0 640 470" width="100%" role="img" aria-label="Ganho de informação de cada sinal clínico, do maior para o menor"></svg>
+    <figcaption>Calculado com a frequência de cada sinal entre casos de dengue e casos descartados na base completa (Tabela 6 do <em>data paper</em>), supondo classes balanceadas. Para comparação: uma divisão que gerasse dois nós puros teria ganho 1.</figcaption>
+  </figure>
+
+  <p>O resultado é a primeira resposta à nossa pergunta. O atributo de maior ganho, a dor retro-orbital, reduz a entropia em cerca de 0,005 bit, menos de 1% do máximo possível. Ainda assim, ele carrega alguma informação: a <strong>probabilidade condicional</strong> (<em>conditional probability</em>) de dengue dado o sinal, P(dengue | dor retro-orbital), é de cerca de 61%, contra 48% quando o sinal está ausente.</p>
+  <p class="nota">Um cuidado de leitura: nessa tabela, “não” inclui as fichas em que o campo ficou em branco. Isso equivale a tratar os <strong>valores ausentes</strong> (<em>missing values</em>) como negativos, uma forma simples de <strong>imputação</strong> (<em>imputation</em>). Entre fichas totalmente preenchidas, as diferenças podem ser maiores.</p>
+</section>
+
+<section class="col">
+  <h2>A árvore cresce</h2>
+  <p>Para construir a árvore inteira, o algoritmo repete esse processo de cima para baixo (<em>top-down</em>): escolhe a divisão de maior ganho, separa as instâncias e, em cada nó filho, procura de novo a melhor divisão. É um <strong>algoritmo guloso</strong> (<em>greedy algorithm</em>): em cada nó, fica com a melhor divisão local, sem rever escolhas anteriores. Essa é a ideia dos algoritmos clássicos ID3, C4.5 e CART; o scikit-learn implementa uma versão otimizada do CART. Os nós em que a árvore para de dividir são as <strong>folhas</strong> (<em>leaves</em>), ou nós terminais, e a regra que decide quando parar é o <strong>critério de parada</strong> (<em>stopping criterion</em>).</p>
+  <p>Em pseudocódigo, o algoritmo é recursivo:</p>
+  <pre class="algoritmo">GerarArvore(D, atributos)
+  crie um nó N
+  se todas as instâncias de D são da mesma classe C:
+      retorne N como folha rotulada com C
+  se atributos está vazio:
+      retorne N como folha com a classe majoritária de D
+  aplique a medida de seleção de atributos a (D, atributos)
+      para encontrar o melhor critério de divisão
+  rotule N com o critério de divisão
+  se o atributo escolhido é discreto e divisões multivias são permitidas:
+      remova o atributo de atributos
+  para cada resultado j do critério de divisão:
+      Dj ← instâncias de D que satisfazem j
+      se Dj está vazio:
+          anexe a N uma folha com a classe majoritária de D
+      senão:
+          anexe a N o nó retornado por GerarArvore(Dj, atributos)
+  retorne N</pre>
+  <p class="nota">Adaptado de Han e Kamber (2006)<sup><a href="#ref3">3</a></sup>.</p>
+  <p>As saídas antecipadas do pseudocódigo são critérios de parada naturais: o nó é puro, não há mais atributos para testar ou a partição ficou vazia. Há ainda um caso comum em dados reais: o nó continua impuro, mas nenhum atributo traz ganho. Fichas com exatamente os mesmos sinais e desfechos diferentes não podem ser separadas por regra nenhuma, e o nó vira folha com a classe majoritária. Nos nossos dados, isso acontece o tempo todo.</p>
+  <p>Um dos critérios de parada mais usados é a <strong>profundidade máxima</strong> (<code>max_depth</code>), um <strong>hiperparâmetro</strong> (<em>hyperparameter</em>): um valor escolhido antes do treinamento, e não aprendido com os dados. Use o controle para aumentar a profundidade e acompanhe a acurácia em dois conjuntos: o <strong>conjunto de treinamento</strong> (<em>training set</em>), usado para construir a árvore, e o <strong>conjunto de teste</strong> (<em>test set</em>), com instâncias que ela nunca viu. A acurácia no teste estima o <strong>desempenho de generalização</strong> (<em>generalization performance</em>). Com a amostra real, a divisão é <strong>temporal</strong>: o treinamento usa as semanas epidemiológicas mais antigas e o teste, as seguintes.</p>
+
+  <figure>
+    <div class="controle">
+      <label for="prof">Profundidade da árvore</label>
+      <input type="range" id="prof" min="0" max="8" value="1" step="1">
+      <output id="profV" for="prof">1</output>
+    </div>
+    <div class="controle"><span style="font-weight:700" id="rotTam">Instâncias de treinamento</span><div class="chips" id="chipsTam" role="group" aria-labelledby="rotTam" style="margin:0"></div></div>
+    <svg id="curvaAcerto" viewBox="0 0 640 280" width="100%" role="img" aria-label="Acerto no treino e no teste conforme a profundidade da árvore"></svg>
+    <div class="legenda"><span><i class="sw" style="background:var(--tinta)"></i>Treinamento</span><span><i class="sw" style="background:var(--vermelho)"></i>Teste</span></div>
+    <h3 id="tituloArvore">A árvore com profundidade 1</h3>
+    <ul class="arvore" id="arvore"></ul>
+    <figcaption id="legendaDados"></figcaption>
+    <div class="controle" style="margin-top:14px">
+      <label class="botao" for="arquivoCsv">Usar a amostra real da base dot</label>
+      <input type="file" id="arquivoCsv" accept=".csv,text/csv" hidden>
+    </div>
+    <p class="carregar-status" id="statusCsv" role="status"></p>
+  </figure>
+
+  <p>Repare no que acontece com a árvore funda, principalmente com 300 instâncias de treinamento: a acurácia no treinamento sobe, mas a acurácia no teste não acompanha. A árvore passa a memorizar particularidades do conjunto de treinamento, como a combinação exata de sinais de poucas pessoas, em vez de aprender um padrão que generaliza. Isso se chama <strong>sobreajuste</strong> (<em>overfitting</em>) e está ligado à <strong>alta variância</strong> (<em>high variance</em>) do modelo: pequenas mudanças nos dados de treinamento mudam muito a árvore. No outro extremo, uma árvore rasa demais sofre de <strong>subajuste</strong> (<em>underfitting</em>), com <strong>alto viés</strong> (<em>high bias</em>). Escolher a profundidade é buscar o equilíbrio desse <strong>dilema viés-variância</strong> (<em>bias-variance trade-off</em>).</p>
+  <p>Como resumem Mayr et al.<sup><a href="#ref6">6</a></sup>, para evitar o sobreajuste, o objetivo do algoritmo não deve ser encontrar o melhor classificador para a amostra de treinamento, e sim a melhor regra de previsão para observações novas.</p>
+  <p>Limitar a profundidade antes do treinamento é uma forma de <strong>pré-poda</strong> (<em>pre-pruning</em>). A alternativa é a <strong>pós-poda</strong> (<em>post-pruning</em>): crescer a árvore inteira e depois remover os ramos que pouco contribuem, como faz a <strong>poda por custo-complexidade</strong> (<em>cost-complexity pruning</em>), disponível no scikit-learn pelo parâmetro <code>ccp_alpha</code>. Com mais instâncias de treinamento, o sobreajuste diminui, porque a variância cai.</p>
+</section>
+
+<section class="col">
+  <h2>Seguindo uma ficha</h2>
+  <p>A grande vantagem das árvores é a <strong>interpretabilidade</strong> (<em>interpretability</em>): são modelos de <strong>caixa-branca</strong> (<em>white-box</em>), cuja decisão pode ser lida e auditada. Cada <strong>caminho da raiz à folha</strong> (<em>root-to-leaf path</em>) equivale a uma <strong>regra de decisão</strong> (<em>decision rule</em>), uma conjunção de condições do tipo “se A e não B, então dengue”. Marque os sinais de uma ficha imaginária e veja o caminho que ela percorre numa árvore de profundidade 3.</p>
+
+  <figure>
+    <div class="ficha" id="ficha"></div>
+    <ul class="arvore" id="arvoreCaminho"></ul>
+    <div class="veredito" id="veredito" aria-live="polite"></div>
+  </figure>
+
+  <p>A resposta vem acompanhada de uma <strong>probabilidade estimada</strong> (<em>predicted probability</em>) da classe positiva: a proporção de dengue entre as instâncias de treinamento que caíram na mesma folha. É o que o método <code>predict_proba</code> do scikit-learn retorna. Quando essa probabilidade fica perto de 50%, a árvore está dizendo que a ficha sozinha não basta. Saber se essas probabilidades correspondem às frequências observadas em dados novos é uma questão de <strong>calibração</strong> (<em>calibration</em>).</p>
+</section>
+
+<section class="col">
+  <h2>Forças e fraquezas</h2>
+  <p>Resumindo o que vimos, com base em Chandramouli, Dutt e Das<sup><a href="#ref4">4</a></sup>.</p>
+  <h3>Forças</h3>
+  <ul>
+    <li>Produz regras simples e compreensíveis: árvores pequenas podem ser lidas sem conhecimento matemático ou computacional avançado.</li>
+    <li>Lida com atributos numéricos e categóricos no mesmo modelo.</li>
+    <li>Funciona com conjuntos de treinamento pequenos e grandes.</li>
+    <li>Indica quais atributos são mais úteis para a classificação: os que aparecem perto da raiz, com mais ganho. No scikit-learn, essa informação está em <code>feature_importances_</code>.</li>
+  </ul>
+  <h3>Fraquezas</h3>
+  <ul>
+    <li>Tem viés para atributos com muitos valores possíveis: dividir em muitos nós pequenos tende a gerar nós mais puros, mesmo por acaso.</li>
+    <li>Sofre sobreajuste ou subajuste com facilidade, dependendo de onde a construção para.</li>
+    <li>Erra mais em problemas com muitas classes e poucas instâncias de treinamento.</li>
+    <li>Árvores grandes são difíceis de entender, e a interpretabilidade se perde.</li>
+    <li>As fronteiras de decisão são paralelas aos eixos: cada regra testa um atributo por vez. Uma fronteira curva ou oblíqua só pode ser aproximada por muitas divisões em escada.</li>
+  </ul>
+</section>
+
+<section class="col">
+  <h2>O que a árvore nos ensinou</h2>
+  <p>Nesta base, os atributos clínicos da ficha têm <strong>baixo poder discriminativo</strong> (<em>low discriminative power</em>) entre dengue confirmada e casos descartados. Nenhum atributo sozinho reduz muito a impureza, e uma árvore mais funda só melhora no conjunto de treinamento. Isso não é um defeito do método: é a árvore mostrando, de forma transparente, o que os dados permitem dizer.</p>
+  <p>Esse resultado conversa com o que a vigilância já sabe. Dengue, chikungunya e outras doenças febris começam de modo parecido, e o diagnóstico seguro depende de exame laboratorial. Um modelo útil, nesse cenário, talvez não seja o que dá a resposta final, mas o que apoia a <strong>triagem</strong> (<em>triage</em>), indicando quem testar primeiro. Para isso, em vez de classificar pela maioria da folha (um limiar de 50%), pode-se ajustar o <strong>limiar de decisão</strong> (<em>decision threshold</em>) aplicado à probabilidade estimada.</p>
+  <p>E quando a árvore recebe atributos mais informativos? Tanner et al.<sup><a href="#ref5">5</a></sup> estudaram 1.200 pacientes que procuraram atendimento em até 72 horas após o início da febre, em Singapura e no Vietnã; 30,3% tinham dengue. Com um classificador C4.5 aplicado à temperatura corporal e a exames simples de sangue, a árvore distinguiu dengue de outras causas de febre com 84,7% de acurácia. O primeiro corte foi a contagem de plaquetas.</p>
+  <p>Vale ler esse número com o cuidado da abertura: com 69,7% de casos sem dengue, o classificador da classe majoritária já acertaria 69,7%, então a árvore acrescenta cerca de 15 pontos. Ainda assim, é muito mais do que os sinais da ficha conseguem nesta base. O método é o mesmo; o que muda é a informação contida nos atributos. Melhorar o modelo, muitas vezes, começa por melhorar os dados.</p>
+  <p>Três perguntas para levar para a aula:</p>
+  <ul>
+    <li><strong>Tratamento de valores ausentes:</strong> as fichas com campos em branco devem ser removidas, imputadas como “não” ou tratadas como uma categoria própria? Como cada escolha muda a árvore?</li>
+    <li><strong>Seleção de atributos</strong> (<em>feature selection</em>): que outras informações da ficha, como a semana epidemiológica ou a idade, poderiam ajudar? Quais delas causariam <strong>vazamento de dados</strong> (<em>data leakage</em>), entregando o desfecho ao modelo, como o resultado de um exame?</li>
+    <li><strong>Custo assimétrico de erro:</strong> se o objetivo fosse priorizar exames, seria pior um <strong>falso negativo</strong> (dengue classificada como descartado) ou um <strong>falso positivo</strong> (caso descartado classificado como dengue)? Como isso se traduz em <strong>sensibilidade</strong> (<em>sensitivity</em>) e <strong>especificidade</strong> (<em>specificity</em>)?</li>
+  </ul>
+</section>
+<section class="col" id="glossario">
+  <h2>Glossário</h2>
+  <dl class="glossario">
+    <dt>Acurácia (<em>accuracy</em>)</dt><dd>Proporção de instâncias classificadas corretamente.</dd>
+    <dt>Algoritmo guloso (<em>greedy algorithm</em>)</dt><dd>Algoritmo que, em cada passo, faz a melhor escolha local sem rever escolhas anteriores.</dd>
+    <dt>Amostra balanceada</dt><dd>Amostra com o mesmo número de instâncias de cada classe.</dd>
+    <dt>Aprendizado supervisionado (<em>supervised learning</em>)</dt><dd>Aprendizado a partir de exemplos cujo rótulo é conhecido.</dd>
+    <dt>Atributo (<em>feature</em>)</dt><dd>Variável que descreve uma instância; aqui, cada sinal clínico.</dd>
+    <dt>Atributo categórico e atributo numérico (<em>categorical and numerical features</em>)</dt><dd>Atributo com valores em categorias, como alta, normal e baixa, ou com valores numéricos, como a temperatura.</dd>
+    <dt>Calibração (<em>calibration</em>)</dt><dd>Grau em que as probabilidades estimadas correspondem às frequências observadas.</dd>
+    <dt>Classe positiva</dt><dd>Classe de interesse do problema; aqui, dengue confirmada.</dd>
+    <dt>Classificador binário (<em>binary classifier</em>)</dt><dd>Modelo que atribui cada instância a uma de duas classes.</dd>
+    <dt>Classificador da classe majoritária (<em>majority-class baseline</em>)</dt><dd>Referência que prevê sempre a classe mais frequente.</dd>
+    <dt>Conjunto de teste (<em>test set</em>)</dt><dd>Instâncias não usadas no treinamento, reservadas para estimar o desempenho de generalização.</dd>
+    <dt>Conjunto de treinamento (<em>training set</em>)</dt><dd>Instâncias usadas para construir o modelo.</dd>
+    <dt>Critério de parada (<em>stopping criterion</em>)</dt><dd>Regra que define quando um nó deixa de ser dividido.</dd>
+    <dt>Desbalanceamento de classes (<em>class imbalance</em>)</dt><dd>Situação em que uma classe é muito mais frequente que a outra.</dd>
+    <dt>Desempenho de generalização (<em>generalization performance</em>)</dt><dd>Desempenho do modelo em dados que ele não viu no treinamento.</dd>
+    <dt>Dilema viés-variância (<em>bias-variance trade-off</em>)</dt><dd>Equilíbrio entre modelos simples demais (alto viés) e complexos demais (alta variância).</dd>
+    <dt>Entropia de Shannon (<em>Shannon entropy</em>)</dt><dd>Medida de impureza baseada na teoria da informação, em bits.</dd>
+    <dt>Especificidade (<em>specificity</em>)</dt><dd>Proporção de negativos reais classificados corretamente.</dd>
+    <dt>Falso negativo e falso positivo</dt><dd>Erro em que um positivo real é classificado como negativo, e vice-versa.</dd>
+    <dt>Folha (<em>leaf</em>)</dt><dd>Nó terminal da árvore, onde a classe é atribuída.</dd>
+    <dt>Ganho de informação (<em>information gain</em>)</dt><dd>Redução da impureza obtida com uma divisão, ponderada pelo tamanho dos nós filhos.</dd>
+    <dt>Hiperparâmetro (<em>hyperparameter</em>)</dt><dd>Configuração do modelo escolhida antes do treinamento, como a profundidade máxima.</dd>
+    <dt>Impureza (<em>impurity</em>)</dt><dd>Medida de mistura de classes num nó.</dd>
+    <dt>Impureza de Gini (<em>Gini impurity</em>)</dt><dd>Probabilidade de classificar errado uma instância sorteada do nó, rotulando-a ao acaso conforme as proporções do nó.</dd>
+    <dt>Imputação (<em>imputation</em>)</dt><dd>Substituição de valores ausentes por valores estimados ou padronizados.</dd>
+    <dt>Instância (<em>instance</em>)</dt><dd>Uma observação do conjunto de dados; aqui, uma ficha.</dd>
+    <dt>Interpretabilidade (<em>interpretability</em>)</dt><dd>Facilidade de um ser humano entender como o modelo chega a uma decisão.</dd>
+    <dt>Limiar de decisão (<em>decision threshold</em>)</dt><dd>Valor de probabilidade acima do qual a instância é atribuída à classe positiva.</dd>
+    <dt>Medida de seleção de atributos (<em>attribute selection measure</em>)</dt><dd>Critério que ordena os atributos para escolher a divisão, como ganho de informação, razão de ganho ou impureza de Gini.</dd>
+    <dt>Nó interno, nó pai e nó filho</dt><dd>Nó interno aplica uma regra de divisão; o nó dividido é o pai e os nós resultantes, os filhos.</dd>
+    <dt>Nó raiz (<em>root node</em>)</dt><dd>Primeiro nó da árvore, onde todas as instâncias entram.</dd>
+    <dt>Particionamento recursivo binário (<em>recursive binary partitioning</em>)</dt><dd>Divisão sucessiva dos dados em dois subconjuntos, aplicada de novo a cada subconjunto.</dd>
+    <dt>Poda (<em>pruning</em>)</dt><dd>Redução da árvore para evitar sobreajuste: antes do treinamento (pré-poda) ou depois (pós-poda).</dd>
+    <dt>Probabilidade condicional (<em>conditional probability</em>)</dt><dd>Probabilidade de um evento dado que outro ocorreu, como P(dengue | sinal).</dd>
+    <dt>Probabilidade estimada (<em>predicted probability</em>)</dt><dd>Proporção da classe positiva na folha em que a instância cai.</dd>
+    <dt>Profundidade máxima (max_depth)</dt><dd>Número máximo de divisões entre a raiz e uma folha.</dd>
+    <dt>Regra de divisão (<em>split</em>)</dt><dd>Teste sobre um atributo que separa as instâncias de um nó em dois nós filhos.</dd>
+    <dt>Rótulo (<em>label</em>)</dt><dd>Classe conhecida de uma instância; a variável-alvo do modelo.</dd>
+    <dt>Seleção de atributos (<em>feature selection</em>)</dt><dd>Escolha de quais atributos entram no modelo.</dd>
+    <dt>Sensibilidade (<em>sensitivity</em>)</dt><dd>Proporção de positivos reais classificados corretamente; também chamada de <em>recall</em>.</dd>
+    <dt>Sobreajuste (<em>overfitting</em>)</dt><dd>Quando o modelo memoriza o treinamento e generaliza mal para dados novos.</dd>
+    <dt>Subajuste (<em>underfitting</em>)</dt><dd>Quando o modelo é simples demais para capturar o padrão dos dados.</dd>
+    <dt>Subamostragem (<em>undersampling</em>)</dt><dd>Remoção aleatória de instâncias da classe majoritária para balancear as classes.</dd>
+    <dt>Valores ausentes (<em>missing values</em>)</dt><dd>Campos sem informação registrada.</dd>
+    <dt>Vazamento de dados (<em>data leakage</em>)</dt><dd>Uso, no treinamento, de informação que não estaria disponível no momento da previsão.</dd>
+  </dl>
+</section>
+</main>
+
+<footer class="col">
+  <p><strong>Dados.</strong> A seção “Uma regra de divisão de cada vez” usa as frequências publicadas na Tabela 6 de da Silva Neto et al. As seções seguintes usam, por padrão, fichas simuladas com essas mesmas frequências, sorteando cada sinal de forma independente; por isso, combinações de sinais não aparecem. Com o botão “Usar a amostra real da base dot”, elas passam a usar a amostra gerada pelo script <code>amostra_arvore_viva.py</code>.</p>
+  <ol>
+    <li id="ref1"><a href="https://doi.org/10.1038/s41597-022-01312-7">da Silva Neto, S. R. et al. Arboviral disease record data — Dengue and Chikungunya, Brazil, 2013–2020. <em>Scientific Data</em> 9, 198 (2022).</a></li>
+    <li><a href="https://app.wiki.saude.es.gov.br/vigilancia/microdados/dic_dados_dengue.pdf">Ministério da Saúde. Dicionário de dados do SINAN Online: dengue e chikungunya.</a></li>
+    <li id="ref3">Han, J.; Kamber, M. <em>Data Mining: Concepts and Techniques</em>. 2. ed. Morgan Kaufmann, 2006.</li>
+    <li id="ref4">Chandramouli, S.; Dutt, S.; Das, A. K. <em>Machine Learning</em>. Pearson, 2018.</li>
+    <li id="ref5"><a href="https://doi.org/10.1371/journal.pntd.0000196">Tanner, L. et al. Decision tree algorithms predict the diagnosis and outcome of dengue fever in the early phase of illness. <em>PLoS Neglected Tropical Diseases</em> 2(3), e196 (2008).</a></li>
+    <li id="ref6">Mayr, A.; Binder, H.; Gefeller, O.; Schmid, M. The evolution of boosting algorithms. <em>Methods of Information in Medicine</em> 53(6), 419–427 (2014).</li>
+  </ol>
+  <p><strong>Leitura complementar.</strong> <a href="https://www.youtube.com/watch?v=ecYpXd4WREk">Cortiz, D. Árvore de Decisão, Aula 3 (vídeo)</a>.</p>
+  <p>VALERIA, um projeto do dotLAB. Material didático; não é ferramenta de diagnóstico.</p>
+  <div class="rodape"><span>dotLAB · Grupo de Pesquisa em Transformação Digital · UPE</span><span>dotlabbrazil.com.br</span></div>
+</footer>
+
+<script>
+(function(){
+const SINAIS=[
+  {k:'FEBRE',n:'Febre',pd:.398,po:.378},
+  {k:'MIALGIA',n:'Mialgia',pd:.370,po:.330},
+  {k:'CEFALEIA',n:'Cefaleia',pd:.374,po:.340},
+  {k:'EXANTEMA',n:'Exantema',pd:.108,po:.073},
+  {k:'VOMITO',n:'Vômito',pd:.102,po:.093},
+  {k:'NAUSEA',n:'Náusea',pd:.160,po:.127},
+  {k:'DOR_COSTAS',n:'Dor nas costas',pd:.127,po:.099},
+  {k:'CONJUNTVIT',n:'Conjuntivite',pd:.015,po:.012},
+  {k:'ARTRITE',n:'Artrite',pd:.050,po:.035},
+  {k:'ARTRALGIA',n:'Artralgia intensa',pd:.105,po:.088},
+  {k:'PETEQUIA_N',n:'Petéquias',pd:.043,po:.028},
+  {k:'LACO',n:'Prova do laço positiva',pd:.023,po:.011},
+  {k:'DOR_RETRO',n:'Dor retro-orbital',pd:.170,po:.110},
+  {k:'LEUCOPENIA',n:'Leucopenia',pd:.025,po:.013}
+];
+const NOME=Object.fromEntries(SINAIS.map(s=>[s.k,s.n]));
+const fmt=(x,d=3)=>x.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=x=>Math.round(x*100)+'%';
+const H=p=>p<=0||p>=1?0:-(p*Math.log2(p)+(1-p)*Math.log2(1-p));
+const G=p=>1-p*p-(1-p)*(1-p);
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* grade de abertura */
+(function(){const r=rng(3);const a=Array.from({length:100},(_,i)=>i<50?'D':'O');for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  document.getElementById('grade').innerHTML=a.map(c=>`<i class="${c}"></i>`).join('');})();
+
+/* mistura */
+const curva=document.getElementById('curva'),pM=document.getElementById('pMistura');
+function desenharCurva(){
+  const p=pM.value/100,W=640,Hh=260,l=48,r=20,t=16,b=40,X=x=>l+x*(W-l-r),Y=y=>t+(1-y)*(Hh-t-b);
+  let pe='',pg='';for(let i=0;i<=100;i++){const x=i/100;pe+=(i?'L':'M')+X(x).toFixed(1)+' '+Y(H(x)).toFixed(1);pg+=(i?'L':'M')+X(x).toFixed(1)+' '+Y(G(x)).toFixed(1);}
+  let ticks='';for(const y of [0,.25,.5,.75,1])ticks+=`<line class="eixo" x1="${l}" x2="${W-r}" y1="${Y(y)}" y2="${Y(y)}"/><text class="eixo-t" x="${l-8}" y="${Y(y)+4}" text-anchor="end">${fmt(y,2)}</text>`;
+  for(const x of [0,.25,.5,.75,1])ticks+=`<text class="eixo-t" x="${X(x)}" y="${Hh-b+20}" text-anchor="middle">${Math.round(x*100)}%</text>`;
+  curva.innerHTML=`${ticks}<text class="eixo-t" x="${(l+W-r)/2}" y="${Hh-4}" text-anchor="middle">proporção de dengue no nó</text>
+   <path d="${pe}" fill="none" stroke="var(--tinta)" stroke-width="2.5"/><path d="${pg}" fill="none" stroke="var(--vermelho)" stroke-width="2.5"/>
+   <text class="rot" x="${X(.5)}" y="${Y(1)-4+14}" text-anchor="middle">entropia</text><text class="rot" x="${X(.5)}" y="${Y(.5)-8}" text-anchor="middle" style="fill:var(--dengue-t)">Gini</text>
+   <line x1="${X(p)}" x2="${X(p)}" y1="${t}" y2="${Hh-b}" stroke="var(--tinta2)" stroke-dasharray="3 4"/>
+   <circle cx="${X(p)}" cy="${Y(H(p))}" r="6" fill="var(--tinta)"/><circle cx="${X(p)}" cy="${Y(G(p))}" r="6" fill="var(--vermelho)"/>`;
+  document.getElementById('vEnt').textContent=fmt(H(p));document.getElementById('vGini').textContent=fmt(G(p));
+  document.getElementById('pMisturaV').textContent=Math.round(p*100)+'%';
+  const nD=Math.round(p*40);document.getElementById('gradeMistura').innerHTML=Array.from({length:40},(_,i)=>`<i class="${i<nD?'D':'O'}"></i>`).join('');
+}
+pM.addEventListener('input',desenharCurva);desenharCurva();
+
+/* uma pergunta: cálculo exato a partir das frequências publicadas */
+function divisao(s){const ps=(s.pd+s.po)/2,dS=s.pd/(s.pd+s.po),dN=(1-s.pd)/(2-s.pd-s.po);return {ps,dS,dN,g:1-(ps*H(dS)+(1-ps)*H(dN))};}
+const ganhos=SINAIS.map(s=>({s,...divisao(s)})).sort((a,b)=>b.g-a.g);
+let sel='EXANTEMA';
+function barra(pD){return `<div class="barra" aria-hidden="true"><i style="width:${pD*100}%;background:var(--dengue)"></i><i style="width:${(1-pD)*100}%;background:var(--outro)"></i></div>`;}
+function desenharSinal(){
+  document.getElementById('chipsSinais').innerHTML=SINAIS.map(s=>`<button type="button" class="chip" data-k="${s.k}" aria-pressed="${s.k===sel}">${s.n}</button>`).join('');
+  const d=ganhos.find(g=>g.s.k===sel);
+  document.getElementById('pilhas').innerHTML=`
+   <div class="pilha"><h4>Com ${d.s.n.toLowerCase()}: ${pct(d.ps)} das fichas</h4>${barra(d.dS)}<p><span class="d">${pct(d.dS)} dengue</span>, entropia ${fmt(H(d.dS))}</p></div>
+   <div class="pilha"><h4>Sem ${d.s.n.toLowerCase()}: ${pct(1-d.ps)} das fichas</h4>${barra(d.dN)}<p><span class="d">${pct(d.dN)} dengue</span>, entropia ${fmt(H(d.dN))}</p></div>`;
+  const svg=document.getElementById('ganhos'),l=170,r=70,t=8,rowH=32,W=640,max=ganhos[0].g;
+  svg.innerHTML=ganhos.map((g,i)=>{const y=t+i*rowH,w=(W-l-r)*g.g/max,on=g.s.k===sel;
+    return `<g><text class="rot" x="${l-10}" y="${y+18}" text-anchor="end" style="${on?'font-weight:700':''}">${g.s.n}</text>
+      <rect x="${l}" y="${y+5}" width="${Math.max(1,w).toFixed(1)}" height="18" rx="2" fill="${on?'var(--dengue)':'var(--linha)'}"/>
+      <text class="eixo-t" x="${l+Math.max(1,w)+8}" y="${y+18}">${fmt(g.g,4)}</text></g>`;}).join('');
+}
+document.getElementById('chipsSinais').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b){sel=b.dataset.k;desenharSinal();}});
+desenharSinal();
+
+/* dados para a árvore */
+function simular(n,seed){const r=rng(seed),out=[];for(let i=0;i<n;i++){const y=i%2?'O':'D',f={};for(const s of SINAIS)f[s.k]=r()<(y==='D'?s.pd:s.po);out.push({y,f});}return out;}
+let DADOS={tipo:'sim',pool:simular(4000,11),teste:simular(6000,99)},TAM=1000;
+const TAMS=[300,1000,4000];
+const treino=()=>DADOS.pool.slice(0,Math.min(TAM,DADOS.pool.length));
+
+function contar(rows){let d=0;for(const r of rows)if(r.y==='D')d++;return {D:d,n:rows.length};}
+const entR=c=>c.n?H(c.D/c.n):0;
+function construir(rows,prof,usados){
+  const c=contar(rows),no={c,rows:rows.length,pD:c.n?c.D/c.n:.5};
+  if(prof===0||c.D===0||c.D===c.n)return no;
+  let melhor=null;
+  for(const s of SINAIS){if(usados.includes(s.k))continue;const a=[],b=[];for(const r of rows)(r.f[s.k]?a:b).push(r);if(!a.length||!b.length)continue;
+    const g=entR(c)-(a.length/c.n)*entR(contar(a))-(b.length/c.n)*entR(contar(b));if(!melhor||g>melhor.g)melhor={k:s.k,g,a,b};}
+  if(!melhor||melhor.g<=1e-12)return no;
+  no.k=melhor.k;no.g=melhor.g;no.sim=construir(melhor.a,prof-1,[...usados,melhor.k]);no.nao=construir(melhor.b,prof-1,[...usados,melhor.k]);
+  return no;
+}
+const prever=(no,f)=>{while(no.k)no=f[no.k]?no.sim:no.nao;return no;};
+const classe=no=>no.pD>=.5?'D':'O';
+const acerto=(arv,rows)=>rows.filter(r=>classe(prever(arv,r.f))===r.y).length/rows.length;
+let ARVORES=[],CURVA=[];
+function recalcular(){
+  ARVORES=[];CURVA=[];
+  const tr=treino();for(let d=0;d<=8;d++){const a=construir(tr,d,[]);ARVORES.push(a);CURVA.push({tr:acerto(a,tr),te:acerto(a,DADOS.teste)});}
+  document.getElementById('chipsTam').innerHTML=TAMS.map(n=>`<button type="button" class="chip" data-n="${n}" aria-pressed="${n===TAM}" ${DADOS.pool.length<n&&n!==TAMS[0]?'disabled':''}>${n.toLocaleString('pt-BR')}</button>`).join('');
+  document.getElementById('legendaDados').textContent=DADOS.tipo==='sim'
+   ?`Fichas simuladas com as frequências da Tabela 6: ${treino().length.toLocaleString('pt-BR')} de treino e ${DADOS.teste.length.toLocaleString('pt-BR')} de teste, metade de cada tipo. Como os sinais foram sorteados de forma independente, combinações de sinais não carregam informação extra aqui.`
+   :`Amostra real da base de arboviroses do dotLAB: ${treino().length.toLocaleString('pt-BR')} fichas de treino (as semanas mais antigas) e ${DADOS.teste.length.toLocaleString('pt-BR')} de teste (as semanas seguintes).`;
+}
+
+function folhaHTML(no,ativo){
+  return `<span class="folha"><span class="barra"><i style="width:${no.pD*100}%;background:var(--dengue)"></i><i style="width:${(1-no.pD)*100}%;background:var(--outro)"></i></span><span class="pv">${pct(no.pD)} dengue em ${no.rows} ${no.rows===1?'ficha':'fichas'}: prevê <span class="${classe(no)==='D'?'d':'o'}">${classe(no)==='D'?'dengue':'descartado'}</span></span></span>`;
+}
+function arvoreHTML(no,caminho,ramo){
+  const cls=caminho?(caminho.has(no)?'no-ativo':'inativo'):'';
+  const r=ramo?`<span class="ramo">${ramo}</span>`:'';
+  if(!no.k)return `<li class="${cls}"><div class="linha-no">${r}${folhaHTML(no)}</div></li>`;
+  return `<li class="${cls}"><div class="linha-no">${r}<span class="no-q">${NOME[no.k]}?</span> <span class="nota">(${no.rows} fichas)</span></div><ul>${arvoreHTML(no.sim,caminho,'sim')}${arvoreHTML(no.nao,caminho,'não')}</ul></li>`;
+}
+function contarFolhas(no){return no.k?contarFolhas(no.sim)+contarFolhas(no.nao):1;}
+
+const prof=document.getElementById('prof');
+function desenharAcerto(){
+  const d=+prof.value,svg=document.getElementById('curvaAcerto'),W=640,Hh=280,l=48,r=20,t=14,b=40;
+  const lo=.4,hi=Math.min(1,Math.max(.7,...CURVA.map(c=>c.tr))+.05);
+  const X=i=>l+i/8*(W-l-r),Y=v=>t+(hi-v)/(hi-lo)*(Hh-t-b);
+  let g='';for(let v=.4;v<=hi+1e-9;v+=.1)g+=`<line class="eixo" x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}"/><text class="eixo-t" x="${l-8}" y="${Y(v)+4}" text-anchor="end">${Math.round(v*100)}%</text>`;
+  for(let i=0;i<=8;i++)g+=`<text class="eixo-t" x="${X(i)}" y="${Hh-b+20}" text-anchor="middle">${i}</text>`;
+  const linha=(k,cor)=>`<path d="${CURVA.map((c,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(c[k]).toFixed(1)).join('')}" fill="none" stroke="${cor}" stroke-width="2.5"/>`;
+  svg.innerHTML=`${g}<line x1="${l}" x2="${W-r}" y1="${Y(.5)}" y2="${Y(.5)}" stroke="var(--alerta)" stroke-dasharray="5 4"/><text class="eixo-t" x="${W-r}" y="${Y(.5)-6}" text-anchor="end" style="fill:var(--alerta)">classificador aleatório: 50%</text>
+   ${linha('tr','var(--tinta)')}${linha('te','var(--vermelho)')}
+   <line x1="${X(d)}" x2="${X(d)}" y1="${t}" y2="${Hh-b}" stroke="var(--tinta2)" stroke-dasharray="3 4"/>
+   <circle cx="${X(d)}" cy="${Y(CURVA[d].tr)}" r="6" fill="var(--tinta)"/><circle cx="${X(d)}" cy="${Y(CURVA[d].te)}" r="6" fill="var(--vermelho)"/>
+   <text class="rot" x="${X(d)+(d>5?-10:10)}" y="${Math.min(Y(CURVA[d].tr),Y(CURVA[d].te))-12}" text-anchor="${d>5?'end':'start'}">treinamento ${pct(CURVA[d].tr)}, teste ${pct(CURVA[d].te)}</text>
+   <text class="eixo-t" x="${(l+W-r)/2}" y="${Hh-4}" text-anchor="middle">profundidade da árvore</text>`;
+  document.getElementById('profV').textContent=d;
+  const a=ARVORES[d],nf=contarFolhas(a);
+  document.getElementById('tituloArvore').textContent=`A árvore com profundidade ${d}: ${nf} ${nf===1?'folha':'folhas'}`;
+  document.getElementById('arvore').innerHTML=d<=3?arvoreHTML(a):`<li class="nota">Com ${nf} folhas, a árvore fica grande demais para ler aqui. Esse é outro custo da profundidade: além de decorar o treino, a árvore deixa de ser explicável.</li>`;
+}
+prof.addEventListener('input',desenharAcerto);
+document.getElementById('chipsTam').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b&&!b.disabled){TAM=+b.dataset.n;tudo();}});
+
+/* seguir uma ficha */
+const marcados={};
+function desenharFicha(){
+  const a=ARVORES[3],usados=new Set();(function f(n){if(n.k){usados.add(n.k);f(n.sim);f(n.nao);}})(a);
+  const lista=SINAIS.filter(s=>usados.has(s.k));
+  document.getElementById('ficha').innerHTML=lista.map(s=>`<label><input type="checkbox" data-k="${s.k}" ${marcados[s.k]?'checked':''}> ${s.n}</label>`).join('')||'<p class="nota">A árvore não encontrou nenhuma pergunta útil.</p>';
+  const caminho=new Set();let n=a;caminho.add(n);while(n.k){n=marcados[n.k]?n.sim:n.nao;caminho.add(n);}
+  document.getElementById('arvoreCaminho').innerHTML=arvoreHTML(a,caminho);
+  const c=classe(n);
+  document.getElementById('veredito').innerHTML=`A árvore responde <strong class="${c==='D'?'d':'o'}">${c==='D'?'dengue':'descartado'}</strong>. Probabilidade estimada de dengue: ${pct(n.pD)}, a proporção entre as ${n.rows} instâncias de treinamento desta folha.`;
+}
+document.getElementById('ficha').addEventListener('change',e=>{const k=e.target.dataset.k;if(k){marcados[k]=e.target.checked;desenharFicha();}});
+
+function tudo(){recalcular();desenharAcerto();desenharFicha();}
+tudo();
+
+/* amostra real */
+const status=document.getElementById('statusCsv');
+document.getElementById('arquivoCsv').addEventListener('change',e=>{
+  const arq=e.target.files[0];if(!arq)return;const fr=new FileReader();
+  fr.onload=()=>{try{
+    const linhas=String(fr.result).replace(/\r/g,'').split('\n').filter(x=>x.trim());
+    const sep=linhas[0].includes(';')&&!linhas[0].includes(',')?';':',';
+    const cab=linhas[0].split(sep).map(c=>c.trim().replace(/^"|"$/g,''));
+    const falt=['CLASSE',...SINAIS.map(s=>s.k)].filter(c=>!cab.includes(c));
+    if(falt.length)throw new Error('faltam as colunas '+falt.join(', ')+'. Gere o arquivo com o script amostra_arvore_viva.py.');
+    const iC=cab.indexOf('CLASSE'),iS=cab.indexOf('SEM'),idx=SINAIS.map(s=>cab.indexOf(s.k)),rows=[];
+    for(let i=1;i<linhas.length;i++){const c=linhas[i].split(sep),y=(c[iC]||'').replace(/"/g,'').trim();if(y!=='D'&&y!=='O')continue;
+      const f={};SINAIS.forEach((s,j)=>{f[s.k]=parseFloat(c[idx[j]])===1;});rows.push({y,f,sem:iS>=0?parseInt(c[iS],10)||0:i});}
+    if(rows.length<200)throw new Error('a amostra tem menos de 200 fichas de dengue ou descartadas.');
+    rows.sort((a,b)=>a.sem-b.sem);const nT=Math.floor(rows.length*.5);
+    DADOS={tipo:'real',pool:rows.slice(0,nT),teste:rows.slice(nT)};if(TAM>nT)TAM=TAMS.filter(n=>n<=nT).pop()||TAMS[0];
+    status.textContent=`Amostra carregada: ${rows.length} fichas.`;tudo();
+  }catch(err){status.textContent='Não foi possível carregar: '+err.message;}};
+  fr.onerror=()=>{status.textContent='Não foi possível carregar: o navegador não conseguiu ler o arquivo.';};
+  fr.readAsText(arq);e.target.value='';
+});
+})();
+</script>
+</body>
+</html>
