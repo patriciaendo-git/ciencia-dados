@@ -7,12 +7,12 @@
 <style>
 :root{
   --bg:#FFFFFF; --fg:#1A1718; --muted:#6A6365; --line:#E6DEDE; --card:#F6F2F2;
-  --red:#F72120; --redText:#D11615; --dash:#D3C8C9; --ok:#1F7A4D; --okBg:#E3F2EA; --wait:#6A6365; --waitBg:#EFEAEA;
+  --red:#D11615; --redText:#D11615; --dash:#D3C8C9; --ok:#1F7A4D; --okBg:#E3F2EA; --wait:#6A6365; --waitBg:#EFEAEA;
   --font:"Poppins",system-ui,-apple-system,"Segoe UI",sans-serif; color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root{
   --bg:#161415; --fg:#F2EDED; --muted:#A79FA1; --line:#3A3537; --card:#221F20;
-  --red:#FF3B3A; --redText:#FF6B6A; --dash:#4A4446; --ok:#6FD3A0; --okBg:#173326; --wait:#A79FA1; --waitBg:#2A2627; color-scheme:dark}}
+  --red:#FF6B6A; --redText:#FF6B6A; --dash:#4A4446; --ok:#6FD3A0; --okBg:#173326; --wait:#A79FA1; --waitBg:#2A2627; color-scheme:dark}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.6;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -101,8 +101,8 @@ const AULAS = [
   {n:"03", t:"Mineração de dados e CRISP-DM", d:"O que é mineração de dados e as fases de um projeto: CRISP-DM, KDD e SEMMA.", apostila:{}, colab:null},
   {n:"04", t:"Introdução ao aprendizado de máquina I", d:"Conceitos, tipos de aprendizado (supervisionado, não supervisionado e por reforço) e tipos de dados.", apostila:{}, colab:null},
   {n:"05", t:"Introdução ao aprendizado de máquina II", d:"Treino, validação e teste; validação cruzada; subajuste e sobreajuste.", apostila:{}, colab:{}},
-  {n:"06", t:"Árvore de decisão", d:"Entropia, ganho de informação, construção da árvore passo a passo e poda.", material:{pagina:"aulas/arvore-de-decisao/index.html", ver:"Versão 1.4 · novembro de 2026"}, apostila:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-material-de-estudo.pdf", pag:13, ver:"Versão 1.5 · novembro de 2026"}, colab:{}},
-  {n:"07", t:"Random Forest e AdaBoost", d:"Comitês de modelos: bagging, boosting e stacking.", apostila:{}, colab:null},
+  {n:"06", t:"Árvore de decisão", d:"Entropia, ganho de informação, construção da árvore passo a passo e poda.", material:{pagina:"aulas/arvore-de-decisao/index.html", ver:"Versão 1.5 · novembro de 2026"}, apostila:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-material-de-estudo.pdf", pag:13, ver:"Versão 1.6 · novembro de 2026"}, colab:{}},
+  {n:"07", t:"Random Forest e AdaBoost", d:"Comitês de modelos: bagging, Random Forest, boosting e AdaBoost, rodada a rodada.", material:{pagina:"aulas/random-forest-e-adaboost/index.html", ver:"Versão 1.0 · novembro de 2026"}, apostila:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-material-de-estudo.pdf", pag:13, ver:"Versão 1.0 · novembro de 2026"}, colab:null},
   {n:"08", t:"kNN", d:"Classificação pelos vizinhos mais próximos: distâncias e escolha de k.", apostila:{}, colab:null},
   {n:"09", t:"SVM", d:"Hiperplano, margem, vetores de suporte e kernels.", apostila:{}, colab:null},
   {n:"10", t:"k-means", d:"Agrupamento passo a passo e escolha do número de grupos.", apostila:{}, colab:null}

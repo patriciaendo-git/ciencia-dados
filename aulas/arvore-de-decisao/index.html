@@ -10,8 +10,8 @@
 <style>
 :root{
   --fundo:#FFFFFF; --papel:#F6F2F2; --tinta:#282425; --tinta2:#6A6365; --linha:#E6DEDE; --suave:#F6F2F2;
-  --dengue:#F72120; --dengue-t:#D11615; --outro:#9C9496; --destaque:#282425; --destaque-tinta:#282425; --alerta:#6A6365;
-  --treino:#9C9496; --teste:#F72120; --vermelho:#F72120;
+  --dengue:#D11615; --dengue-t:#D11615; --outro:#9C9496; --destaque:#282425; --destaque-tinta:#282425; --alerta:#6A6365;
+  --treino:#9C9496; --teste:#D11615; --vermelho:#D11615;
   --display:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
   --texto:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme:light;
@@ -19,15 +19,15 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
-    --dengue:#FF3B3A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
-    --treino:#7D7578; --teste:#FF3B3A; --vermelho:#FF3B3A;
+    --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+    --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
-  --dengue:#FF3B3A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
-  --treino:#7D7578; --teste:#FF3B3A; --vermelho:#FF3B3A;
+  --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+  --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
   color-scheme:dark;
 }
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -508,11 +508,11 @@ function arvoreSVG(raiz,caminho,neutro,atual){
     ed+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${con?'var(--vermelho)':(caminho?'var(--linha)':'var(--tinta2)')}" stroke-width="${con?4:1.6}"/>`;
     ed+=`<text x="${(x1+x2)/2+(x2<x1?-10:10)}" y="${(y1+y2)/2+4}" text-anchor="${x2<x1?'end':'start'}" font-size="14" font-weight="${con?700:400}" fill="${con?'var(--dengue-t)':'var(--tinta2)'}">${l}</text>`;draw(c);}}
   const desab=!!caminho&&!caminho.has(n);
-  const cor=desab?'var(--fundo)':((n.k||neutro)?'#282425':(classe(n)==='D'?'#F72120':'#9C9496'));const tc=desab?'var(--tinta2)':'#fff';
+  const cor=desab?'var(--fundo)':((n.k||neutro)?'#282425':(classe(n)==='D'?'#D11615':'#9C9496'));const tc=desab?'var(--tinta2)':'#fff';
   const t1=n.k?NOME[n.k]+'?':(classe(n)==='D'?'dengue':'descartado');
   const linhas=n.k?[[t1,fs,700],[`${n.rows} registros`,fs2,400]]:[[t1,fs,700],[`${pct(n.pD)} dengue`,fs2,400],[`${n.rows} ${n.rows===1?'registro':'registros'}`,fs2,400]];
   const y0=Y(n._d)+(linhas.length===2?36:28),dy=linhas.length===2?26:22;
-  nd+=`<g opacity="${desab?.75:1}"><rect x="${n._x-BW(n)/2}" y="${Y(n._d)}" width="${BW(n)}" height="${bh}" rx="10" fill="${cor}"${desab?' stroke="var(--linha)" stroke-width="2"':''}${n===atual?' stroke="#F72120" stroke-width="5"':''}/>`+linhas.map(([t,f,w],i)=>`<text x="${n._x}" y="${y0+i*dy}" text-anchor="middle" font-size="${f}" font-weight="${w}" fill="${tc}">${t}</text>`).join('')+`</g>`;})(raiz);
+  nd+=`<g opacity="${desab?.75:1}"><rect x="${n._x-BW(n)/2}" y="${Y(n._d)}" width="${BW(n)}" height="${bh}" rx="10" fill="${cor}"${desab?' stroke="var(--linha)" stroke-width="2"':''}${n===atual?' stroke="#D11615" stroke-width="5"':''}/>`+linhas.map(([t,f,w],i)=>`<text x="${n._x}" y="${y0+i*dy}" text-anchor="middle" font-size="${f}" font-weight="${w}" fill="${tc}">${t}</text>`).join('')+`</g>`;})(raiz);
  return `<svg viewBox="0 0 ${W} ${Y(prof)+bh+6}" width="100%" role="img" aria-label="Árvore de decisão">${ed}${nd}</svg>`;}
 
 function arvoreHTML(no,caminho,ramo){
