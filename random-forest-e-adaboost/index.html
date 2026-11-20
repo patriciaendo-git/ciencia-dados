@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aula 07 · Random Forest e AdaBoost · Ciência de Dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fundo:#FFFFFF; --papel:#F6F2F2; --tinta:#282425; --tinta2:#6A6365; --linha:#E6DEDE; --suave:#F6F2F2;
+  --dengue:#D11615; --dengue-t:#D11615; --outro:#9C9496; --destaque:#282425; --destaque-tinta:#282425; --alerta:#6A6365;
+  --treino:#9C9496; --teste:#D11615; --vermelho:#D11615;
+  --display:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --texto:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+    --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+    --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+  --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+  --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--fundo);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.7;counter-reset:sec}
+:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
+button,input{font:inherit;color:inherit}
+
+.col{max-width:680px;margin:0 auto;padding:0 20px}
+.larga{max-width:880px;margin:0 auto;padding:0 20px}
+header.abertura{padding:40px 0 28px;border-bottom:2px solid var(--vermelho);margin-bottom:8px}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px}
+.topo img{height:64px;width:auto;display:block;background:#fff;border-radius:6px}
+.topo .logos{display:flex;align-items:center;gap:16px}.topo .logos .sep{width:1px;height:46px;background:var(--linha)}.topo img.dotl{height:56px;padding:3px}
+.topo .volta{font-size:.82rem;font-weight:600;color:var(--tinta2);text-decoration:none}
+.topo .volta:hover{color:var(--dengue-t)}
+.selo{display:block;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:14px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,3.2rem);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;max-width:18ch;text-wrap:balance}
+h1 em{font-style:normal;color:var(--dengue-t)}
+.lead{font-size:1.1rem;color:var(--tinta2);margin:0 0 18px}
+.creditos{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:.85rem;color:var(--tinta2)}
+.creditos b{color:var(--tinta);font-weight:600}
+.etq{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:999px;border:1px solid var(--vermelho);color:var(--dengue-t)}
+main h2{counter-increment:sec}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,3.4vw,1.7rem);line-height:1.2;margin:64px 0 16px;display:flex;align-items:baseline;gap:14px;text-wrap:balance}
+h2::before{content:counter(sec,decimal-leading-zero);font-weight:800;font-size:1.5em;color:var(--dengue-t);font-variant-numeric:tabular-nums;flex:none}
+h3{font-size:1rem;margin:24px 0 8px}
+p{margin:0 0 16px}
+.nota{font-size:.9rem;color:var(--tinta2)}
+.d{color:var(--dengue-t);font-weight:700}
+.o{color:var(--outro);font-weight:700}
+figure{margin:26px 0 30px;padding:22px;background:var(--papel);border:0;border-radius:10px}
+figcaption{font-size:.88rem;color:var(--tinta2);margin-top:12px}
+.destaque{background:var(--papel);border-left:5px solid var(--vermelho);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0}
+.numero{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,9vw,4.2rem);line-height:1;color:var(--tinta)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;background:var(--suave);padding:1px 5px;border-radius:4px}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:1.05rem;text-align:center;margin:12px 0;overflow-x:auto;white-space:nowrap}
+
+/* grade de fichas */
+.grade{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;max-width:520px}
+.grade i{display:block;aspect-ratio:3/4;border-radius:2px}
+.grade i.D{background:var(--dengue)} .grade i.O{background:var(--outro)}
+.legenda{display:flex;flex-wrap:wrap;gap:16px;font-size:.9rem;margin-top:12px}
+.legenda span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}
+.sw.D{background:var(--dengue)} .sw.O{background:var(--outro)}
+
+/* controles */
+.controle{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+.controle label{font-weight:700}
+input[type=range]{flex:1;min-width:180px;accent-color:var(--vermelho)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.chip{border:1px solid var(--linha);background:var(--fundo);border-radius:999px;padding:5px 12px;font-size:.84rem;font-weight:500;cursor:pointer}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.chip[aria-pressed="true"]{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+.botao{border:1px solid var(--vermelho);background:var(--vermelho);color:#fff;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.88rem}
+.botao.primario{background:var(--tinta);color:var(--papel)}
+.leitura{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:.95rem}
+.leitura b{font-family:var(--display);font-size:1.25rem}
+
+svg text{font-family:var(--texto)}
+.eixo{stroke:var(--linha)} .eixo-t{fill:var(--tinta2);font-size:12px}
+.rot{fill:var(--tinta);font-size:13px} .rot-q{fill:var(--tinta2);font-size:12px}
+
+/* pilhas da divisão */
+.pilhas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pilha h4{margin:0 0 6px;font-size:.95rem}
+.barra{display:flex;height:22px;border-radius:3px;overflow:hidden;border:1px solid var(--linha)}
+.barra i{display:block;height:100%}
+.pilha p{font-size:.88rem;color:var(--tinta2);margin:6px 0 0}
+
+/* árvore em lista */
+.arvore{list-style:none;margin:0;padding:0;font-size:.95rem}
+.arvore ul{list-style:none;margin:0;padding-left:22px;border-left:2px solid var(--linha);margin-left:8px}
+.arvore li{margin:6px 0}
+.no-q{font-weight:700}
+.ramo{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.folha{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.folha .barra{width:90px;height:12px}
+.folha .pv{font-size:.88rem}
+.no-ativo>.linha-no{background:color-mix(in srgb,var(--vermelho) 14%,transparent);border-radius:4px;padding:2px 6px;margin-left:-6px}
+.inativo>.linha-no{opacity:.45}
+.ficha{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px 14px;margin-bottom:16px}
+.ficha label{display:flex;align-items:center;gap:8px;font-size:.92rem;cursor:pointer}
+.ficha input{width:18px;height:18px;accent-color:var(--vermelho)}
+.veredito{font-size:1rem;padding:12px 16px;background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;margin-top:14px}
+
+.glossario{margin:0}
+.glossario dt{font-weight:700;margin-top:14px}
+.glossario dd{margin:2px 0 0;color:var(--tinta2)}
+pre.algoritmo{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--papel);border:0;border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:16px;overflow-x:auto;font-size:.85rem;line-height:1.55;margin:16px 0 8px}
+footer{margin:80px 0 0;padding:28px 0 40px;border-top:2px solid var(--vermelho);font-size:.85rem;color:var(--tinta2)}
+footer a{color:inherit}
+.rodape{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:22px;padding-top:14px;border-top:1px solid var(--linha)}
+.glossario dt{font-weight:600}
+footer ol{padding-left:1.2em}
+.carregar-status{font-size:.88rem;color:var(--tinta2);margin-top:8px}
+@media (max-width:560px){body{font-size:15.5px}figure{padding:14px}.pilhas{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.nota-comp{background:var(--papel);border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:18px 20px;margin:30px 0 8px}
+.etq-nc{display:block;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta2);margin-bottom:4px}
+.nota-comp h3{margin:0 0 12px;font-size:1.05rem}
+.nota-comp p{margin:12px 0 0;font-size:.95rem}
+.tab-scroll{overflow-x:auto}
+table.cmp{width:100%;min-width:520px;border-collapse:collapse;font-size:.85rem;line-height:1.45;background:var(--fundo)}
+table.cmp thead th{background:var(--tinta);color:var(--fundo);text-align:left;padding:8px 10px;vertical-align:bottom;font-weight:600}
+table.cmp thead th span{display:block;font-weight:400;font-size:.75rem;opacity:.75}
+table.cmp tbody th{text-align:left;padding:8px 10px;vertical-align:top;font-weight:700;width:24%}
+table.cmp td{padding:8px 10px;vertical-align:top;border-top:1px solid var(--linha)}
+table.cmp tbody th{border-top:1px solid var(--linha)}
+.arv-larga{overflow-x:auto;margin-top:6px}
+figure.larga-fig{width:auto;position:static;left:auto;margin-left:0;margin-right:0}
+
+.arv-svg svg{display:block}
+.pergunta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;min-height:42px}
+.pergunta .pq{font-weight:700;font-size:1.05rem;margin-right:4px}
+.bt{font:inherit;font-weight:600;font-size:.95rem;border-radius:8px;padding:6px 18px;cursor:pointer;border:2px solid var(--tinta);background:var(--fundo);color:var(--tinta)}
+.bt.sim{background:var(--tinta);color:var(--fundo)}
+.bt.rec{font-size:.85rem;border-color:var(--linha);color:var(--tinta2);padding:5px 12px}
+
+.wt{display:flex;align-items:center;gap:8px}.wt i{display:block;height:10px;background:var(--vermelho);border-radius:2px;min-width:2px}
+table.ada{width:100%;border-collapse:collapse;font-size:.85rem;background:var(--fundo)}
+table.ada th{background:var(--tinta);color:var(--fundo);text-align:left;padding:6px 8px;font-weight:600}
+table.ada td{padding:5px 8px;border-top:1px solid var(--linha)}
+table.ada tr.err td{background:color-mix(in srgb,var(--vermelho) 12%,transparent)}
+.cands{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.cand{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:.85rem;background:var(--fundo)}
+.cand.best{border:2px solid var(--vermelho)}
+.cand b{display:block}
+.contas{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.92rem;margin-top:10px}
+.bt{font:inherit;font-weight:600;font-size:.95rem;border-radius:8px;padding:6px 18px;cursor:pointer;border:2px solid var(--tinta);background:var(--fundo);color:var(--tinta)}
+.bt.sim{background:var(--tinta);color:var(--fundo)}.bt:disabled{opacity:.4;cursor:not-allowed}
+table.dic{min-width:560px}table.dic tbody th{width:18%}
+
+.etapa{font-size:.85rem;color:var(--tinta2);font-weight:600;margin-left:6px}
+.passo{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:14px 16px;margin:0 0 14px;font-size:.93rem;line-height:1.6}
+.passo h4{margin:0 0 6px;font-size:1rem}
+.passo .lin{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;background:var(--suave);border-radius:6px;padding:8px 10px;margin:8px 0;white-space:pre-wrap;line-height:1.55}
+.passo .alerta{font-size:.85rem;color:var(--tinta2);margin-top:6px}
+.stumps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:8px}
+.gform{font-size:1rem;font-weight:500;text-align:center;margin:8px 0 12px;font-variant-numeric:tabular-nums}
+.gform i,.eqs i{font-style:italic;font-weight:500}
+.eqs sub,.gform sub{font-size:.72em;vertical-align:-.3em;line-height:0;margin-left:1px}
+.um{display:grid;grid-template-columns:1fr;gap:10px;align-items:start;margin-top:8px}
+.um>svg{max-width:340px;margin:0 auto}
+@media(max-width:720px){.um{grid-template-columns:1fr}}
+.um svg{width:100%;height:auto;display:block}
+.eqs{font-size:.92rem;line-height:1.5;font-variant-numeric:tabular-nums}
+.eqs .eq{margin:0}
+.eqs .eq .v{white-space:nowrap}
+.eqs .eq .sep{display:inline-block;width:18px}
+.eqs .bl{margin:0 0 12px}
+.eqs .rot{font-family:Poppins,sans-serif;font-size:.78rem;font-weight:600;color:var(--tinta2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px}
+.eq{display:block;line-height:2.4}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.2;font-size:.88em;font-weight:500;margin:0 1px}
+.fr>span:first-child{border-bottom:1.2px solid currentColor;padding:0 3px 1px}
+.fr>span:last-child{padding:1px 3px 0}
+.eq .res{font-weight:700}
+.eqs .tot{border-top:1px solid var(--linha);padding-top:10px}
+.eqs .tot .res{color:var(--vermelho)}
+.cortes{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font-size:.8rem}
+.cortes span{border:1px solid var(--linha);border-radius:6px;padding:2px 8px;background:var(--papel)}
+.cortes span.min{border:2px solid var(--vermelho);font-weight:700}
+.comp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
+.comp>div{text-align:center;font-size:.92rem}
+.comp>div.best b{color:var(--vermelho)}
+.st{border:1px solid var(--linha);border-radius:8px;padding:10px;font-size:.82rem;line-height:1.45;background:var(--papel)}
+.st.best{border:2px solid var(--vermelho)}
+.st b.q{display:block;font-size:.9rem;margin-bottom:4px}
+.st .g{font-weight:700;margin-top:4px}.st.best .g{color:var(--dengue-t)}
+table.ada td.wnew{font-weight:700}
+table.ada td,table.ada th{white-space:nowrap}
+table.ada tr.err td{background:color-mix(in srgb,var(--vermelho) 14%,transparent)}
+table.ada tr.lado-a td:first-child{box-shadow:inset 4px 0 0 var(--tinta)}
+.treinados{font-size:.88rem;margin-top:10px;color:var(--tinta2)}
+.treinados b{color:var(--tinta)}
+.pd{font-weight:700}.pd.d{color:var(--dengue-t)}.pd.o{color:var(--tinta2)}
+
+.paciente{background:var(--papel);border-radius:8px;padding:10px 14px}
+.paciente label{font-weight:600}.paciente select{font:inherit;padding:2px 6px;border-radius:6px;border:1px solid var(--linha);background:var(--fundo);color:var(--tinta)}
+.rot-p{font-weight:700;color:var(--vermelho)}
+.dica-p{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.paciente[hidden],.placar[hidden]{display:none}
+.placar{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:12px 16px;margin:0 0 14px;font-size:.95rem}
+.placar .barra{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--linha);margin:8px 0 4px;max-width:460px}
+.placar .barra i{display:block;background:var(--vermelho)}.placar .barra u{display:block;background:var(--outro)}
+.placar .dec{font-weight:700;font-size:1.05rem}.placar .dec.d{color:var(--dengue-t)}
+.floresta{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.arv{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:.78rem;line-height:1.45;background:var(--fundo)}
+.arv.nova{border:2px solid var(--tinta)}
+.arv h4{margin:0 0 4px;font-size:.85rem;display:flex;justify-content:space-between}
+.arv .voto{font-weight:700}.arv .voto.d{color:var(--dengue-t)}.arv .voto.o{color:var(--tinta2)}
+.arv .at span{display:inline-block;border:1px solid var(--linha);border-radius:5px;padding:0 5px;margin:1px 2px 1px 0}
+.arv .at span.fora{text-decoration:line-through;color:var(--tinta2);opacity:.6}
+.arv svg{width:100%;height:auto;display:block;margin-top:4px}
+table.ada.fixa{max-width:640px}
+
+.sorteios{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;font-size:.82rem}
+.sorteios span{border:1px solid var(--linha);border-radius:6px;padding:2px 8px;background:var(--papel)}
+table.ada tr.oob td{color:var(--tinta2);opacity:.55}
+table.ada tr.rep td:last-child{color:var(--vermelho)}
+.chips-at{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap}
+.chips-at span{border:2px solid var(--vermelho);border-radius:8px;padding:4px 14px;font-weight:700}
+.chips-at span.fora{border-color:var(--linha);color:var(--tinta2);text-decoration:line-through;font-weight:400}
+.um1{max-width:360px;margin:10px 0}
+.um1 svg,.comp svg{width:auto;max-width:100%;height:120px;display:block;margin:0 auto}
+.comp .eqs{text-align:left;margin-top:6px}
+.miniinfo{color:var(--tinta2);font-size:.74rem}
+.arv svg{max-width:100%!important;height:150px!important;width:auto!important;display:block;margin:6px auto 0}
+.arv-grande{margin:12px 0;overflow-x:auto}.arv-grande svg{display:block;margin:0 auto;width:100%;max-width:620px;height:auto}
+.divs{font-size:.85rem;margin:8px 0 0;padding-left:20px}.divs li{margin-bottom:4px}
+.sk{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--vermelho);border-radius:10px;padding:12px 16px;margin:18px 0;background:var(--fundo);font-size:.92rem;line-height:1.55}
+.sk svg{flex:none;width:28px;height:26px;margin-top:2px}
+.sk-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:2px}
+.sk p{margin:0}
+.fd{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin-right:8px;vertical-align:1px;font-style:normal;white-space:nowrap}
+.fd.real{background:var(--tinta);color:var(--fundo);border:1.5px solid var(--tinta)}
+.fd.sint{border:1.5px solid var(--tinta2);color:var(--tinta2)}
+.fd.teo{border:1.5px dashed var(--tinta2);color:var(--tinta2)}
+.pp{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--tinta);border-radius:10px;padding:14px 18px;margin:22px 0;background:var(--fundo)}
+.pp svg{flex:none;width:30px;height:30px;margin-top:2px}
+.pp-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta);margin-bottom:4px}
+.pp .pp-i{margin:0 0 10px;font-size:.95rem;line-height:1.6}
+.pp .pp-q{margin:0;font-weight:700;font-size:1.02rem;line-height:1.45}
+.pp .pp-d{margin:6px 0 0;font-size:.9rem;color:var(--tinta2);font-weight:400}
+main h2.sem-n{counter-increment:none}
+h2.sem-n::before{content:none}
+.coment h3{margin-top:28px}
+.coment .volta-pp{font-size:.88rem}
+.pp a,.coment a{color:var(--dengue-t)}
+.aprof{margin:28px 0 0;padding-top:12px;border-top:1px solid var(--linha);font-size:.9rem;color:var(--tinta2)}
+.aprof a{color:var(--dengue-t);font-weight:700}
+</style></head><body>
+<header class="abertura col">
+  <div class="topo"><div class="logos"><img src="../../upe.png" alt="Universidade de Pernambuco (UPE)"><span class="sep"></span><img src="../../logo.png" alt="dotLAB" class="dotl"></div><a class="volta" href="../../index.html">Todas as aulas</a></div>
+  <span class="selo">Ciência de Dados · Aula 07 · Random Forest e AdaBoost</span>
+  <h1>Muitas árvores <em>simples</em> erram menos que uma?</h1>
+  <p class="lead">Comitês de modelos: bagging, Random Forest e AdaBoost, com registros de casos suspeitos de dengue.</p>
+  <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">Versão 1.4 · novembro de 2026</span></div>
+</header>
+<main>
+<section class="col">
+  <p>Na aula anterior, vimos que uma árvore de decisão funda decora o conjunto de treinamento: acerta quase tudo nele e generaliza mal. Pequenas mudanças nos dados mudam muito a árvore, o que chamamos de <strong>alta variância</strong>. Uma árvore rasa, por outro lado, é estável, mas simples demais.</p>
+  <p>Os <strong>comitês de modelos</strong> (<em>ensemble learning</em>) atacam esse problema de outro jeito: em vez de procurar a melhor árvore, combinam muitas. Nesta aula veremos os tipos de comitê e as duas estratégias mais usadas: o <strong>bagging</strong>, que treina árvores independentes e faz uma votação (o Random Forest é o exemplo mais conhecido), e o <strong>boosting</strong>, que treina árvores em sequência, cada uma corrigindo os erros da anterior (o AdaBoost é o exemplo clássico). Vamos acompanhar os dois com tabelas pequenas, que dá para conferir à mão.</p>
+</section>
+
+<section class="col">
+  <h2>Por que combinar modelos</h2>
+  <h3>Os tipos de comitê</h3>
+  <p>Um <strong>comitê de modelos</strong> (<em>ensemble</em>) treina vários modelos e combina as respostas deles. Os comitês costumam ser organizados em três famílias, que diferem em como os modelos são treinados e em como as respostas são combinadas:</p>
+  <div class="tab-scroll"><table class="cmp">
+    <thead><tr><th></th><th>Bagging</th><th>Boosting</th><th>Stacking</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Modelos</th><td>Do mesmo tipo, em geral árvores completas</td><td>Do mesmo tipo, em geral aprendizes fracos</td><td>De tipos diferentes (por exemplo, SVM, regressão logística e árvore)</td></tr>
+      <tr><th scope="row">Treinamento</th><td>Em paralelo: cada modelo é independente</td><td>Em sequência: cada modelo foca nos erros dos anteriores</td><td>Em paralelo, e depois um modelo a mais</td></tr>
+      <tr><th scope="row">De onde vem a diversidade</th><td>Sorteio dos registros (amostra bootstrap) e, no Random Forest, também dos atributos</td><td>Pesos que aumentam nos registros errados</td><td>Algoritmos diferentes, que erram de jeitos diferentes</td></tr>
+      <tr><th scope="row">Como combina</th><td>Votação por maioria (ou média)</td><td>Votação ponderada pela qualidade de cada modelo</td><td>Um <strong>metamodelo</strong> aprende a combinar as previsões</td></tr>
+      <tr><th scope="row">O que mais reduz</th><td>A variância</td><td>O viés</td><td>Depende dos modelos combinados</td></tr>
+      <tr><th scope="row">Exemplos</th><td><strong>Random Forest</strong>, Extra Trees</td><td><strong>AdaBoost</strong>, Gradient Boosting, XGBoost</td><td><code>StackingClassifier</code> do scikit-learn</td></tr>
+    </tbody></table></div>
+  <p class="nota">Com base em Bonaccorso (2017), Dietterich (2000) e Wolpert (1992). A forma mais simples de comitê heterogêneo é a votação direta entre modelos diferentes, sem metamodelo (<code>VotingClassifier</code>). Nesta aula, aprofundamos um exemplo de cada uma das duas primeiras famílias.</p>
+
+  <h3>O poder da votação e da diversidade</h3>
+  <p>Imagine vários classificadores, cada um acertando um pouco mais que o acaso. Se os erros deles forem <strong>independentes</strong>, a decisão por <strong>maioria dos votos</strong> (<em>majority vote</em>) acerta mais que qualquer um deles sozinho. Use os controles para ver o efeito.</p>
+  <figure>
+    <div class="controle"><label for="pAc">Acerto de cada classificador</label><input type="range" id="pAc" min="51" max="75" value="60" step="1"><output id="pAcV" for="pAc">60%</output></div>
+    <div class="controle"><label for="nMod">Número de classificadores</label><input type="range" id="nMod" min="1" max="101" value="25" step="2"><output id="nModV" for="nMod">25</output></div>
+    <svg id="curvaVoto" viewBox="0 0 640 280" width="100%" role="img" aria-label="Acerto da votação por maioria conforme o número de classificadores"></svg>
+    <div class="leitura"><span>Um classificador: <b id="vUm">60%</b></span><span>Votação por maioria: <b id="vVoto">–</b></span></div>
+    <figcaption><span class="fd teo">Cálculo teórico · sem dados</span>Probabilidade de a maioria acertar, supondo erros independentes (distribuição binomial).</figcaption>
+  </figure>
+  <p>O gráfico supõe erros <strong>independentes</strong>. Se os classificadores errarem <strong>juntos</strong>, nos mesmos registros, a votação não ajuda: dez cópias do mesmo modelo erram exatamente como uma. Por isso, todo comitê precisa de <strong>diversidade</strong>: modelos que errem em lugares diferentes.</p>
+  <p>No bagging e no Random Forest, a diversidade vem da <strong>aleatoriedade</strong>: cada árvore vê um sorteio dos registros e, no Random Forest, só um sorteio dos atributos em cada divisão. Cada árvore fica um pouco pior sozinha, mas as árvores passam a errar de jeitos diferentes, e a votação ganha com isso (Breiman, 2001). No boosting, a diversidade vem dos <strong>pesos</strong>, que concentram a atenção nos registros que os modelos anteriores erraram. O AdaBoost clássico não sorteia nada: com os mesmos dados, produz sempre os mesmos stumps.</p>
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=3" target="_blank" rel="noopener">Para aprofundar: seção 01 do material de estudo</a> · inclui a tabela da votação e o papel da aleatoriedade.</p>
+</section>
+
+<section class="col">
+  <h2>Os dados do exemplo</h2>
+  <p>Usamos duas tabelas pequenas de casos suspeitos de dengue, criadas para o exemplo. Em cada uma, um registro é um paciente, descrito por três atributos, e a última coluna é a classe que queremos prever: se o caso foi confirmado como dengue.</p>
+  <h3>Tabela 1: para o Random Forest</h3>
+  <p>São os 10 registros da Aula 06. Os três atributos são categóricos:</p>
+  <div class="tab-scroll"><table class="cmp dic">
+    <thead><tr><th>Coluna</th><th>Valores</th><th>O que significa</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Febre</th><td>sim / não</td><td>Se o paciente teve febre.</td></tr>
+      <tr><th scope="row">Pressão arterial</th><td>alta / normal / baixa</td><td>Faixa da pressão arterial medida no atendimento.</td></tr>
+      <tr><th scope="row">Dor abdominal</th><td>intensa / neutra</td><td>Intensidade da dor abdominal relatada.</td></tr>
+      <tr><th scope="row">Dengue</th><td>sim / não</td><td>Classe (variável-alvo): se o caso foi confirmado como dengue.</td></tr>
+    </tbody></table></div>
+  <div class="tab-scroll"><table class="ada fixa">
+    <thead><tr><th>#</th><th>Febre</th><th>Pressão arterial</th><th>Dor abdominal</th><th>Dengue</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>não</td><td>alta</td><td>intensa</td><td class="pd o">não</td></tr>
+      <tr><td>2</td><td>sim</td><td>baixa</td><td>intensa</td><td class="pd o">não</td></tr>
+      <tr><td>3</td><td>sim</td><td>baixa</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>4</td><td>não</td><td>normal</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>5</td><td>não</td><td>baixa</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>6</td><td>não</td><td>normal</td><td>intensa</td><td class="pd o">não</td></tr>
+      <tr><td>7</td><td>não</td><td>normal</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>8</td><td>sim</td><td>baixa</td><td>intensa</td><td class="pd o">não</td></tr>
+      <tr><td>9</td><td>sim</td><td>normal</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>10</td><td>sim</td><td>baixa</td><td>neutra</td><td class="pd o">não</td></tr>
+    </tbody></table></div>
+  <p class="nota"><span class="fd sint">Dados sintéticos</span>Valores criados para o exemplo; não refletem a realidade. Cinco registros são de dengue e cinco não.</p>
+  <h3>Tabela 2: para o AdaBoost</h3>
+  <p>São 8 registros com um atributo numérico, a contagem de plaquetas:</p>
+  <div class="tab-scroll"><table class="cmp dic">
+    <thead><tr><th>Coluna</th><th>Valores</th><th>O que significa</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Dor abdominal</th><td>sim / não</td><td>Se o paciente relatou dor abdominal.</td></tr>
+      <tr><th scope="row">Febre</th><td>sim / não</td><td>Se o paciente teve febre.</td></tr>
+      <tr><th scope="row">Plaquetas</th><td>mil por mm³</td><td>Contagem de plaquetas no exame de sangue. Abaixo de 150 mil por mm³ fala-se em <strong>plaquetopenia</strong>, uma alteração laboratorial frequente na dengue.</td></tr>
+      <tr><th scope="row">Dengue</th><td>sim / não</td><td>Classe (variável-alvo): se o caso foi confirmado como dengue.</td></tr>
+    </tbody></table></div>
+  <div class="tab-scroll"><table class="ada fixa">
+    <thead><tr><th>#</th><th>Dor abdominal</th><th>Febre</th><th>Plaquetas (mil/mm³)</th><th>Dengue</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>sim</td><td>sim</td><td>98</td><td class="pd d">sim</td></tr>
+      <tr><td>2</td><td>não</td><td>sim</td><td>120</td><td class="pd d">sim</td></tr>
+      <tr><td>3</td><td>sim</td><td>não</td><td>85</td><td class="pd d">sim</td></tr>
+      <tr><td>4</td><td>sim</td><td>sim</td><td>180</td><td class="pd d">sim</td></tr>
+      <tr><td>5</td><td>não</td><td>sim</td><td>210</td><td class="pd o">não</td></tr>
+      <tr><td>6</td><td>não</td><td>sim</td><td>250</td><td class="pd o">não</td></tr>
+      <tr><td>7</td><td>sim</td><td>não</td><td>172</td><td class="pd o">não</td></tr>
+      <tr><td>8</td><td>sim</td><td>sim</td><td>165</td><td class="pd o">não</td></tr>
+    </tbody></table></div>
+  <p class="nota"><span class="fd sint">Dados sintéticos</span>Valores criados para o exemplo; não refletem a realidade. Quatro registros são de dengue e quatro não. Sobre plaquetopenia e dengue: Brasil, Ministério da Saúde. <em>Dengue: diagnóstico e manejo clínico: adulto e criança</em>. 6. ed. Brasília, 2024.</p>
+
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=5" target="_blank" rel="noopener">Para aprofundar: seção 02 do material de estudo</a> · traz as mesmas tabelas e dicionários, para estudar no papel.</p>
+</section>
+
+<section class="col">
+  <h2>Bagging e Random Forest</h2>
+  <p>No <strong>bagging</strong> (de <em>bootstrap aggregating</em>), cada árvore do comitê é treinada <strong>de forma independente</strong>, numa versão um pouco diferente dos dados. No fim, as árvores votam, e a classe mais votada vence. A ordem em que as árvores são treinadas não importa.</p>
+  <h3>Passo 1: sortear uma amostra bootstrap</h3>
+  <p>Uma <strong>amostra bootstrap</strong> (<em>bootstrap sample</em>) tem o mesmo tamanho da tabela original e é formada por sorteios <strong>com reposição</strong>: depois de sorteado, o registro volta para a urna e pode sair de novo. Por isso, alguns registros aparecem duas ou três vezes e outros não aparecem. Os que ficam de fora formam o conjunto <strong>out-of-bag</strong>, que serve para avaliar a árvore sem separar um conjunto de teste. Em média, cerca de 37% dos registros ficam de fora de cada amostra.</p>
+  <h3>Passo 2: sortear os atributos de cada divisão</h3>
+  <p>Só a amostra bootstrap não basta: árvores treinadas em amostras parecidas tendem a fazer as mesmas perguntas e a errar juntas. O <strong>Random Forest</strong> acrescenta uma segunda fonte de acaso: em cada divisão, a árvore só pode escolher entre um <strong>subconjunto aleatório de atributos</strong>. Na Tabela 1, com três atributos, cada divisão sorteia dois. Breiman (2001) sugere sortear cerca de √M dos M atributos; aqui usamos dois, como nos slides da aula. O resultado é uma floresta de árvores bem diferentes entre si, e é justamente essa diferença que faz a votação funcionar, como vimos na seção 01.</p>
+  <h3>Passo 3: deixar a árvore crescer, repetir e votar</h3>
+  <p>Cada árvore cresce <strong>até o fim, sem poda</strong>: divide os ramos até as folhas ficarem puras, sorteando atributos de novo em cada divisão. Como as amostras e os sorteios mudam, as árvores saem com <strong>formas e tamanhos diferentes</strong>. Repetimos tudo até completar a floresta: isso é o treinamento. Depois, para classificar um paciente novo, ele passa por todas as árvores, e a floresta responde com a <strong>maioria dos votos</strong>. Plante a primeira árvore passo a passo e complete a floresta. Só então chega um paciente novo para ser classificado.</p>
+  <figure class="larga-fig">
+    <div class="controle"><button type="button" class="bt sim" id="rfProx">Plantar a árvore 1</button><button type="button" class="bt" id="rfResto">Plantar as restantes (até 15)</button><button type="button" class="bt" id="rfRec">Recomeçar</button><span class="etapa" id="rfEtapa"></span></div>
+    <div class="passo" id="rfPasso" aria-live="polite"></div>
+    <div class="controle paciente" id="rfPac" hidden><span class="rot-p">Paciente novo</span><span class="dica-p">a ser classificado</span>
+      <label>Febre <select id="pFeb"><option selected>sim</option><option>não</option></select></label>
+      <label>Pressão arterial <select id="pPre"><option>alta</option><option>normal</option><option selected>baixa</option></select></label>
+      <label>Dor abdominal <select id="pDor"><option selected>intensa</option><option>neutra</option></select></label></div>
+    <div class="placar" id="placar" aria-live="polite"></div>
+    <div class="floresta" id="floresta"></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Tabela 1, criada para o exemplo. Há duas fases: o treinamento constrói todas as árvores, e só depois a classificação passa o paciente novo por todas elas. Cada árvore pronta vira um cartão com os registros out-of-bag; na classificação, o cartão mostra o caminho do paciente em vermelho e o voto. Como nos slides da aula, cada pergunta abre um ramo para cada valor do atributo. Com só 10 registros as árvores ficam pequenas; numa base real, teriam muitos níveis. “Recomeçar” planta a mesma floresta de novo.</figcaption>
+  </figure>
+  <p>Repare que nenhuma árvore é a “melhor”: algumas fazem perguntas ruins, porque o sorteio as deixou sem o atributo mais útil ou com uma amostra estranha. Mesmo assim, a votação costuma acertar mais do que a maioria das árvores sozinhas.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>O <code>RandomForestClassifier</code> tem três parâmetros centrais: <code>n_estimators</code> (número de árvores), <code>max_features</code> (atributos sorteados em cada divisão; por padrão, a raiz quadrada do total, o que daria 1 com os 3 atributos da Tabela 1) e <code>oob_score=True</code> (acurácia nos registros out-of-bag). As árvores crescem sem limite de profundidade (<code>max_depth=None</code>) e só fazem <strong>divisões binárias</strong>, por isso atributos categóricos precisam ser codificados antes. Na classificação, em vez da votação simples do artigo de Breiman, a floresta faz a <strong>média das probabilidades</strong> estimadas pelas árvores e escolhe a classe de maior média.</p></div></div>
+
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=7" target="_blank" rel="noopener">Para aprofundar: seção 03 do material de estudo</a> · inclui uma amostra bootstrap sorteada à mão e os detalhes do Random Forest.</p>
+</section>
+
+<section class="col">
+  <h2>AdaBoost, rodada a rodada</h2>
+  <p>No <strong>boosting</strong>, os modelos são treinados <strong>em sequência</strong>, e cada um tenta corrigir os erros dos anteriores. O AdaBoost (<em>Adaptive Boosting</em>) é o exemplo clássico. Ele difere do Random Forest em três pontos: usa árvores de uma única pergunta, os <strong>stumps</strong>; a ordem importa, porque o erro de um stump define como o próximo será feito; e na votação final alguns stumps têm mais voz que outros. Antes de rodar o algoritmo, vale entender a ideia de <strong>peso</strong>, que é o coração do método.</p>
+
+  <h3>Por que cada registro começa com peso 0,125</h3>
+  <p>Além dos atributos, o AdaBoost dá a cada registro um <strong>peso</strong> (<em>sample weight</em>), que diz quanto aquele registro <strong>conta</strong> no treinamento; não é um dado do paciente, é uma informação do algoritmo. No começo, todos os registros são tratados igualmente, e os pesos somam 1: cada um dos 8 registros começa com <strong>1/8 = 0,125</strong>. O peso entra na <strong>impureza de Gini</strong>, que passa a somar pesos em vez de contar registros, e no <strong>erro</strong> de cada stump, que é a soma dos pesos dos registros errados. Um registro com peso 0,500 vale tanto quanto quatro com peso 0,125: errar nele custa caro.</p>
+  <h3>O passo a passo de cada rodada</h3>
+  <ol>
+    <li><strong>Escolher o stump.</strong> Um stump é uma árvore com uma única pergunta e duas folhas, um <strong>aprendiz fraco</strong> (<em>weak learner</em>). Testamos um stump por atributo (para as plaquetas, vários pontos de corte) e ficamos com o de menor impureza de Gini ponderada.</li>
+    <li><strong>Medir o erro:</strong> a soma dos pesos dos registros que o stump erra.</li>
+    <li><strong>Calcular a voz do stump</strong> (<em>amount of say</em>): α = ½ · ln[(1 − erro) / erro]. Quanto menor o erro, maior a voz na votação final.</li>
+    <li><strong>Atualizar os pesos:</strong> multiplicar o peso dos registros errados por e<sup>α</sup> (aumenta) e o dos certos por e<sup>−α</sup> (diminui).</li>
+    <li><strong>Normalizar:</strong> dividir todos os pesos pela soma, para voltarem a somar 1.</li>
+  </ol>
+  <div class="pp" role="note" id="pp2"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">E se um stump tivesse erro 0,7, ou seja, errasse mais do que acertasse? Qual seria a voz dele, e o que o comitê faria com ela?</p><p class="pp-d">Calcule α = ½ · ln[(1 − erro) / erro] e observe o sinal. <a href="#com2">Comentário no fim da página</a>.</p></div></div>
+  <p>Na rodada seguinte, os registros que acabaram de ser errados pesam mais, e o próximo stump é escolhido para acertá-los. Clique para ver as rodadas acontecendo.</p>
+  <figure class="larga-fig">
+    <div class="controle"><button type="button" class="bt sim" id="btProx">Começar a rodada 1</button><button type="button" class="bt" id="btRec">Recomeçar</button><span class="etapa" id="etapa"></span></div>
+    <div class="passo" id="passo" aria-live="polite"></div>
+    <div class="tab-scroll"><table class="ada" id="tabAda"></table></div>
+    <div class="treinados" id="treinados"></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Tabela 2: oito registros criados para o exemplo; não refletem a realidade. Use “Próximo passo” para avançar: cada rodada tem seis passos, e o primeiro mostra um stump por vez. A coluna “Comitê” aparece quando o primeiro stump termina e mostra a votação de todos os stumps já treinados, cada um com a sua voz α.</figcaption>
+  </figure>
+  <div class="pp" role="note" id="pp1"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-i">Antes da pergunta, um pouco de biologia. As <strong>plaquetas</strong> são fragmentos de células do sangue que ajudam na coagulação. Num adulto saudável, a contagem fica entre cerca de 150 mil e 450 mil plaquetas por mm³ de sangue. Abaixo de 150 mil, fala-se em <strong>plaquetopenia</strong> (ou trombocitopenia). Na dengue, a queda das plaquetas é uma alteração frequente, sobretudo na fase crítica da doença, por volta do terceiro ao sétimo dia, e por isso a contagem de plaquetas é acompanhada no hemograma (Brasil, 2024). Em resumo: plaquetas baixas combinam com dengue, mas plaquetas normais não descartam a doença. Nos 8 registros da Tabela 2, que são sintéticos, o stump 1 cortou em 150 mil, exatamente o limite da plaquetopenia.</p><p class="pp-q">O stump 3 prevê dengue quando as plaquetas estão <em>acima</em> de 175 mil, o contrário do que a plaquetopenia sugere. O modelo aprendeu uma regra clínica errada?</p><p class="pp-d">Veja quais registros pesam mais no início da rodada 3 e em que folha cada um cai. <a href="#com1">Comentário no fim da página</a>.</p></div></div>
+
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=9" target="_blank" rel="noopener">Para aprofundar: seção 04 do material de estudo</a> · inclui a rodada 1 calculada à mão e os mesmos stumps no scikit-learn.</p>
+</section>
+<section class="col">
+  <h2>Random Forest × AdaBoost</h2>
+  <div class="tab-scroll"><table class="cmp">
+    <thead><tr><th></th><th>Random Forest<span>bagging</span></th><th>AdaBoost<span>boosting</span></th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Árvores</th><td>Árvores completas, de tamanhos diferentes</td><td>Stumps: uma pergunta e duas folhas</td></tr>
+      <tr><th scope="row">Treinamento</th><td>Independente: a ordem não importa e as árvores podem ser treinadas em paralelo</td><td>Sequencial: o erro de um stump define os pesos usados pelo próximo</td></tr>
+      <tr><th scope="row">Fonte de diversidade</th><td>Amostra bootstrap e subconjunto aleatório de atributos</td><td>Pesos dos registros, que aumentam nos registros errados</td></tr>
+      <tr><th scope="row">Votação</th><td>Cada árvore tem um voto igual</td><td>Cada stump vota com a sua voz α</td></tr>
+      <tr><th scope="row">O que reduz</th><td>Principalmente a variância de árvores fundas</td><td>Principalmente o viés de modelos fracos</td></tr>
+      <tr><th scope="row">No scikit-learn</th><td><code>RandomForestClassifier</code>: <code>n_estimators</code>, <code>max_features</code>, <code>oob_score</code></td><td><code>AdaBoostClassifier</code>: <code>n_estimators</code>, <code>learning_rate</code></td></tr>
+    </tbody></table></div>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>No <code>AdaBoostClassifier</code>, a voz de cada stump aparece em <code>estimator_weights_</code> sem o ½ da fórmula: para o primeiro stump desta página, 1,946 em vez de 0,973. Como todos os stumps são multiplicados pelo mesmo fator, a votação dá o mesmo resultado.</p></div></div>
+  <p>Na simulação da Aula 06, com 4.000 registros de treinamento, nem a árvore, nem o Random Forest, nem o AdaBoost passam de 56% de acurácia no teste: um comitê não cria informação que não está nos atributos.</p>
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=13" target="_blank" rel="noopener">Para aprofundar: seção 05 do material de estudo</a> · inclui a tabela de acurácias da simulação.</p>
+</section>
+
+<section class="col">
+  <h2>Forças e fraquezas</h2>
+  <p>Com base em Chandramouli, Dutt e Das<sup><a href="#ref2">2</a></sup> e em Bonaccorso<sup><a href="#ref1">1</a></sup>.</p>
+  <h3>Random Forest</h3>
+  <ul>
+    <li><strong>Forças.</strong> Funciona bem com bases grandes e com muitos atributos. Reduz o sobreajuste de uma árvore funda sem exigir poda. Dá uma estimativa de erro sem conjunto de teste separado (out-of-bag) e uma medida de importância dos atributos. Tem recursos para classes desbalanceadas, como o parâmetro <code>class_weight</code>. Serve para classificação e para regressão.</li>
+    <li><strong>Fraquezas.</strong> Por combinar centenas de árvores, não pode ser lido como uma única árvore: perde a interpretabilidade. É mais caro de treinar e de guardar do que uma árvore.</li>
+  </ul>
+  <h3>AdaBoost</h3>
+  <ul>
+    <li><strong>Forças.</strong> Transforma aprendizes fracos num classificador forte. Tem poucos hiperparâmetros (o número de stumps e a taxa de aprendizado). Resiste bem ao sobreajuste quando os dados têm pouco ruído. Breiman chegou a chamar o boosting com árvores de “o melhor classificador pronto para uso do mundo”, como lembram Friedman, Hastie e Tibshirani<sup><a href="#ref4">4</a></sup>.</li>
+    <li><strong>Fraquezas.</strong> É muito sensível a ruído e a valores atípicos (<em>outliers</em>): um registro com rótulo errado é errado de novo a cada rodada, seu peso cresce sem parar e os stumps seguintes passam a se dedicar a ele. Por isso, a qualidade dos dados importa ainda mais. O treinamento é sequencial e não pode ser feito em paralelo.</li>
+  </ul>
+  <div class="pp" role="note" id="pp3"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">Suponha que o registro 4 esteja com o rótulo errado: o paciente não tinha dengue. Basta remover o registro e treinar de novo?</p><p class="pp-d">Pense em como saber que o rótulo está errado, e não só que o modelo errou. <a href="#com3">Comentário no fim da página</a>.</p></div></div>
+  <p>Os comitês não criam informação. Se os atributos separam mal as classes, como os sinais clínicos da Aula 06, uma floresta inteira também vai separar mal. O ganho dos comitês está em <strong>aproveitar melhor</strong> a informação que já está nos dados.</p>
+
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=15" target="_blank" rel="noopener">Para aprofundar: seção 06 do material de estudo</a> · o material traz também os erros comuns da aula.</p>
+</section>
+
+<section class="col coment" id="comentarios">
+  <h2 class="sem-n">Comentários sobre as perguntas para pensar</h2>
+  <h3 id="com1">O stump 3 e a plaquetopenia</h3>
+  <p>O stump não aprendeu uma regra clínica errada, e também não aprendeu uma certa: nenhum stump aprende biologia. Cada stump do AdaBoost escolhe a pergunta que melhor separa os registros <strong>com os pesos daquela rodada</strong>. No início da rodada 3, os registros mais pesados são o 4 (0,292), errado pelo stump 1, e o 7 e o 8 (0,250 cada), errados pelo stump 2. Os outros cinco pesam 0,042 cada.</p>
+  <p>Abaixo de 175 mil ficam os registros 7 e 8, que não são dengue e pesam 0,500 juntos, e os registros 1, 2 e 3, que são dengue e pesam só 0,125: a folha fica com “não dengue”. Acima de 175 mil fica o registro 4, dengue com 0,292, contra os registros 5 e 6, que pesam 0,083: a folha fica com “dengue”. O stump erra os registros 1, 2, 3, 5 e 6, que juntos pesam só 0,208.</p>
+  <p>O stump 3 isolado não é uma regra para usar com pacientes: é uma correção do comitê para os casos difíceis da rodada. Quem classifica é a soma das vozes dos três stumps, e ela acerta os 8 registros. Lembre também que esses registros são sintéticos: só o limite de 150 mil para a plaquetopenia vem da literatura; o corte de 175 mil vem apenas desses dados e desses pesos. Ao interpretar um modelo treinado com dados reais, vale a mesma cautela: um corte estranho num aprendiz fraco diz mais sobre os pesos daquela rodada do que sobre a doença.</p>
+  <p class="volta-pp"><a href="#pp1">Voltar à pergunta</a></p>
+  <h3 id="com2">O stump que erra mais do que acerta</h3>
+  <p>A voz seria negativa: α = ½ · ln(0,3 / 0,7) = −0,424. Com duas classes, erro 0,5 é um cara ou coroa: α = 0, e o stump não tem voz. Abaixo de 0,5, a voz é positiva; acima de 0,5, é negativa, e o comitê <strong>inverte</strong> o voto do stump. Um stump que erra 70% das vezes é tão informativo quanto um que acerta 70%, desde que se faça o contrário do que ele diz. É como alguém que sempre mente: escutando ao contrário, ele ajuda. A atualização dos pesos também se inverte: os registros que ele errou perdem peso, em vez de ganhar.</p>
+  <p>Na prática, isso não acontece com os stumps desta aula. Cada folha recebe a classe de <strong>maior peso</strong> entre os registros que caem nela, então cada folha erra no máximo metade do seu peso, e o stump inteiro erra no máximo 0,5. Um erro acima de 0,5 só apareceria se as folhas fossem rotuladas ao contrário, ou com outro tipo de aprendiz fraco.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>O <code>AdaBoostClassifier</code> (algoritmo SAMME) não aceita voz negativa. Com K classes, um aprendiz com erro maior ou igual a 1 − 1/K (0,5 para duas classes) é descartado e o treinamento para ali; se isso acontecer logo no primeiro aprendiz, o ajuste falha com erro. A voz é calculada como ln[(1 − erro) / erro] + ln(K − 1), multiplicada pela taxa de aprendizado (<code>learning_rate</code>, 1 por padrão) e sem o ½ da aula. Com duas classes, ln(K − 1) = 0; por isso <code>estimator_weights_</code> mostra 1,946, 1,792 e 1,335, o dobro dos nossos valores.</p></div></div>
+  <p class="volta-pp"><a href="#pp2">Voltar à pergunta</a></p>
+  <h3 id="com3">O registro com rótulo errado</h3>
+  <p>O AdaBoost ajuda a <strong>encontrar</strong> o suspeito: depois da rodada 1, o registro 4 sozinho vale metade do peso do conjunto, e o stump 3 existe em boa parte para acertá-lo. Um registro que acumula muito peso é um bom candidato a revisão. Mas o modelo errar um registro não prova que o rótulo está errado. Um paciente com dengue e 180 mil plaquetas é plausível: nem todo caso tem plaquetopenia, sobretudo nos primeiros dias.</p>
+  <p>Remover um registro só porque o modelo o errou é perigoso. O treinamento fica mais bonito, mas o modelo aprende uma realidade mais simples do que a verdadeira e erra justamente os casos difíceis quando eles aparecerem. Antes de remover, confira a origem do dado. No SINAN, por exemplo, a ficha de notificação registra se o caso foi confirmado por <strong>critério laboratorial</strong> ou <strong>clínico-epidemiológico</strong>, e os do segundo tipo têm mais chance de erro de rótulo. Se o erro se confirmar, corrija ou remova o registro e documente a decisão. Se não der para confirmar, mantenha o registro e prefira um modelo menos sensível a ruído, como o Random Forest, ou limite o número de stumps do AdaBoost.</p>
+  <p class="volta-pp"><a href="#pp3">Voltar à pergunta</a></p>
+</section>
+
+</main>
+<footer class="col">
+  <p><strong>Dados.</strong> <span class="fd sint">Dados sintéticos</span>As duas tabelas desta página foram criadas para o exemplo e não refletem a realidade. A Tabela 1 é a mesma da Aula 06.</p>
+  <ol>
+    <li id="ref1">Bonaccorso, G. <em>Machine Learning Algorithms</em>. Packt Publishing, 2017.</li>
+    <li id="ref2">Chandramouli, S.; Dutt, S.; Das, A. K. <em>Machine Learning</em>. Pearson, 2018.</li>
+    <li id="ref3"><a href="https://doi.org/10.1023/A:1010933404324">Breiman, L. Random forests. <em>Machine Learning</em> 45(1), 5–32 (2001).</a></li>
+    <li id="ref4"><a href="https://doi.org/10.1214/aos/1016218223">Friedman, J.; Hastie, T.; Tibshirani, R. Additive logistic regression: a statistical view of boosting. <em>The Annals of Statistics</em> 28(2), 337–407 (2000).</a></li>
+    <li id="ref5"><a href="https://doi.org/10.1006/jcss.1997.1504">Freund, Y.; Schapire, R. E. A decision-theoretic generalization of on-line learning and an application to boosting. <em>Journal of Computer and System Sciences</em> 55(1), 119–139 (1997).</a></li>
+    <li id="ref8"><a href="https://doi.org/10.1007/BF00058655">Breiman, L. Bagging predictors. <em>Machine Learning</em> 24(2), 123–140 (1996).</a></li>
+    <li id="ref9"><a href="https://doi.org/10.1007/3-540-45014-9_1">Dietterich, T. G. Ensemble methods in machine learning. In: <em>Multiple Classifier Systems</em>, LNCS 1857, 1–15 (2000).</a></li>
+    <li id="ref10"><a href="https://doi.org/10.1016/S0893-6080(05)80023-1">Wolpert, D. H. Stacked generalization. <em>Neural Networks</em> 5(2), 241–259 (1992).</a></li>
+    <li id="ref6">Mayr, A.; Binder, H.; Gefeller, O.; Schmid, M. The evolution of boosting algorithms. <em>Methods of Information in Medicine</em> 53(6), 419–427 (2014).</li>
+    <li id="ref7">Brasil, Ministério da Saúde. <em>Dengue: diagnóstico e manejo clínico: adulto e criança</em>. 6. ed. Brasília, 2024.</li>
+  </ol>
+  <p><strong>Vídeos recomendados.</strong> <a href="https://www.youtube.com/watch?v=J4Wdy0Wc_xQ">StatQuest: Random Forests Part 1, Building, Using and Evaluating</a> · <a href="https://www.youtube.com/watch?v=LsK-xG1cLYA">StatQuest: AdaBoost, Clearly Explained</a>.</p>
+  <p>Material didático; não é ferramenta de diagnóstico.</p>
+  <div class="rodape"><span>dotLAB · Grupo de Pesquisa em Transformação Digital · UPE</span><span>dotlabbrazil.com.br</span></div>
+</footer>
+<script>
+(function(){
+const fmt=(x,d=3)=>x.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=x=>Math.round(x*100)+'%';
+/* votação por maioria */
+function lgamma(z){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,.1208650973866179e-2,-.5395239384953e-5];let x=z,y=z,t=x+5.5;t-=(x+.5)*Math.log(t);let s=1.000000000190015;for(const q of c)s+=q/++y;return -t+Math.log(2.5066282746310005*s/x);}
+function maj(n,p){p=Math.min(1-1e-12,Math.max(1e-12,p));let s=0;for(let k=Math.floor(n/2)+1;k<=n;k++){s+=Math.exp(lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p));}return s;}
+const pAc=document.getElementById('pAc'),nMod=document.getElementById('nMod'),svg=document.getElementById('curvaVoto');
+function desenharVoto(){const p=pAc.value/100,n=+nMod.value,W=640,H=280,l=48,r=20,t=14,b=40;
+ const X=k=>l+(k-1)/100*(W-l-r),Y=v=>t+(1-(v-.5)/.5)*(H-t-b);
+ let g='';for(const v of [.5,.6,.7,.8,.9,1])g+=`<line x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--linha)"/><text x="${l-8}" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="var(--tinta2)">${Math.round(v*100)}%</text>`;
+ for(const k of [1,25,51,75,101])g+=`<text x="${X(k)}" y="${H-b+20}" text-anchor="middle" font-size="12" fill="var(--tinta2)">${k}</text>`;
+ let d='';for(let k=1;k<=101;k+=2){d+=(k>1?'L':'M')+X(k).toFixed(1)+' '+Y(maj(k,p)).toFixed(1)}
+ svg.innerHTML=`${g}<line x1="${l}" x2="${W-r}" y1="${Y(p)}" y2="${Y(p)}" stroke="var(--tinta2)" stroke-dasharray="5 4"/><text x="${W-r}" y="${Y(p)-6}" text-anchor="end" font-size="12" fill="var(--tinta2)">um classificador: ${pct(p)}</text>
+  <path d="${d}" fill="none" stroke="var(--vermelho)" stroke-width="2.5"/><circle cx="${X(n)}" cy="${Y(maj(n,p))}" r="6" fill="var(--vermelho)"/>
+  <text x="${(l+W-r)/2}" y="${H-4}" text-anchor="middle" font-size="12" fill="var(--tinta2)">número de classificadores na votação</text>`;
+ document.getElementById('pAcV').textContent=pct(p);document.getElementById('nModV').textContent=n;
+ document.getElementById('vUm').textContent=pct(p);document.getElementById('vVoto').textContent=pct(maj(n,p));}
+pAc.addEventListener('input',desenharVoto);nMod.addEventListener('input',desenharVoto);desenharVoto();
+
+/* AdaBoost, passo a passo */
+const R=[{dor:1,feb:1,pl:98,y:1},{dor:0,feb:1,pl:120,y:1},{dor:1,feb:0,pl:85,y:1},{dor:1,feb:1,pl:180,y:1},{dor:0,feb:1,pl:210,y:0},{dor:0,feb:1,pl:250,y:0},{dor:1,feb:0,pl:172,y:0},{dor:1,feb:1,pl:165,y:0}];
+const CORTES=[90,110,150,170,175,195,230];
+const MAXR=3;
+let w,wAntes,stumps,rodada,passo,cur;
+const f3=x=>fmt(x,3),f2=x=>fmt(x,2);
+const lista=ids=>ids.map(i=>i+1).join(', ');
+function folha(mask,lado){const ids=[];R.forEach((r,i)=>{if(mask[i]===lado)ids.push(i);});let ws=0,wd=0;ids.forEach(i=>{ws+=w[i];wd+=w[i]*R[i].y;});const p=ws?wd/ws:0;return {ids,ws,wd,p,g:1-p*p-(1-p)*(1-p),classe:p>=.5?1:0};}
+function avaliar(nome,mask,txtSim,txtNao){const A=folha(mask,true),B=folha(mask,false);return {nome,mask,A,B,txtSim,txtNao,g:A.ws*A.g+B.ws*B.g};}
+function candidatos(){const c=[avaliar('Dor abdominal?',R.map(r=>r.dor===1),'sim','não'),avaliar('Febre?',R.map(r=>r.feb===1),'sim','não')];
+ let melhor=null;CORTES.forEach(t=>{const x=avaliar(`Plaquetas < ${t} mil?`,R.map(r=>r.pl<t),'sim','não');x.t=t;if(!melhor||x.g<melhor.g)melhor=x;});c.push(melhor);return c;}
+function reset(){w=R.map(()=>1/8);wAntes=null;stumps=[];rodada=0;passo=0;cur=null;
+ document.getElementById('passo').innerHTML='<h4>Antes da rodada 1</h4>Todos os registros têm o mesmo peso, <b>0,125</b> (1/8), e os pesos somam 1. Clique em “Começar a rodada 1”.';
+ document.getElementById('etapa').textContent='';desenharTabela();desenharTreinados();botao();}
+function comite(i){let s=0;stumps.forEach(st=>s+=st.a*(st.pred[i]?1:-1));return s;}
+function desenharTabela(){
+ const show=passo>=5;const err=cur&&passo>=2?cur.err:[];
+ let h='<tr><th>#</th><th>Dor abd.</th><th>Febre</th><th>Plaquetas</th><th>Dengue</th>'+(cur&&passo>=2?'<th>Stump prevê</th>':'')+'<th>Peso'+(show?' antes':'')+'</th>'+(show?'<th>Peso depois</th>':'')+(stumps.length&&passo===0||passo>=6?'<th>Comitê</th>':'')+'</tr>';
+ const base=show?wAntes:w,max=Math.max(...w);
+ R.forEach((r,i)=>{const c=comite(i);
+  h+=`<tr class="${err.includes(i)?'err':''}"><td>${i+1}</td><td>${r.dor?'sim':'não'}</td><td>${r.feb?'sim':'não'}</td><td>${r.pl}</td><td class="pd ${r.y?'d':'o'}">${r.y?'sim':'não'}</td>`+
+   (cur&&passo>=2?`<td class="pd ${cur.pred[i]?'d':'o'}">${cur.pred[i]?'dengue':'não'}${cur.pred[i]===r.y?' ✓':' ✗'}</td>`:'')+
+   `<td>${f3(base[i])}</td>`+(show?`<td class="wnew"><span class="wt"><i style="width:${(w[i]/max*60).toFixed(0)}px"></i>${f3(w[i])}</span></td>`:'')+
+   (stumps.length&&passo===0||passo>=6?`<td class="pd ${c>0?'d':'o'}">${c>0?'dengue':'não'}${(c>0)===(r.y===1)?' ✓':' ✗'}</td>`:'')+'</tr>';});
+ document.getElementById('tabAda').innerHTML=h;}
+function desenharTreinados(){document.getElementById('treinados').innerHTML=stumps.length?'Stumps já treinados: '+stumps.map((s,k)=>`<b>${k+1}. ${s.nome}</b> (voz α = ${f2(s.a)})`).join(' · '):'';}
+function botao(){const b=document.getElementById('btProx');
+ if(rodada>=MAXR&&passo===0){b.disabled=true;b.textContent='Fim do exemplo';return;}
+ b.disabled=false;b.textContent=passo===0?`Começar a rodada ${rodada+1}`:(passo<6?'Próximo passo':`Começar a rodada ${rodada+1}`);
+ if(passo===6&&rodada>=MAXR){b.disabled=true;b.textContent='Fim do exemplo';}}
+function textoFolha(F,lado){const nD=F.ids.filter(i=>R[i].y).length;
+ return `<div>${lado}: registros ${lista(F.ids)||'nenhum'}<br>peso de dengue ${f3(F.wd)} de ${f3(F.ws)} → proporção ${f2(F.p)}<br>Gini = 1 − (${f2(F.p)}² + ${f2(1-F.p)}²) = ${f3(F.g)}</div>`;}
+const CAND_ORDEM=()=>cur.c;
+const frac=(a,b)=>`<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+function contar(F){const n=F.ids.length,d=F.ids.filter(i=>R[i].y).length;return {n,d};}
+function eqFolha(F,rot,r1){const {n,d}=contar(F);const p=F.p,q=1-p;
+ if(!F.ids.length)return `<div class="bl"><span class="rot">${rot}</span>nenhum registro</div>`;
+ const fp=r1?frac(d,n):frac(f3(F.wd),f3(F.ws)), fq=r1?frac(n-d,n):frac(f3(F.ws-F.wd),f3(F.ws));
+ return `<div class="bl"><span class="rot">${rot}: registros ${lista(F.ids)}</span>
+ <div class="eq"><span class="v"><i>p</i><sub>dengue</sub></span> = ${fp} = ${f2(p)}<span class="sep"></span><span class="v"><i>p</i><sub>não</sub></span> = ${fq} = ${f2(q)}</div>
+ <div class="eq">Gini = 1 − (${f2(p)}² + ${f2(q)}²) = 1 − (${f3(p*p)} + ${f3(q*q)}) = <span class="res">${f3(F.g)}</span></div></div>`;}
+function eqPond(x,r1){const a=r1?frac(x.A.ids.length,8):f3(x.A.ws),b=r1?frac(x.B.ids.length,8):f3(x.B.ws);
+ return `<div class="bl tot"><span class="rot">Gini ponderado do stump${r1?' (cada folha pesa pela fração de registros)':' (cada folha pesa pela soma dos pesos)'}</span>
+ <div class="eq">${a} · ${f3(x.A.g)} + ${b} · ${f3(x.B.g)} = <span class="res">${f3(x.g)}</span></div></div>`;}
+function svgStump(x,r1,mini){const W=320,H=mini?150:172;
+ const leaf=(F,cx,lab)=>{const {n,d}=contar(F);const vs=r1?d:f3(F.wd),vn=r1?n-d:f3(F.ws-F.wd);
+  return `<text x="${cx}" y="66" text-anchor="middle" font-size="12" style="fill:var(--tinta2)" font-weight="600">${lab}</text>
+  <rect x="${cx-70}" y="74" width="140" height="58" rx="8" style="fill:var(--papel);stroke:var(--tinta)" stroke-width="1.2"/>
+  <text x="${cx}" y="92" text-anchor="middle" font-size="11" font-weight="700" style="fill:var(--tinta)">DENGUE</text>
+  <text x="${cx-35}" y="106" text-anchor="middle" font-size="10" style="fill:var(--tinta2)">sim</text><text x="${cx+35}" y="106" text-anchor="middle" font-size="10" style="fill:var(--tinta2)">não</text>
+  <line x1="${cx}" y1="98" x2="${cx}" y2="126" style="stroke:var(--linha)"/>
+  <text x="${cx-35}" y="124" text-anchor="middle" font-size="${r1?15:13}" font-weight="700" style="fill:var(--vermelho)">${vs}</text><text x="${cx+35}" y="124" text-anchor="middle" font-size="${r1?15:13}" font-weight="700" style="fill:var(--tinta)">${vn}</text>
+  ${mini?'':`<text x="${cx}" y="152" text-anchor="middle" font-size="10" style="fill:var(--tinta2)">${r1?'registros':'soma dos pesos'}</text><text x="${cx}" y="166" text-anchor="middle" font-size="10" style="fill:var(--tinta2)">nº ${lista(F.ids)||'—'}</text>`}`;};
+ return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Stump ${x.nome}" font-family="Poppins,sans-serif">
+ <line x1="160" y1="34" x2="80" y2="74" style="stroke:var(--tinta)" stroke-width="1.4"/><line x1="160" y1="34" x2="240" y2="74" style="stroke:var(--tinta)" stroke-width="1.4"/>
+ <rect x="85" y="4" width="150" height="30" rx="8" style="fill:var(--tinta)"/><text x="160" y="24" text-anchor="middle" font-size="12" font-weight="600" style="fill:var(--fundo)">${x.nome}</text>
+ ${leaf(x.A,80,'sim')}${leaf(x.B,240,'não')}</svg>`;}
+function avancar(){
+ if(passo===0||passo===6){if(rodada>=MAXR)return;rodada++;passo=1;const c=candidatos();cur={c,sub:0,best:c.reduce((a,b)=>b.g<a.g?b:a)};}
+ else if(passo===1&&cur.sub<3)cur.sub++;
+ else passo++;
+ const P=document.getElementById('passo'),B=cur.best;
+ document.getElementById('etapa').textContent=`Rodada ${rodada} · passo ${passo} de 6`+(passo===1?` · ${cur.sub<3?'stump '+(cur.sub+1)+' de 3':'comparação'}`:'');
+ if(passo===1){
+  const x=cur.c[cur.sub],B=cur.best,r1=rodada===1;
+  if(cur.sub<3){
+   const ordem=['Dor abdominal?','Febre?'];
+   P.innerHTML=`<h4>Passo 1 · Stump ${cur.sub+1} de 3: ${x.nome}</h4>${cur.sub===0?`Vamos montar um stump para cada atributo e medir a impureza de Gini das duas folhas. ${r1?'Nesta rodada todos os registros pesam o mesmo, então basta <b>contar</b> registros.':'Agora os registros têm pesos diferentes, então em vez de contar registros <b>somamos os pesos</b>.'}<div class="gform">Gini = 1 − ∑ <i>p</i><sub><i>i</i></sub>²</div>`:''}
+   <div class="um">${svgStump(x,r1)}<div class="eqs">${eqFolha(x.A,'Folha “sim”',r1)}${eqFolha(x.B,'Folha “não”',r1)}${eqPond(x,r1)}</div></div>
+   ${x.t?`<div class="alerta">Para plaquetas, testamos vários pontos de corte e ficamos com o de menor Gini:</div><div class="cortes">${CORTES.map(t=>{const g=avaliar('',R.map(r=>r.pl<t)).g;return `<span class="${t===x.t?'min':''}">&lt; ${t} mil: ${f3(g)}</span>`}).join('')}</div>`:''}`;
+  } else {
+   P.innerHTML=`<h4>Passo 1 · Comparar os três stumps</h4>O stump com <b>menor Gini ponderado</b> separa melhor quem tem e quem não tem dengue. Ele é o stump desta rodada.
+   <div class="comp">${CAND_ORDEM().map(y=>`<div class="${y===B?'best':''}">${svgStump(y,r1,true)}<b>Gini = ${f3(y.g)}</b>${y===B?'<br><b>menor: escolhido</b>':''}</div>`).join('')}</div>`;
+  }
+ }
+ if(passo===2){const A=B.A,Bn=B.B;
+  cur.pred=R.map((r,i)=>B.mask[i]?A.classe:Bn.classe);cur.err=R.map((r,i)=>cur.pred[i]!==r.y?i:-1).filter(i=>i>=0);
+  P.innerHTML=`<h4>Passo 2 · Ver o que o stump prevê e quem ele erra</h4>Cada folha prevê a classe que tem mais peso nela. O stump <b>${B.nome}</b> prevê <b>${A.classe?'dengue':'não dengue'}</b> na folha “sim” e <b>${Bn.classe?'dengue':'não dengue'}</b> na folha “não”.<br>Ele erra <b>${cur.err.length} ${cur.err.length===1?'registro':'registros'}</b>: ${cur.err.length===1?'o registro':'os registros'} <b>${lista(cur.err)}</b> (linhas destacadas na tabela).`;}
+ if(passo===3){let e=0;cur.err.forEach(i=>e+=w[i]);cur.e=e;
+  P.innerHTML=`<h4>Passo 3 · Calcular o erro do stump</h4>O erro é a <b>soma dos pesos dos registros errados</b>:<div class="lin">erro = ${cur.err.map(i=>'peso do registro '+(i+1)+' ('+f3(w[i])+')').join(' + ')} = ${f3(e)}</div><div class="alerta">Gini e erro são coisas diferentes. O Gini mede o quanto as classes ficam misturadas nas folhas e serve para <b>escolher</b> o stump (passo 1). O erro mede quanto peso o stump escolhido erra e serve para decidir a <b>voz</b> dele na votação (passo 4).</div>`;}
+ if(passo===4){const e=cur.e,razao=(1-e)/e,ln=Math.log(razao);cur.a=.5*ln;
+  P.innerHTML=`<h4>Passo 4 · Calcular a voz do stump (α)</h4>A voz (<em>amount of say</em>) diz quanto o voto deste stump vale no comitê. Quanto menor o erro, maior a voz:<div class="lin">α = ½ · ln[(1 − erro) / erro]
+  = ½ · ln[(1 − ${f3(e)}) / ${f3(e)}]
+  = ½ · ln(${f3(razao)})
+  = ½ · ${f3(ln)}
+  = ${f3(cur.a)}</div>A voz pertence ao <b>stump</b>, não a um registro. Um stump com erro 0,5 (igual a chutar) teria voz 0.`;}
+ if(passo===5){wAntes=w.slice();const a=cur.a,eu=Math.exp(a),ed=Math.exp(-a);w=w.map((v,i)=>v*(cur.err.includes(i)?eu:ed));cur.soma=w.reduce((x,y)=>x+y,0);cur.bruto=w.slice();
+  P.innerHTML=`<h4>Passo 5 · Atualizar os pesos dos registros</h4>Os registros errados ganham peso e os certos perdem:<div class="lin">registro errado: peso × e^α  = peso × e^${f3(a)}  = peso × ${f3(eu)}
+registro certo:  peso × e^−α = peso × e^−${f3(a)} = peso × ${f3(ed)}</div>${cur.err.map(i=>`Registro ${i+1}: ${f3(wAntes[i])} × ${f3(eu)} = ${f3(w[i])}`).join('<br>')}<br>Cada registro certo: ${f3(wAntes[R.findIndex((r,i)=>!cur.err.includes(i))])} × ${f3(ed)} = ${f3(w[R.findIndex((r,i)=>!cur.err.includes(i))])} (os certos podem ter pesos diferentes a partir da rodada 2)<div class="alerta">Agora os pesos somam ${f3(cur.soma)}, e não mais 1. Por isso o próximo passo.</div>`;
+  w=cur.bruto;desenharTabela();}
+ if(passo===6){w=w.map(v=>v/cur.soma);
+  stumps.push({nome:B.nome,a:cur.a,pred:cur.pred});
+  const i0=cur.err[0];
+  P.innerHTML=`<h4>Passo 6 · Normalizar</h4>Dividimos cada peso pela soma (${f3(cur.soma)}) para que voltem a somar 1:<div class="lin">${cur.err.map(i=>`registro ${i+1} (errado): ${f3(cur.bruto[i])} / ${f3(cur.soma)} = ${f3(w[i])}`).join('\n')}
+${(()=>{const j=R.findIndex((r,i)=>!cur.err.includes(i));return `registro ${j+1} (certo): ${f3(cur.bruto[j])} / ${f3(cur.soma)} = ${f3(w[j])}, e o mesmo para os demais certos`})()}</div>${cur.err.length===1?`O registro ${i0+1} agora vale <b>${f3(w[i0])}</b> do total: esse é o <b>peso do registro</b>, não a voz do stump (que é ${f2(cur.a)}).`:''} Na próxima rodada, o stump será escolhido com esses novos pesos e vai se esforçar para acertar os registros pesados.${rodada>=MAXR?' Fim do exemplo: o comitê vota somando a voz de cada stump.':''}`;
+  desenharTreinados();}
+ if(passo!==5)desenharTabela();
+ botao();}
+document.getElementById('btProx').addEventListener('click',avancar);document.getElementById('btRec').addEventListener('click',reset);
+reset();
+})();
+// ---------- Random Forest ----------
+(function(){
+const R=[["não","alta","intensa",0],["sim","baixa","intensa",0],["sim","baixa","intensa",1],["não","normal","intensa",1],["não","baixa","intensa",1],["não","normal","intensa",0],["não","normal","intensa",1],["sim","baixa","intensa",0],["sim","normal","intensa",1],["sim","baixa","neutra",0]].map(([feb,pre,dor,y])=>({feb,pre,dor,y}));
+const N=R.length,MAX=15;
+const AT=[{k:'feb',nome:'Febre',q:'Febre?',vals:['sim','não']},{k:'pre',nome:'Pressão arterial',q:'Pressão arterial?',vals:['alta','normal','baixa']},{k:'dor',nome:'Dor abdominal',q:'Dor abdominal?',vals:['intensa','neutra']}];
+const f3=x=>x.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3});
+const fr=(a,b)=>`<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+let rng,arvores=[],cur=null,passo=0;
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+const gini=(n,d)=>{if(!n)return 0;const p=d/n;return 1-p*p-(1-p)*(1-p);};
+function sortear(lista,k){const a=lista.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,k).sort((x,y)=>x-y);}
+function avaliar(ids,a){const n=ids.length;const ramos=AT[a].vals.map(v=>{const s=ids.filter(i=>R[i][AT[a].k]===v);return {v,ids:s,n:s.length,d:s.filter(i=>R[i].y).length};});
+ return {a,ramos,g:ramos.reduce((t,r)=>t+r.n/n*gini(r.n,r.d),0)};}
+function crescer(ids,disp,prof,clsPai,sorteioRaiz){const n=ids.length,d=ids.filter(i=>R[i].y).length;
+ const cls=d*2>n?1:d*2<n?0:clsPai;const no={ids,n,d,cls,prof};
+ if(d===0||d===n||!disp.length){no.folha=true;no.motivo=!disp.length&&d&&d<n?'sem atributos':'pura';return no;}
+ const sorteados=sorteioRaiz||(disp.length>2?sortear(disp,2):disp.slice());no.sorteados=sorteados;no.disp=disp;
+ no.cands=sorteados.map(a=>avaliar(ids,a));const best=no.cands.reduce((x,c)=>c.g<x.g-1e-12?c:x);
+ if(best.g>=gini(n,d)-1e-12){no.folha=true;no.motivo='sem ganho';return no;}
+ no.best=best;no.filhos=best.ramos.map(r=>({v:r.v,no:r.n?crescer(r.ids,disp.filter(x=>x!==best.a),prof+1,cls):{ids:[],n:0,d:0,cls,prof:prof+1,folha:true,vazia:true}}));
+ return no;}
+function treinar(){const am=Array.from({length:N},()=>Math.floor(rng()*N));const fora=[...Array(N).keys()].filter(i=>!am.includes(i));
+ const sr=sortear([0,1,2],2);return {am,fora,sr,raiz:crescer(am,[0,1,2],0,1,sr)};}
+function classificar(no,p,cam=[]){cam.push(no);if(no.folha)return {cls:no.cls,cam};return classificar(no.filhos.find(f=>f.v===p[AT[no.best.a].k]).no,p,cam);}
+const paciente=()=>({feb:pFeb.value,pre:pPre.value,dor:pDor.value});
+const voto=a=>classificar(a.raiz,paciente()).cls;
+const nf=no=>no.folha?1:no.filhos.reduce((t,f)=>t+nf(f.no),0);
+const prof=no=>no.folha?0:1+Math.max(...no.filhos.map(f=>prof(f.no)));
+const nPerg=no=>no.folha?0:1+no.filhos.reduce((t,f)=>t+nPerg(f.no),0);
+function svgArvore(raiz,opt={}){const mini=!!opt.mini,cam=opt.cam||null;
+ const LW=mini?74:104,DY=mini?56:84,QW=mini?118:168,QH=mini?20:28,FH=mini?30:40;
+ const W=Math.max(nf(raiz)*LW,QW+8),H=prof(raiz)*DY+FH+4;let x0=0,out='';const pos=new Map();
+ (function lay(no){if(no.folha){pos.set(no,{x:x0*LW+LW/2,y:no.prof*DY+2});x0++;return;}no.filhos.forEach(f=>lay(f.no));const xs=no.filhos.map(f=>pos.get(f.no).x);pos.set(no,{x:(Math.min(...xs)+Math.max(...xs))/2,y:no.prof*DY+2});})(raiz);
+ const dx=Math.max(0,QW/2-pos.get(raiz).x+4);const on=no=>cam&&cam.includes(no);
+ (function ar(no){if(no.folha)return;const p=pos.get(no);no.filhos.forEach(f=>{const q=pos.get(f.no),o=on(no)&&on(f.no);
+   out+=`<line x1="${p.x}" y1="${p.y+QH}" x2="${q.x}" y2="${q.y}" style="${o?'stroke:var(--vermelho);stroke-width:3':'stroke:var(--tinta);stroke-width:1.2'}"/><text x="${p.x+(q.x-p.x)*.75+(q.x<p.x-1?-5:4)}" y="${p.y+QH+(q.y-p.y-QH)*.75}" font-size="${mini?8.5:10.5}" text-anchor="${q.x<p.x-1?'end':'start'}" style="fill:var(--tinta2)">${f.v}</text>`;ar(f.no);});})(raiz);
+ pos.forEach((p,no)=>{const dim=cam&&!on(no)?'opacity:.3':'';
+  if(no.folha){const w=LW-10;out+=`<g style="${dim}"><rect x="${p.x-w/2}" y="${p.y}" width="${w}" height="${FH}" rx="6" style="fill:${no.vazia?'var(--fundo)':no.cls?'var(--vermelho)':'var(--outro)'};${no.vazia?'stroke:var(--outro);stroke-dasharray:3 2;':''}${on(no)?'stroke:var(--tinta);stroke-width:3':''}"/><text x="${p.x}" y="${p.y+(mini?13:17)}" font-size="${mini?9.5:12}" font-weight="700" text-anchor="middle" style="fill:${no.vazia?'var(--tinta2)':'#fff'}">${no.cls?'dengue':'não'}</text><text x="${p.x}" y="${p.y+(mini?25:32)}" font-size="${mini?8:9.5}" text-anchor="middle" style="fill:${no.vazia?'var(--tinta2)':'#fff'}">${no.vazia?'sem registros':no.d+' | '+(no.n-no.d)}</text></g>`;}
+  else out+=`<g style="${dim}"><rect x="${p.x-QW/2}" y="${p.y}" width="${QW}" height="${QH}" rx="6" style="fill:var(--tinta)"/><text x="${p.x}" y="${p.y+QH/2+4}" font-size="${mini?9.5:12}" font-weight="600" text-anchor="middle" style="fill:var(--fundo)">${AT[no.best.a].q}</text></g>`;});
+ return `<svg viewBox="${-dx} 0 ${W+2*dx} ${H}" role="img" aria-label="Árvore de decisão" font-family="Poppins,sans-serif">${out}</svg>`;}
+function eqCand(c,n,dPai){const gp=gini(n,dPai);
+ return `<div class="eqs">${c.ramos.map(r=>`<div class="eq">${r.v}: ${r.n?`1 − (${fr(r.d,r.n)})² − (${fr(r.n-r.d,r.n)})² = ${f3(gini(r.n,r.d))}`:'nenhum registro'}</div>`).join('')}<div class="eq tot">${c.ramos.filter(r=>r.n).map(r=>`${fr(r.n,n)} · ${f3(gini(r.n,r.d))}`).join(' + ')} = <span class="res">${f3(c.g)}</span></div></div>`;}
+function stumpSvg(c){const k=c.ramos.length,LW=96,W=k*LW,out=[];c.ramos.forEach((r,i)=>{const x=i*LW+LW/2;out.push(`<line x1="${W/2}" y1="26" x2="${x}" y2="62" style="stroke:var(--tinta)" stroke-width="1.2"/><text x="${x}" y="58" font-size="10" text-anchor="middle" style="fill:var(--tinta2)">${r.v}</text><rect x="${x-42}" y="64" width="84" height="40" rx="7" style="fill:var(--papel);stroke:var(--tinta)" stroke-width="1"/><text x="${x}" y="77" font-size="8.5" font-weight="700" text-anchor="middle" style="fill:var(--tinta)">DENGUE</text><text x="${x-18}" y="97" font-size="13" font-weight="700" text-anchor="middle" style="fill:var(--vermelho)">${r.d}</text><text x="${x+18}" y="97" font-size="13" font-weight="700" text-anchor="middle" style="fill:var(--tinta)">${r.n-r.d}</text>`);});
+ return `<svg viewBox="0 0 ${Math.max(W,180)} 108" font-family="Poppins,sans-serif"><rect x="${Math.max(W,180)/2-80}" y="2" width="160" height="24" rx="7" style="fill:var(--tinta)"/><text x="${Math.max(W,180)/2}" y="18.5" font-size="12" font-weight="600" text-anchor="middle" style="fill:var(--fundo)">${AT[c.a].q}</text>${out.join('').replaceAll(`x1="${W/2}"`,`x1="${Math.max(W,180)/2}"`)}</svg>`;}
+function tabelaAmostra(a){const cont=Array(N).fill(0);a.am.forEach(i=>cont[i]++);
+ return `<div class="tab-scroll"><table class="ada fixa"><thead><tr><th>#</th><th>Febre</th><th>Pressão arterial</th><th>Dor abdominal</th><th>Dengue</th><th>Vezes na amostra</th></tr></thead><tbody>${R.map((r,i)=>`<tr class="${cont[i]===0?'oob':cont[i]>1?'rep':''}"><td>${i+1}</td><td>${r.feb}</td><td>${r.pre}</td><td>${r.dor}</td><td class="pd ${r.y?'d':'o'}">${r.y?'sim':'não'}</td><td><b>${cont[i]===0?'0 · fora (out-of-bag)':cont[i]+'×'}</b></td></tr>`).join('')}</tbody></table></div>`;}
+function caminho(raiz,alvo){const L=[];(function rec(no,c){if(no===alvo){L.push(...c);return true;}if(no.folha)return false;return no.filhos.some(f=>rec(f.no,c.concat(`${AT[no.best.a].nome.toLowerCase()} ${f.v}`)));})(raiz,[]);return L;}
+function nos(raiz){const L=[];(function rec(no){L.push(no);if(!no.folha)no.filhos.forEach(f=>rec(f.no));})(raiz);return L;}
+const unic=ids=>[...new Set(ids)].sort((x,y)=>x-y).map(i=>i+1).join(', ');
+function render(){const P=document.getElementById('rfPasso'),k=arvores.length+(cur?1:0),et=document.getElementById('rfEtapa');
+ if(!cur){P.innerHTML=arvores.length>=MAX?`<h4>Floresta completa: o treinamento terminou</h4>As ${MAX} árvores nasceram dos mesmos quatro passos, com sorteios diferentes, e por isso têm formas e tamanhos diferentes. Agora começa a <b>classificação</b>: chega um paciente novo, que nenhuma árvore viu. Escolha os dados dele abaixo; ele passa por todas as árvores, cada uma vota e a classe mais votada vence.`:arvores.length?`<h4>Árvore ${arvores.length} plantada</h4>Ela entrou na floresta abaixo. Plante a próxima passo a passo, ou plante as restantes de uma vez para completar a floresta.`:`<h4>Como nasce uma árvore da floresta</h4>Primeiro vem o <b>treinamento</b>: cada árvore nasce em quatro passos, <b>1</b> sortear a amostra bootstrap, <b>2</b> sortear os atributos da raiz, <b>3</b> escolher a pergunta da raiz e <b>4</b> deixar a árvore crescer até o fim. Só quando a floresta estiver completa vem a <b>classificação</b> de um paciente novo. Clique em “Plantar a árvore 1”.`;et.textContent='';}
+ else{const a=cur,r=a.raiz;et.textContent=`Árvore ${k} · passo ${passo} de 4`;
+  if(passo===1)P.innerHTML=`<h4>Passo 1 · Sortear a amostra bootstrap</h4>Sorteamos ${N} vezes um registro entre os ${N} da tabela, <b>com reposição</b>: depois de sorteado, o registro volta e pode sair de novo.
+   <div class="sorteios">${a.am.map((i,j)=>`<span>${j+1}º: <b>registro ${i+1}</b></span>`).join('')}</div>${tabelaAmostra(a)}
+   <div class="alerta">${a.fora.length?`Os registros ${a.fora.map(i=>i+1).join(', ')} não saíram: formam o conjunto out-of-bag desta árvore.`:'Todos os registros saíram pelo menos uma vez, o que é raro.'} Registros repetidos contam mais de uma vez nas contas a seguir.</div>`;
+  if(passo===2)P.innerHTML=`<h4>Passo 2 · Sortear os atributos da raiz</h4>Antes de <b>cada</b> divisão, sorteamos 2 dos atributos disponíveis. Na raiz, a árvore só pode escolher entre estes:
+   <div class="chips-at">${[0,1,2].map(x=>`<span class="${a.sr.includes(x)?'':'fora'}">${AT[x].nome}</span>`).join('')}</div>
+   <div class="alerta">Nas próximas divisões haverá um novo sorteio. É esse sorteio, junto com a amostra, que deixa as árvores diferentes entre si.</div>`;
+  if(passo===3){const best=r.folha?null:r.best;P.innerHTML=`<h4>Passo 3 · Escolher a pergunta da raiz</h4>Com os ${N} registros da amostra (contando as repetições), testamos cada atributo sorteado e calculamos a impureza de Gini ponderada dos ramos, como na Aula 06 e no AdaBoost. A pergunta de menor Gini vira a raiz.
+   <div class="comp">${(r.cands||[]).map(c=>`<div class="${c===best?'best':''}">${stumpSvg(c)}${eqCand(c,r.n,r.d)}${c===best?'<b>menor Gini: vira a raiz</b>':''}</div>`).join('')}</div>
+   <div class="alerta">Gini da amostra inteira, antes de dividir: ${f3(gini(r.n,r.d))}.</div>`;}
+  if(passo===4){const internos=nos(r).filter(no=>!no.folha&&no!==r);
+   P.innerHTML=`<h4>Passo 4 · A árvore cresce até o fim</h4>Em cada ramo que ainda mistura dengue e não dengue, repetimos o processo com os registros que chegaram ali: <b>novo sorteio de atributos</b> e a pergunta de menor Gini. O ramo para quando fica <b>puro</b> (uma só classe), quando não sobra atributo para perguntar ou quando nenhuma pergunta reduz a impureza. Não há poda.
+   <div class="arv-grande">${svgArvore(r)}</div><div class="alerta">Nas folhas, dengue | não dengue entre os registros da amostra que chegaram ali. Se houver empate, a folha fica com a classe mais frequente no nó de cima; um ramo sem registros também. Esta árvore tem ${nPerg(r)} pergunta${nPerg(r)>1?'s':''} e ${prof(r)} níve${prof(r)>1?'is':'l'}.</div>
+   ${internos.length?`<ul class="divs">${internos.map(no=>`<li>Ramo <b>${caminho(r,no).join(' → ')}</b> (registros ${unic(no.ids)}): ${no.sorteados.length>1?'sorteio '+no.sorteados.map(x=>AT[x].nome.toLowerCase()).join(' e '):'só resta '+AT[no.sorteados[0]].nome.toLowerCase()} → <b>${AT[no.best.a].q}</b></li>`).join('')}</ul>`:''}`;}}
+ desenharFloresta();botoes();}
+function desenharFloresta(){let vd=0;const n=arvores.length,ok=n>=MAX;document.getElementById('rfPac').hidden=!ok;
+ document.getElementById('floresta').innerHTML=arvores.map((a,k)=>{const c=ok?classificar(a.raiz,paciente()):null;if(ok)vd+=c.cls;
+  return `<div class="arv"><h4><span>Árvore ${k+1}</span>${ok?`<span class="voto ${c.cls?'d':'o'}">vota ${c.cls?'dengue':'não'}</span>`:`<span class="miniinfo">${nPerg(a.raiz)} pergunta${nPerg(a.raiz)>1?'s':''}</span>`}</h4><div class="miniinfo">fora (out-of-bag): ${a.fora.map(i=>i+1).join(', ')||'nenhum'}</div>${svgArvore(a.raiz,ok?{mini:true,cam:c.cam}:{mini:true})}</div>`;}).join('');
+ const pl=document.getElementById('placar');
+ if(!ok){pl.hidden=!n;pl.innerHTML=`Floresta em construção: <b>${n} de ${MAX}</b> árvores. A classificação de um paciente novo só começa quando a floresta estiver completa.`;return;}
+ pl.hidden=false;const vn=n-vd,dec=vd>vn?1:vd<vn?0:null;
+ pl.innerHTML=`<b>Classificação</b> · ${vd} voto${vd!==1?'s':''} para dengue, ${vn} para não<div class="barra"><i style="width:${vd/n*100}%"></i><u style="width:${vn/n*100}%"></u></div><span class="dec ${dec===1?'d':''}">${dec===null?'Empate.':'A floresta responde: '+(dec?'dengue':'não é dengue')}</span>`;}
+function botoes(){const b=document.getElementById('rfProx');
+ if(!cur){b.textContent=arvores.length>=MAX?'Floresta completa':`Plantar a árvore ${arvores.length+1}`;b.disabled=arvores.length>=MAX;}
+ else{b.textContent=passo<4?'Próximo passo':'Pôr a árvore na floresta';b.disabled=false;}
+ document.getElementById('rfResto').disabled=arvores.length>=MAX;}
+function avancar(){if(!cur){if(arvores.length>=MAX)return;cur=treinar();passo=1;}else if(passo<4)passo++;else{arvores.push(cur);cur=null;passo=0;}render();}
+function resto(){if(cur){arvores.push(cur);cur=null;passo=0;}while(arvores.length<MAX)arvores.push(treinar());render();}
+function recomecar(){rng=mulberry(SEED);arvores=[];cur=null;passo=0;render();}
+const SEED=5;
+document.getElementById('rfProx').onclick=avancar;document.getElementById('rfResto').onclick=resto;document.getElementById('rfRec').onclick=recomecar;
+[pFeb,pPre,pDor].forEach(e=>e.onchange=render);
+window.__rf={treinar,setSeed:s=>{rng=mulberry(s)},nPerg,prof};
+recomecar();
+})();
+</script></body></html>
