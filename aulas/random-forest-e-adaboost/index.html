@@ -206,12 +206,14 @@ table.ada tr.lado-a td:first-child{box-shadow:inset 4px 0 0 var(--tinta)}
 
 .paciente{background:var(--papel);border-radius:8px;padding:10px 14px}
 .paciente label{font-weight:600}.paciente select{font:inherit;padding:2px 6px;border-radius:6px;border:1px solid var(--linha);background:var(--fundo);color:var(--tinta)}
-.rot-p{font-weight:700;color:var(--vermelho);margin-right:4px}
+.rot-p{font-weight:700;color:var(--vermelho)}
+.dica-p{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.paciente[hidden],.placar[hidden]{display:none}
 .placar{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:12px 16px;margin:0 0 14px;font-size:.95rem}
 .placar .barra{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--linha);margin:8px 0 4px;max-width:460px}
 .placar .barra i{display:block;background:var(--vermelho)}.placar .barra u{display:block;background:var(--outro)}
 .placar .dec{font-weight:700;font-size:1.05rem}.placar .dec.d{color:var(--dengue-t)}
-.floresta{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.floresta{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
 .arv{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:.78rem;line-height:1.45;background:var(--fundo)}
 .arv.nova{border:2px solid var(--tinta)}
 .arv h4{margin:0 0 4px;font-size:.85rem;display:flex;justify-content:space-between}
@@ -220,45 +222,106 @@ table.ada tr.lado-a td:first-child{box-shadow:inset 4px 0 0 var(--tinta)}
 .arv .at span.fora{text-decoration:line-through;color:var(--tinta2);opacity:.6}
 .arv svg{width:100%;height:auto;display:block;margin-top:4px}
 table.ada.fixa{max-width:640px}
+
+.sorteios{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;font-size:.82rem}
+.sorteios span{border:1px solid var(--linha);border-radius:6px;padding:2px 8px;background:var(--papel)}
+table.ada tr.oob td{color:var(--tinta2);opacity:.55}
+table.ada tr.rep td:last-child{color:var(--vermelho)}
+.chips-at{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap}
+.chips-at span{border:2px solid var(--vermelho);border-radius:8px;padding:4px 14px;font-weight:700}
+.chips-at span.fora{border-color:var(--linha);color:var(--tinta2);text-decoration:line-through;font-weight:400}
+.um1{max-width:360px;margin:10px 0}
+.um1 svg,.comp svg{width:auto;max-width:100%;height:120px;display:block;margin:0 auto}
+.comp .eqs{text-align:left;margin-top:6px}
+.miniinfo{color:var(--tinta2);font-size:.74rem}
+.arv svg{max-width:100%!important;height:150px!important;width:auto!important;display:block;margin:6px auto 0}
+.arv-grande{margin:12px 0;overflow-x:auto}.arv-grande svg{display:block;margin:0 auto;width:100%;max-width:620px;height:auto}
+.divs{font-size:.85rem;margin:8px 0 0;padding-left:20px}.divs li{margin-bottom:4px}
+.sk{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--vermelho);border-radius:10px;padding:12px 16px;margin:18px 0;background:var(--fundo);font-size:.92rem;line-height:1.55}
+.sk svg{flex:none;width:28px;height:26px;margin-top:2px}
+.sk-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:2px}
+.sk p{margin:0}
 </style></head><body>
 <header class="abertura col">
   <div class="topo"><div class="logos"><img src="../../upe.png" alt="Universidade de Pernambuco (UPE)"><span class="sep"></span><img src="../../logo.png" alt="dotLAB" class="dotl"></div><a class="volta" href="../../index.html">Todas as aulas</a></div>
   <span class="selo">Ciência de Dados · Aula 07 · Random Forest e AdaBoost</span>
   <h1>Muitas árvores <em>simples</em> erram menos que uma?</h1>
   <p class="lead">Comitês de modelos: bagging, Random Forest e AdaBoost, com registros de casos suspeitos de dengue.</p>
-  <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">Versão 1.0 · novembro de 2026</span></div>
+  <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">Versão 1.1 · novembro de 2026</span></div>
 </header>
 <main>
 <section class="col">
   <p>Na aula anterior, vimos que uma árvore de decisão funda decora o conjunto de treinamento: acerta quase tudo nele e generaliza mal. Pequenas mudanças nos dados mudam muito a árvore, o que chamamos de <strong>alta variância</strong>. Uma árvore rasa, por outro lado, é estável, mas simples demais.</p>
-  <p>Os <strong>comitês de modelos</strong> (<em>ensemble learning</em>) atacam esse problema de outro jeito: em vez de procurar a melhor árvore, combinam muitas. Nesta aula veremos as duas estratégias mais usadas: o <strong>bagging</strong>, que treina árvores independentes e faz uma votação (o Random Forest é o exemplo mais conhecido), e o <strong>boosting</strong>, que treina árvores em sequência, cada uma corrigindo os erros da anterior (o AdaBoost é o exemplo clássico). Vamos acompanhar os dois com a mesma tabela de oito registros.</p>
+  <p>Os <strong>comitês de modelos</strong> (<em>ensemble learning</em>) atacam esse problema de outro jeito: em vez de procurar a melhor árvore, combinam muitas. Nesta aula veremos os tipos de comitê e as duas estratégias mais usadas: o <strong>bagging</strong>, que treina árvores independentes e faz uma votação (o Random Forest é o exemplo mais conhecido), e o <strong>boosting</strong>, que treina árvores em sequência, cada uma corrigindo os erros da anterior (o AdaBoost é o exemplo clássico). Vamos acompanhar os dois com tabelas pequenas, que dá para conferir à mão.</p>
 </section>
 
 <section class="col">
   <h2>Por que combinar modelos funciona</h2>
+  <h3>Os tipos de comitê</h3>
+  <p>Um <strong>comitê de modelos</strong> (<em>ensemble</em>) treina vários modelos e combina as respostas deles. Os comitês costumam ser organizados em três famílias, que diferem em como os modelos são treinados e em como as respostas são combinadas:</p>
+  <div class="tab-scroll"><table class="cmp">
+    <thead><tr><th></th><th>Bagging</th><th>Boosting</th><th>Stacking</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Modelos</th><td>Do mesmo tipo, em geral árvores completas</td><td>Do mesmo tipo, em geral aprendizes fracos</td><td>De tipos diferentes (por exemplo, SVM, regressão logística e árvore)</td></tr>
+      <tr><th scope="row">Treinamento</th><td>Em paralelo: cada modelo é independente</td><td>Em sequência: cada modelo foca nos erros dos anteriores</td><td>Em paralelo, e depois um modelo a mais</td></tr>
+      <tr><th scope="row">De onde vem a diversidade</th><td>Sorteio dos registros (amostra bootstrap) e, no Random Forest, também dos atributos</td><td>Pesos que aumentam nos registros errados</td><td>Algoritmos diferentes, que erram de jeitos diferentes</td></tr>
+      <tr><th scope="row">Como combina</th><td>Votação por maioria (ou média)</td><td>Votação ponderada pela qualidade de cada modelo</td><td>Um <strong>metamodelo</strong> aprende a combinar as previsões</td></tr>
+      <tr><th scope="row">O que mais reduz</th><td>A variância</td><td>O viés</td><td>Depende dos modelos combinados</td></tr>
+      <tr><th scope="row">Exemplos</th><td><strong>Random Forest</strong>, Extra Trees</td><td><strong>AdaBoost</strong>, Gradient Boosting, XGBoost</td><td><code>StackingClassifier</code> do scikit-learn</td></tr>
+    </tbody></table></div>
+  <p class="nota">Com base em Bonaccorso (2017), Dietterich (2000) e Wolpert (1992). A forma mais simples de comitê heterogêneo é a votação direta entre modelos diferentes, sem metamodelo (<code>VotingClassifier</code>). Nesta aula, aprofundamos um exemplo de cada uma das duas primeiras famílias.</p>
+
+  <h3>O poder da votação e da diversidade</h3>
   <p>Imagine vários classificadores, cada um acertando um pouco mais que o acaso. Se os erros deles forem <strong>independentes</strong>, a decisão por <strong>maioria dos votos</strong> (<em>majority vote</em>) acerta mais que qualquer um deles sozinho. Use os controles para ver o efeito.</p>
   <figure>
     <div class="controle"><label for="pAc">Acerto de cada classificador</label><input type="range" id="pAc" min="51" max="75" value="60" step="1"><output id="pAcV" for="pAc">60%</output></div>
     <div class="controle"><label for="nMod">Número de classificadores</label><input type="range" id="nMod" min="1" max="101" value="25" step="2"><output id="nModV" for="nMod">25</output></div>
     <svg id="curvaVoto" viewBox="0 0 640 280" width="100%" role="img" aria-label="Acerto da votação por maioria conforme o número de classificadores"></svg>
     <div class="leitura"><span>Um classificador: <b id="vUm">60%</b></span><span>Votação por maioria: <b id="vVoto">–</b></span></div>
-    <figcaption>Probabilidade de a maioria acertar, supondo erros independentes (distribuição binomial). Na prática, árvores treinadas nos mesmos dados erram parecido, e o ganho é menor. Por isso o bagging e o Random Forest tentam deixar as árvores <em>diferentes</em> entre si.</figcaption>
+    <figcaption>Probabilidade de a maioria acertar, supondo erros independentes (distribuição binomial).</figcaption>
   </figure>
+  <p>O gráfico depende de uma suposição forte: erros <strong>independentes</strong>. Se os classificadores errarem <strong>juntos</strong>, nos mesmos registros, a votação não ajuda: dez cópias do mesmo modelo erram exatamente como uma, e árvores treinadas nos mesmos dados fazem as mesmas perguntas e erram parecido. Por isso, todo comitê precisa de <strong>diversidade</strong>: modelos que errem em lugares diferentes. No bagging e no Random Forest, a diversidade vem da <strong>aleatoriedade</strong>: cada árvore vê uma amostra sorteada dos registros e, no Random Forest, só um sorteio dos atributos em cada divisão. O sorteio deixa cada árvore um pouco pior sozinha, mas faz as árvores errarem de jeitos diferentes, e a votação ganha com isso. Breiman (2001) mostrou que o erro da floresta cai quando as árvores são boas e, ao mesmo tempo, pouco parecidas entre si.</p>
+  <p>No boosting, a diversidade vem de outro lugar: cada modelo é treinado com <strong>pesos</strong> diferentes, que concentram a atenção nos registros que os anteriores erraram. No AdaBoost clássico, que veremos aqui, não há sorteio: com os mesmos dados, ele sempre produz os mesmos stumps. A aleatoriedade só entra quando, em vez de usar os pesos nas contas, sorteamos uma nova amostra em que os registros pesados têm mais chance de sair, ou em variações como o boosting estocástico.</p>
 </section>
 
 <section class="col">
   <h2>Os dados do exemplo</h2>
-  <p>A tabela tem 8 registros de casos suspeitos de dengue, criados para o exemplo. Cada registro é um paciente, descrito por três atributos, e a última coluna é a classe que queremos prever:</p>
+  <p>Usamos duas tabelas pequenas de casos suspeitos de dengue, criadas para o exemplo. Em cada uma, um registro é um paciente, descrito por três atributos, e a última coluna é a classe que queremos prever: se o caso foi confirmado como dengue.</p>
+  <h3>Tabela 1: para o Random Forest</h3>
+  <p>São os 10 registros da Aula 06. Os três atributos são categóricos:</p>
   <div class="tab-scroll"><table class="cmp dic">
-    <thead><tr><th>Coluna</th><th>Tipo</th><th>Valores</th><th>O que significa</th></tr></thead>
+    <thead><tr><th>Coluna</th><th>Valores</th><th>O que significa</th></tr></thead>
     <tbody>
-      <tr><th scope="row">Dor abdominal</th><td>Atributo categórico</td><td>sim / não</td><td>Se o paciente relatou dor abdominal.</td></tr>
-      <tr><th scope="row">Febre</th><td>Atributo categórico</td><td>sim / não</td><td>Se o paciente teve febre.</td></tr>
-      <tr><th scope="row">Plaquetas</th><td>Atributo numérico</td><td>mil por mm³</td><td>Contagem de plaquetas no exame de sangue. Abaixo de 150 mil por mm³ fala-se em <strong>plaquetopenia</strong>, uma alteração laboratorial frequente na dengue.</td></tr>
-      <tr><th scope="row">Dengue</th><td>Classe (variável-alvo)</td><td>sim / não</td><td>Se o caso foi confirmado como dengue. É o que o modelo tenta prever.</td></tr>
+      <tr><th scope="row">Febre</th><td>sim / não</td><td>Se o paciente teve febre.</td></tr>
+      <tr><th scope="row">Pressão arterial</th><td>alta / normal / baixa</td><td>Faixa da pressão arterial medida no atendimento.</td></tr>
+      <tr><th scope="row">Dor abdominal</th><td>intensa / neutra</td><td>Intensidade da dor abdominal relatada.</td></tr>
+      <tr><th scope="row">Dengue</th><td>sim / não</td><td>Classe (variável-alvo): se o caso foi confirmado como dengue.</td></tr>
     </tbody></table></div>
-  <p class="nota">Sobre plaquetopenia e dengue: Brasil, Ministério da Saúde. <em>Dengue: diagnóstico e manejo clínico: adulto e criança</em>. 6. ed. Brasília, 2024.</p>
-  <p>Quatro registros são de dengue e quatro não são: as classes estão balanceadas, e um classificador que chuta acerta metade.</p>
+  <div class="tab-scroll"><table class="ada fixa">
+    <thead><tr><th>#</th><th>Febre</th><th>Pressão arterial</th><th>Dor abdominal</th><th>Dengue</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>não</td><td>alta</td><td>intensa</td><td class="pd o">não</td></tr>
+      <tr><td>2</td><td>sim</td><td>baixa</td><td>intensa</td><td class="pd o">não</td></tr>
+      <tr><td>3</td><td>sim</td><td>baixa</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>4</td><td>não</td><td>normal</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>5</td><td>não</td><td>baixa</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>6</td><td>não</td><td>normal</td><td>intensa</td><td class="pd o">não</td></tr>
+      <tr><td>7</td><td>não</td><td>normal</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>8</td><td>sim</td><td>baixa</td><td>intensa</td><td class="pd o">não</td></tr>
+      <tr><td>9</td><td>sim</td><td>normal</td><td>intensa</td><td class="pd d">sim</td></tr>
+      <tr><td>10</td><td>sim</td><td>baixa</td><td>neutra</td><td class="pd o">não</td></tr>
+    </tbody></table></div>
+  <p class="nota">Valores criados para o exemplo; não refletem a realidade. Cinco registros são de dengue e cinco não.</p>
+  <h3>Tabela 2: para o AdaBoost</h3>
+  <p>São 8 registros com um atributo numérico, a contagem de plaquetas:</p>
+  <div class="tab-scroll"><table class="cmp dic">
+    <thead><tr><th>Coluna</th><th>Valores</th><th>O que significa</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Dor abdominal</th><td>sim / não</td><td>Se o paciente relatou dor abdominal.</td></tr>
+      <tr><th scope="row">Febre</th><td>sim / não</td><td>Se o paciente teve febre.</td></tr>
+      <tr><th scope="row">Plaquetas</th><td>mil por mm³</td><td>Contagem de plaquetas no exame de sangue. Abaixo de 150 mil por mm³ fala-se em <strong>plaquetopenia</strong>, uma alteração laboratorial frequente na dengue.</td></tr>
+      <tr><th scope="row">Dengue</th><td>sim / não</td><td>Classe (variável-alvo): se o caso foi confirmado como dengue.</td></tr>
+    </tbody></table></div>
   <div class="tab-scroll"><table class="ada fixa">
     <thead><tr><th>#</th><th>Dor abdominal</th><th>Febre</th><th>Plaquetas (mil/mm³)</th><th>Dengue</th></tr></thead>
     <tbody>
@@ -271,8 +334,7 @@ table.ada.fixa{max-width:640px}
       <tr><td>7</td><td>sim</td><td>não</td><td>172</td><td class="pd o">não</td></tr>
       <tr><td>8</td><td>sim</td><td>sim</td><td>165</td><td class="pd o">não</td></tr>
     </tbody></table></div>
-  <p class="nota">Valores criados para o exemplo; não refletem a realidade.</p>
-  <p>As duas próximas seções usam esta mesma tabela: primeiro para montar uma pequena floresta, depois para acompanhar o AdaBoost rodada a rodada.</p>
+  <p class="nota">Valores criados para o exemplo; não refletem a realidade. Quatro registros são de dengue e quatro não. Sobre plaquetopenia e dengue: Brasil, Ministério da Saúde. <em>Dengue: diagnóstico e manejo clínico: adulto e criança</em>. 6. ed. Brasília, 2024.</p>
 </section>
 
 <section class="col">
@@ -281,20 +343,22 @@ table.ada.fixa{max-width:640px}
   <h3>Passo 1: sortear uma amostra bootstrap</h3>
   <p>Uma <strong>amostra bootstrap</strong> (<em>bootstrap sample</em>) tem o mesmo tamanho da tabela original e é formada por sorteios <strong>com reposição</strong>: depois de sorteado, o registro volta para a urna e pode sair de novo. Por isso, alguns registros aparecem duas ou três vezes e outros não aparecem. Os que ficam de fora formam o conjunto <strong>out-of-bag</strong>, que serve para avaliar a árvore sem separar um conjunto de teste. Em média, cerca de 37% dos registros ficam de fora de cada amostra.</p>
   <h3>Passo 2: sortear os atributos de cada divisão</h3>
-  <p>Só a amostra bootstrap não basta: árvores treinadas em amostras parecidas tendem a fazer as mesmas perguntas e a errar juntas. O <strong>Random Forest</strong> acrescenta uma segunda fonte de acaso: em cada divisão, a árvore só pode escolher entre um <strong>subconjunto aleatório de atributos</strong>. Com três atributos, cada divisão sorteia dois. O resultado é uma floresta de árvores bem diferentes entre si, e é justamente essa diferença que faz a votação funcionar, como vimos na seção 01.</p>
-  <h3>Passo 3: repetir e votar</h3>
-  <p>Repetimos os dois passos para cada árvore. Para classificar um paciente novo, ele passa por todas as árvores, e a floresta responde com a <strong>maioria dos votos</strong>. Escolha um paciente e plante árvores uma a uma.</p>
+  <p>Só a amostra bootstrap não basta: árvores treinadas em amostras parecidas tendem a fazer as mesmas perguntas e a errar juntas. O <strong>Random Forest</strong> acrescenta uma segunda fonte de acaso: em cada divisão, a árvore só pode escolher entre um <strong>subconjunto aleatório de atributos</strong>. Na Tabela 1, com três atributos, cada divisão sorteia dois. Breiman (2001) sugere sortear cerca de √M dos M atributos; aqui usamos dois, como nos slides da aula. O resultado é uma floresta de árvores bem diferentes entre si, e é justamente essa diferença que faz a votação funcionar, como vimos na seção 01.</p>
+  <h3>Passo 3: deixar a árvore crescer, repetir e votar</h3>
+  <p>Cada árvore cresce <strong>até o fim, sem poda</strong>: divide os ramos até as folhas ficarem puras, sorteando atributos de novo em cada divisão. Como as amostras e os sorteios mudam, as árvores saem com <strong>formas e tamanhos diferentes</strong>. Repetimos tudo até completar a floresta: isso é o treinamento. Depois, para classificar um paciente novo, ele passa por todas as árvores, e a floresta responde com a <strong>maioria dos votos</strong>. Plante a primeira árvore passo a passo e complete a floresta. Só então chega um paciente novo para ser classificado.</p>
   <figure class="larga-fig">
-    <div class="controle paciente"><span class="rot-p">Paciente novo</span>
-      <label>Dor abdominal <select id="pDor"><option value="1">sim</option><option value="0" selected>não</option></select></label>
-      <label>Febre <select id="pFeb"><option value="1" selected>sim</option><option value="0">não</option></select></label>
-      <label for="pPl">Plaquetas</label><input type="range" id="pPl" min="60" max="260" step="5" value="160"><output id="pPlV" for="pPl">160 mil</output></div>
-    <div class="controle"><button type="button" class="bt sim" id="rfUma">Plantar uma árvore</button><button type="button" class="bt" id="rfDez">Plantar até 15</button><button type="button" class="bt" id="rfRec">Recomeçar</button></div>
+    <div class="controle"><button type="button" class="bt sim" id="rfProx">Plantar a árvore 1</button><button type="button" class="bt" id="rfResto">Plantar as restantes (até 15)</button><button type="button" class="bt" id="rfRec">Recomeçar</button><span class="etapa" id="rfEtapa"></span></div>
+    <div class="passo" id="rfPasso" aria-live="polite"></div>
+    <div class="controle paciente" id="rfPac" hidden><span class="rot-p">Paciente novo</span><span class="dica-p">a ser classificado</span>
+      <label>Febre <select id="pFeb"><option selected>sim</option><option>não</option></select></label>
+      <label>Pressão arterial <select id="pPre"><option>alta</option><option>normal</option><option selected>baixa</option></select></label>
+      <label>Dor abdominal <select id="pDor"><option selected>intensa</option><option>neutra</option></select></label></div>
     <div class="placar" id="placar" aria-live="polite"></div>
     <div class="floresta" id="floresta"></div>
-    <figcaption>Cada cartão é uma árvore: os registros sorteados para ela (com repetição), os que ficaram de fora (out-of-bag), os dois atributos sorteados e a pergunta escolhida pela impureza de Gini. Para caber na tela, cada árvore aqui tem uma única pergunta; no Random Forest de verdade, as árvores crescem até o fim, e o sorteio de atributos acontece em <em>cada</em> divisão. “Recomeçar” planta a mesma floresta de novo.</figcaption>
+    <figcaption>Há duas fases: o treinamento constrói todas as árvores, e só depois a classificação passa o paciente novo por todas elas. Cada árvore pronta vira um cartão com os registros out-of-bag; na classificação, o cartão mostra o caminho do paciente em vermelho e o voto. Como nos slides da aula, cada pergunta abre um ramo para cada valor do atributo. Com só 10 registros as árvores ficam pequenas; numa base real, teriam muitos níveis. “Recomeçar” planta a mesma floresta de novo.</figcaption>
   </figure>
-  <p>Repare que nenhuma árvore é a “melhor”: algumas fazem perguntas ruins, porque o sorteio as deixou sem o atributo mais útil ou com uma amostra estranha. Mesmo assim, a votação costuma acertar mais do que a maioria das árvores sozinhas. No scikit-learn, o número de árvores é <code>n_estimators</code>, o tamanho do subconjunto de atributos é <code>max_features</code> (por padrão, a raiz quadrada do número de atributos) e <code>oob_score=True</code> calcula a acurácia nos registros out-of-bag.</p>
+  <p>Repare que nenhuma árvore é a “melhor”: algumas fazem perguntas ruins, porque o sorteio as deixou sem o atributo mais útil ou com uma amostra estranha. Mesmo assim, a votação costuma acertar mais do que a maioria das árvores sozinhas.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>O <code>RandomForestClassifier</code> tem três parâmetros centrais: <code>n_estimators</code> (número de árvores), <code>max_features</code> (atributos sorteados em cada divisão; por padrão, a raiz quadrada do total, o que daria 1 com os 3 atributos da Tabela 1) e <code>oob_score=True</code> (acurácia nos registros out-of-bag). As árvores crescem sem limite de profundidade (<code>max_depth=None</code>) e só fazem <strong>divisões binárias</strong>, por isso atributos categóricos precisam ser codificados antes. Na classificação, em vez da votação simples do artigo de Breiman, a floresta faz a <strong>média das probabilidades</strong> estimadas pelas árvores e escolhe a classe de maior média.</p></div></div>
 </section>
 
 <section class="col">
@@ -335,8 +399,7 @@ table.ada.fixa{max-width:640px}
       <tr><th scope="row">O que reduz</th><td>Principalmente a variância de árvores fundas</td><td>Principalmente o viés de modelos fracos</td></tr>
       <tr><th scope="row">No scikit-learn</th><td><code>RandomForestClassifier</code>: <code>n_estimators</code>, <code>max_features</code>, <code>oob_score</code></td><td><code>AdaBoostClassifier</code>: <code>n_estimators</code>, <code>learning_rate</code></td></tr>
     </tbody></table></div>
-  <p>Existe ainda uma terceira estratégia, o <strong>stacking</strong>: modelos de tipos diferentes (por exemplo, SVM, regressão logística e árvore de decisão) são treinados separadamente, e um modelo auxiliar aprende a combinar as previsões deles.</p>
-  <div class="nota-comp"><span class="etq-nc">Um detalhe do scikit-learn</span><p style="margin:0">No <code>AdaBoostClassifier</code>, a voz de cada stump aparece em <code>estimator_weights_</code> sem o ½ da fórmula: para o primeiro stump desta página, 1,946 em vez de 0,973. Como todos os stumps são multiplicados pelo mesmo fator, a votação dá o mesmo resultado.</p></div>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>No <code>AdaBoostClassifier</code>, a voz de cada stump aparece em <code>estimator_weights_</code> sem o ½ da fórmula: para o primeiro stump desta página, 1,946 em vez de 0,973. Como todos os stumps são multiplicados pelo mesmo fator, a votação dá o mesmo resultado.</p></div></div>
 </section>
 
 <section class="col">
@@ -364,6 +427,9 @@ table.ada.fixa{max-width:640px}
     <li id="ref3"><a href="https://doi.org/10.1023/A:1010933404324">Breiman, L. Random forests. <em>Machine Learning</em> 45(1), 5–32 (2001).</a></li>
     <li id="ref4"><a href="https://doi.org/10.1214/aos/1016218223">Friedman, J.; Hastie, T.; Tibshirani, R. Additive logistic regression: a statistical view of boosting. <em>The Annals of Statistics</em> 28(2), 337–407 (2000).</a></li>
     <li id="ref5"><a href="https://doi.org/10.1006/jcss.1997.1504">Freund, Y.; Schapire, R. E. A decision-theoretic generalization of on-line learning and an application to boosting. <em>Journal of Computer and System Sciences</em> 55(1), 119–139 (1997).</a></li>
+    <li id="ref8"><a href="https://doi.org/10.1007/BF00058655">Breiman, L. Bagging predictors. <em>Machine Learning</em> 24(2), 123–140 (1996).</a></li>
+    <li id="ref9"><a href="https://doi.org/10.1007/3-540-45014-9_1">Dietterich, T. G. Ensemble methods in machine learning. In: <em>Multiple Classifier Systems</em>, LNCS 1857, 1–15 (2000).</a></li>
+    <li id="ref10"><a href="https://doi.org/10.1016/S0893-6080(05)80023-1">Wolpert, D. H. Stacked generalization. <em>Neural Networks</em> 5(2), 241–259 (1992).</a></li>
     <li id="ref6">Mayr, A.; Binder, H.; Gefeller, O.; Schmid, M. The evolution of boosting algorithms. <em>Methods of Information in Medicine</em> 53(6), 419–427 (2014).</li>
     <li id="ref7">Brasil, Ministério da Saúde. <em>Dengue: diagnóstico e manejo clínico: adulto e criança</em>. 6. ed. Brasília, 2024.</li>
   </ol>
@@ -377,13 +443,13 @@ const fmt=(x,d=3)=>x.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFrac
 const pct=x=>Math.round(x*100)+'%';
 /* votação por maioria */
 function lgamma(z){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,.1208650973866179e-2,-.5395239384953e-5];let x=z,y=z,t=x+5.5;t-=(x+.5)*Math.log(t);let s=1.000000000190015;for(const q of c)s+=q/++y;return -t+Math.log(2.5066282746310005*s/x);}
-function maj(n,p){let s=0;for(let k=Math.floor(n/2)+1;k<=n;k++){s+=Math.exp(lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p));}return s;}
+function maj(n,p){p=Math.min(1-1e-12,Math.max(1e-12,p));let s=0;for(let k=Math.floor(n/2)+1;k<=n;k++){s+=Math.exp(lgamma(n+1)-lgamma(k+1)-lgamma(n-k+1)+k*Math.log(p)+(n-k)*Math.log(1-p));}return s;}
 const pAc=document.getElementById('pAc'),nMod=document.getElementById('nMod'),svg=document.getElementById('curvaVoto');
 function desenharVoto(){const p=pAc.value/100,n=+nMod.value,W=640,H=280,l=48,r=20,t=14,b=40;
  const X=k=>l+(k-1)/100*(W-l-r),Y=v=>t+(1-(v-.5)/.5)*(H-t-b);
  let g='';for(const v of [.5,.6,.7,.8,.9,1])g+=`<line x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--linha)"/><text x="${l-8}" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="var(--tinta2)">${Math.round(v*100)}%</text>`;
  for(const k of [1,25,51,75,101])g+=`<text x="${X(k)}" y="${H-b+20}" text-anchor="middle" font-size="12" fill="var(--tinta2)">${k}</text>`;
- let d='';for(let k=1;k<=101;k+=2)d+=(k>1?'L':'M')+X(k).toFixed(1)+' '+Y(maj(k,p)).toFixed(1);
+ let d='';for(let k=1;k<=101;k+=2){d+=(k>1?'L':'M')+X(k).toFixed(1)+' '+Y(maj(k,p)).toFixed(1)}
  svg.innerHTML=`${g}<line x1="${l}" x2="${W-r}" y1="${Y(p)}" y2="${Y(p)}" stroke="var(--tinta2)" stroke-dasharray="5 4"/><text x="${W-r}" y="${Y(p)-6}" text-anchor="end" font-size="12" fill="var(--tinta2)">um classificador: ${pct(p)}</text>
   <path d="${d}" fill="none" stroke="var(--vermelho)" stroke-width="2.5"/><circle cx="${X(n)}" cy="${Y(maj(n,p))}" r="6" fill="var(--vermelho)"/>
   <text x="${(l+W-r)/2}" y="${H-4}" text-anchor="middle" font-size="12" fill="var(--tinta2)">número de classificadores na votação</text>`;
@@ -494,55 +560,88 @@ reset();
 })();
 // ---------- Random Forest ----------
 (function(){
-const R=[{dor:1,feb:1,pl:98,y:1},{dor:0,feb:1,pl:120,y:1},{dor:1,feb:0,pl:85,y:1},{dor:1,feb:1,pl:180,y:1},{dor:0,feb:1,pl:210,y:0},{dor:0,feb:1,pl:250,y:0},{dor:1,feb:0,pl:172,y:0},{dor:1,feb:1,pl:165,y:0}];
-const CORTES=[90,110,150,170,175,195,230];
-const NOMES=['Dor abdominal','Febre','Plaquetas'];
-let seed0=11,rng,arvores=[];
+const R=[["não","alta","intensa",0],["sim","baixa","intensa",0],["sim","baixa","intensa",1],["não","normal","intensa",1],["não","baixa","intensa",1],["não","normal","intensa",0],["não","normal","intensa",1],["sim","baixa","intensa",0],["sim","normal","intensa",1],["sim","baixa","neutra",0]].map(([feb,pre,dor,y])=>({feb,pre,dor,y}));
+const N=R.length,MAX=15;
+const AT=[{k:'feb',nome:'Febre',q:'Febre?',vals:['sim','não']},{k:'pre',nome:'Pressão arterial',q:'Pressão arterial?',vals:['alta','normal','baixa']},{k:'dor',nome:'Dor abdominal',q:'Dor abdominal?',vals:['intensa','neutra']}];
+const f3=x=>x.toLocaleString('pt-BR',{minimumFractionDigits:3,maximumFractionDigits:3});
+const fr=(a,b)=>`<span class="fr"><span>${a}</span><span>${b}</span></span>`;
+let rng,arvores=[],cur=null,passo=0;
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
-const giniCont=(n,d)=>{if(!n)return 0;const p=d/n;return 1-p*p-(1-p)*(1-p);};
-function regra(at,t){return at===0?(r=>r.dor===1):at===1?(r=>r.feb===1):(r=>r.pl<t);}
-function rotulo(at,t){return at===0?'Dor abdominal?':at===1?'Febre?':`Plaquetas < ${t} mil?`;}
-function treinar(){
- const amostra=Array.from({length:8},()=>Math.floor(rng()*8));
- const fora=[0,1,2,3,4,5,6,7].filter(i=>!amostra.includes(i));
- const excl=Math.floor(rng()*3);const ats=[0,1,2].filter(a=>a!==excl);
- const nT=amostra.length,dT=amostra.filter(i=>R[i].y).length,maj=dT*2>=nT?1:0;
- let best=null;
- ats.forEach(at=>{(at===2?CORTES:[null]).forEach(t=>{const f=regra(at,t);
-  let nS=0,dS=0;amostra.forEach(i=>{if(f(R[i])){nS++;dS+=R[i].y;}});const nN=nT-nS,dN=dT-dS;
-  const g=nS/nT*giniCont(nS,dS)+nN/nT*giniCont(nN,dN);
-  if(!best||g<best.g-1e-12)best={at,t,g,nS,dS,nN,dN,f,cS:nS?(dS*2>=nS?1:0):maj,cN:nN?(dN*2>=nN?1:0):maj};});});
- return {amostra,fora,excl,...best};}
-function paciente(){return {dor:+pDor.value,feb:+pFeb.value,pl:+pPl.value};}
-function mini(a){const c=k=>k?'var(--vermelho)':'var(--outro)';
- return `<svg viewBox="0 0 200 84" role="img" aria-label="${rotulo(a.at,a.t)}" font-family="Poppins,sans-serif">
- <line x1="100" y1="24" x2="50" y2="52" style="stroke:var(--tinta)" stroke-width="1.2"/><line x1="100" y1="24" x2="150" y2="52" style="stroke:var(--tinta)" stroke-width="1.2"/>
- <text x="66" y="40" font-size="9" style="fill:var(--tinta2)" text-anchor="end">sim</text><text x="134" y="40" font-size="9" style="fill:var(--tinta2)">não</text>
- <rect x="22" y="2" width="156" height="22" rx="6" style="fill:var(--tinta)"/><text x="100" y="17" font-size="10.5" font-weight="600" text-anchor="middle" style="fill:var(--fundo)">${rotulo(a.at,a.t)}</text>
- <rect x="10" y="52" width="80" height="26" rx="6" style="fill:${c(a.cS)}"/><text x="50" y="69" font-size="10" font-weight="700" text-anchor="middle" fill="#fff">${a.cS?'dengue':'não'}</text>
- <rect x="110" y="52" width="80" height="26" rx="6" style="fill:${c(a.cN)}"/><text x="150" y="69" font-size="10" font-weight="700" text-anchor="middle" fill="#fff">${a.cN?'dengue':'não'}</text></svg>`;}
-function desenhar(){const P=paciente();let vd=0;
- const cards=arvores.map((a,k)=>{const v=a.f(P)?a.cS:a.cN;vd+=v;
-  const cont={};a.amostra.forEach(i=>cont[i]=(cont[i]||0)+1);
-  const lista=Object.keys(cont).map(Number).sort((x,y)=>x-y).map(i=>cont[i]>1?`${i+1} (${cont[i]}×)`:`${i+1}`).join(', ');
-  return `<div class="arv${k===arvores.length-1?' nova':''}"><h4><span>Árvore ${k+1}</span><span class="voto ${v?'d':'o'}">vota ${v?'dengue':'não'}</span></h4>
-  <div>Amostra: ${lista}</div><div>Fora (out-of-bag): ${a.fora.map(i=>i+1).join(', ')||'nenhum'}</div>
-  <div class="at">Atributos: ${[0,1,2].map(x=>`<span class="${x===a.excl?'fora':''}">${NOMES[x]}</span>`).join('')}</div>${mini(a)}</div>`;});
- document.getElementById('floresta').innerHTML=cards.reverse().join('');
- const n=arvores.length,vn=n-vd;const pl=document.getElementById('placar');
- if(!n){pl.innerHTML='Nenhuma árvore plantada ainda. Clique em “Plantar uma árvore”: o algoritmo sorteia a amostra bootstrap, sorteia dois atributos e escolhe a pergunta de menor Gini.';}
- else{const dec=vd>vn?1:vd<vn?0:null;
-  pl.innerHTML=`<b>${n} árvore${n>1?'s':''}</b> · ${vd} voto${vd!==1?'s':''} para dengue, ${vn} para não
-  <div class="barra"><i style="width:${vd/n*100}%"></i><u style="width:${vn/n*100}%"></u></div>
-  <span class="dec ${dec===1?'d':''}">${dec===null?'Empate: plante mais uma árvore para desempatar.':'A floresta responde: '+(dec?'dengue':'não é dengue')}</span>`;}
- document.getElementById('rfUma').disabled=document.getElementById('rfDez').disabled=n>=15;}
-function plantar(k){for(let i=0;i<k&&arvores.length<15;i++)arvores.push(treinar());desenhar();}
-function recomecar(){rng=mulberry(seed0);arvores=[];desenhar();}
-document.getElementById('rfUma').onclick=()=>plantar(1);
-document.getElementById('rfDez').onclick=()=>plantar(15);
-document.getElementById('rfRec').onclick=recomecar;
-[pDor,pFeb].forEach(e=>e.onchange=desenhar);
-pPl.oninput=()=>{pPlV.textContent=pPl.value+' mil';desenhar();};
+const gini=(n,d)=>{if(!n)return 0;const p=d/n;return 1-p*p-(1-p)*(1-p);};
+function sortear(lista,k){const a=lista.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,k).sort((x,y)=>x-y);}
+function avaliar(ids,a){const n=ids.length;const ramos=AT[a].vals.map(v=>{const s=ids.filter(i=>R[i][AT[a].k]===v);return {v,ids:s,n:s.length,d:s.filter(i=>R[i].y).length};});
+ return {a,ramos,g:ramos.reduce((t,r)=>t+r.n/n*gini(r.n,r.d),0)};}
+function crescer(ids,disp,prof,clsPai,sorteioRaiz){const n=ids.length,d=ids.filter(i=>R[i].y).length;
+ const cls=d*2>n?1:d*2<n?0:clsPai;const no={ids,n,d,cls,prof};
+ if(d===0||d===n||!disp.length){no.folha=true;no.motivo=!disp.length&&d&&d<n?'sem atributos':'pura';return no;}
+ const sorteados=sorteioRaiz||(disp.length>2?sortear(disp,2):disp.slice());no.sorteados=sorteados;no.disp=disp;
+ no.cands=sorteados.map(a=>avaliar(ids,a));const best=no.cands.reduce((x,c)=>c.g<x.g-1e-12?c:x);
+ if(best.g>=gini(n,d)-1e-12){no.folha=true;no.motivo='sem ganho';return no;}
+ no.best=best;no.filhos=best.ramos.map(r=>({v:r.v,no:r.n?crescer(r.ids,disp.filter(x=>x!==best.a),prof+1,cls):{ids:[],n:0,d:0,cls,prof:prof+1,folha:true,vazia:true}}));
+ return no;}
+function treinar(){const am=Array.from({length:N},()=>Math.floor(rng()*N));const fora=[...Array(N).keys()].filter(i=>!am.includes(i));
+ const sr=sortear([0,1,2],2);return {am,fora,sr,raiz:crescer(am,[0,1,2],0,1,sr)};}
+function classificar(no,p,cam=[]){cam.push(no);if(no.folha)return {cls:no.cls,cam};return classificar(no.filhos.find(f=>f.v===p[AT[no.best.a].k]).no,p,cam);}
+const paciente=()=>({feb:pFeb.value,pre:pPre.value,dor:pDor.value});
+const voto=a=>classificar(a.raiz,paciente()).cls;
+const nf=no=>no.folha?1:no.filhos.reduce((t,f)=>t+nf(f.no),0);
+const prof=no=>no.folha?0:1+Math.max(...no.filhos.map(f=>prof(f.no)));
+const nPerg=no=>no.folha?0:1+no.filhos.reduce((t,f)=>t+nPerg(f.no),0);
+function svgArvore(raiz,opt={}){const mini=!!opt.mini,cam=opt.cam||null;
+ const LW=mini?74:104,DY=mini?56:84,QW=mini?118:168,QH=mini?20:28,FH=mini?30:40;
+ const W=Math.max(nf(raiz)*LW,QW+8),H=prof(raiz)*DY+FH+4;let x0=0,out='';const pos=new Map();
+ (function lay(no){if(no.folha){pos.set(no,{x:x0*LW+LW/2,y:no.prof*DY+2});x0++;return;}no.filhos.forEach(f=>lay(f.no));const xs=no.filhos.map(f=>pos.get(f.no).x);pos.set(no,{x:(Math.min(...xs)+Math.max(...xs))/2,y:no.prof*DY+2});})(raiz);
+ const dx=Math.max(0,QW/2-pos.get(raiz).x+4);const on=no=>cam&&cam.includes(no);
+ (function ar(no){if(no.folha)return;const p=pos.get(no);no.filhos.forEach(f=>{const q=pos.get(f.no),o=on(no)&&on(f.no);
+   out+=`<line x1="${p.x}" y1="${p.y+QH}" x2="${q.x}" y2="${q.y}" style="${o?'stroke:var(--vermelho);stroke-width:3':'stroke:var(--tinta);stroke-width:1.2'}"/><text x="${p.x+(q.x-p.x)*.75+(q.x<p.x-1?-5:4)}" y="${p.y+QH+(q.y-p.y-QH)*.75}" font-size="${mini?8.5:10.5}" text-anchor="${q.x<p.x-1?'end':'start'}" style="fill:var(--tinta2)">${f.v}</text>`;ar(f.no);});})(raiz);
+ pos.forEach((p,no)=>{const dim=cam&&!on(no)?'opacity:.3':'';
+  if(no.folha){const w=LW-10;out+=`<g style="${dim}"><rect x="${p.x-w/2}" y="${p.y}" width="${w}" height="${FH}" rx="6" style="fill:${no.vazia?'var(--fundo)':no.cls?'var(--vermelho)':'var(--outro)'};${no.vazia?'stroke:var(--outro);stroke-dasharray:3 2;':''}${on(no)?'stroke:var(--tinta);stroke-width:3':''}"/><text x="${p.x}" y="${p.y+(mini?13:17)}" font-size="${mini?9.5:12}" font-weight="700" text-anchor="middle" style="fill:${no.vazia?'var(--tinta2)':'#fff'}">${no.cls?'dengue':'não'}</text><text x="${p.x}" y="${p.y+(mini?25:32)}" font-size="${mini?8:9.5}" text-anchor="middle" style="fill:${no.vazia?'var(--tinta2)':'#fff'}">${no.vazia?'sem registros':no.d+' | '+(no.n-no.d)}</text></g>`;}
+  else out+=`<g style="${dim}"><rect x="${p.x-QW/2}" y="${p.y}" width="${QW}" height="${QH}" rx="6" style="fill:var(--tinta)"/><text x="${p.x}" y="${p.y+QH/2+4}" font-size="${mini?9.5:12}" font-weight="600" text-anchor="middle" style="fill:var(--fundo)">${AT[no.best.a].q}</text></g>`;});
+ return `<svg viewBox="${-dx} 0 ${W+2*dx} ${H}" role="img" aria-label="Árvore de decisão" font-family="Poppins,sans-serif">${out}</svg>`;}
+function eqCand(c,n,dPai){const gp=gini(n,dPai);
+ return `<div class="eqs">${c.ramos.map(r=>`<div class="eq">${r.v}: ${r.n?`1 − (${fr(r.d,r.n)})² − (${fr(r.n-r.d,r.n)})² = ${f3(gini(r.n,r.d))}`:'nenhum registro'}</div>`).join('')}<div class="eq tot">${c.ramos.filter(r=>r.n).map(r=>`${fr(r.n,n)} · ${f3(gini(r.n,r.d))}`).join(' + ')} = <span class="res">${f3(c.g)}</span></div></div>`;}
+function stumpSvg(c){const k=c.ramos.length,LW=96,W=k*LW,out=[];c.ramos.forEach((r,i)=>{const x=i*LW+LW/2;out.push(`<line x1="${W/2}" y1="26" x2="${x}" y2="62" style="stroke:var(--tinta)" stroke-width="1.2"/><text x="${x}" y="58" font-size="10" text-anchor="middle" style="fill:var(--tinta2)">${r.v}</text><rect x="${x-42}" y="64" width="84" height="40" rx="7" style="fill:var(--papel);stroke:var(--tinta)" stroke-width="1"/><text x="${x}" y="77" font-size="8.5" font-weight="700" text-anchor="middle" style="fill:var(--tinta)">DENGUE</text><text x="${x-18}" y="97" font-size="13" font-weight="700" text-anchor="middle" style="fill:var(--vermelho)">${r.d}</text><text x="${x+18}" y="97" font-size="13" font-weight="700" text-anchor="middle" style="fill:var(--tinta)">${r.n-r.d}</text>`);});
+ return `<svg viewBox="0 0 ${Math.max(W,180)} 108" font-family="Poppins,sans-serif"><rect x="${Math.max(W,180)/2-80}" y="2" width="160" height="24" rx="7" style="fill:var(--tinta)"/><text x="${Math.max(W,180)/2}" y="18.5" font-size="12" font-weight="600" text-anchor="middle" style="fill:var(--fundo)">${AT[c.a].q}</text>${out.join('').replaceAll(`x1="${W/2}"`,`x1="${Math.max(W,180)/2}"`)}</svg>`;}
+function tabelaAmostra(a){const cont=Array(N).fill(0);a.am.forEach(i=>cont[i]++);
+ return `<div class="tab-scroll"><table class="ada fixa"><thead><tr><th>#</th><th>Febre</th><th>Pressão arterial</th><th>Dor abdominal</th><th>Dengue</th><th>Vezes na amostra</th></tr></thead><tbody>${R.map((r,i)=>`<tr class="${cont[i]===0?'oob':cont[i]>1?'rep':''}"><td>${i+1}</td><td>${r.feb}</td><td>${r.pre}</td><td>${r.dor}</td><td class="pd ${r.y?'d':'o'}">${r.y?'sim':'não'}</td><td><b>${cont[i]===0?'0 · fora (out-of-bag)':cont[i]+'×'}</b></td></tr>`).join('')}</tbody></table></div>`;}
+function caminho(raiz,alvo){const L=[];(function rec(no,c){if(no===alvo){L.push(...c);return true;}if(no.folha)return false;return no.filhos.some(f=>rec(f.no,c.concat(`${AT[no.best.a].nome.toLowerCase()} ${f.v}`)));})(raiz,[]);return L;}
+function nos(raiz){const L=[];(function rec(no){L.push(no);if(!no.folha)no.filhos.forEach(f=>rec(f.no));})(raiz);return L;}
+const unic=ids=>[...new Set(ids)].sort((x,y)=>x-y).map(i=>i+1).join(', ');
+function render(){const P=document.getElementById('rfPasso'),k=arvores.length+(cur?1:0),et=document.getElementById('rfEtapa');
+ if(!cur){P.innerHTML=arvores.length>=MAX?`<h4>Floresta completa: o treinamento terminou</h4>As ${MAX} árvores nasceram dos mesmos quatro passos, com sorteios diferentes, e por isso têm formas e tamanhos diferentes. Agora começa a <b>classificação</b>: chega um paciente novo, que nenhuma árvore viu. Escolha os dados dele abaixo; ele passa por todas as árvores, cada uma vota e a classe mais votada vence.`:arvores.length?`<h4>Árvore ${arvores.length} plantada</h4>Ela entrou na floresta abaixo. Plante a próxima passo a passo, ou plante as restantes de uma vez para completar a floresta.`:`<h4>Como nasce uma árvore da floresta</h4>Primeiro vem o <b>treinamento</b>: cada árvore nasce em quatro passos, <b>1</b> sortear a amostra bootstrap, <b>2</b> sortear os atributos da raiz, <b>3</b> escolher a pergunta da raiz e <b>4</b> deixar a árvore crescer até o fim. Só quando a floresta estiver completa vem a <b>classificação</b> de um paciente novo. Clique em “Plantar a árvore 1”.`;et.textContent='';}
+ else{const a=cur,r=a.raiz;et.textContent=`Árvore ${k} · passo ${passo} de 4`;
+  if(passo===1)P.innerHTML=`<h4>Passo 1 · Sortear a amostra bootstrap</h4>Sorteamos ${N} vezes um registro entre os ${N} da tabela, <b>com reposição</b>: depois de sorteado, o registro volta e pode sair de novo.
+   <div class="sorteios">${a.am.map((i,j)=>`<span>${j+1}º: <b>registro ${i+1}</b></span>`).join('')}</div>${tabelaAmostra(a)}
+   <div class="alerta">${a.fora.length?`Os registros ${a.fora.map(i=>i+1).join(', ')} não saíram: formam o conjunto out-of-bag desta árvore.`:'Todos os registros saíram pelo menos uma vez, o que é raro.'} Registros repetidos contam mais de uma vez nas contas a seguir.</div>`;
+  if(passo===2)P.innerHTML=`<h4>Passo 2 · Sortear os atributos da raiz</h4>Antes de <b>cada</b> divisão, sorteamos 2 dos atributos disponíveis. Na raiz, a árvore só pode escolher entre estes:
+   <div class="chips-at">${[0,1,2].map(x=>`<span class="${a.sr.includes(x)?'':'fora'}">${AT[x].nome}</span>`).join('')}</div>
+   <div class="alerta">Nas próximas divisões haverá um novo sorteio. É esse sorteio, junto com a amostra, que deixa as árvores diferentes entre si.</div>`;
+  if(passo===3){const best=r.folha?null:r.best;P.innerHTML=`<h4>Passo 3 · Escolher a pergunta da raiz</h4>Com os ${N} registros da amostra (contando as repetições), testamos cada atributo sorteado e calculamos a impureza de Gini ponderada dos ramos, como na Aula 06 e no AdaBoost. A pergunta de menor Gini vira a raiz.
+   <div class="comp">${(r.cands||[]).map(c=>`<div class="${c===best?'best':''}">${stumpSvg(c)}${eqCand(c,r.n,r.d)}${c===best?'<b>menor Gini: vira a raiz</b>':''}</div>`).join('')}</div>
+   <div class="alerta">Gini da amostra inteira, antes de dividir: ${f3(gini(r.n,r.d))}.</div>`;}
+  if(passo===4){const internos=nos(r).filter(no=>!no.folha&&no!==r);
+   P.innerHTML=`<h4>Passo 4 · A árvore cresce até o fim</h4>Em cada ramo que ainda mistura dengue e não dengue, repetimos o processo com os registros que chegaram ali: <b>novo sorteio de atributos</b> e a pergunta de menor Gini. O ramo para quando fica <b>puro</b> (uma só classe), quando não sobra atributo para perguntar ou quando nenhuma pergunta reduz a impureza. Não há poda.
+   <div class="arv-grande">${svgArvore(r)}</div><div class="alerta">Nas folhas, dengue | não dengue entre os registros da amostra que chegaram ali. Se houver empate, a folha fica com a classe mais frequente no nó de cima; um ramo sem registros também. Esta árvore tem ${nPerg(r)} pergunta${nPerg(r)>1?'s':''} e ${prof(r)} níve${prof(r)>1?'is':'l'}.</div>
+   ${internos.length?`<ul class="divs">${internos.map(no=>`<li>Ramo <b>${caminho(r,no).join(' → ')}</b> (registros ${unic(no.ids)}): ${no.sorteados.length>1?'sorteio '+no.sorteados.map(x=>AT[x].nome.toLowerCase()).join(' e '):'só resta '+AT[no.sorteados[0]].nome.toLowerCase()} → <b>${AT[no.best.a].q}</b></li>`).join('')}</ul>`:''}`;}}
+ desenharFloresta();botoes();}
+function desenharFloresta(){let vd=0;const n=arvores.length,ok=n>=MAX;document.getElementById('rfPac').hidden=!ok;
+ document.getElementById('floresta').innerHTML=arvores.map((a,k)=>{const c=ok?classificar(a.raiz,paciente()):null;if(ok)vd+=c.cls;
+  return `<div class="arv"><h4><span>Árvore ${k+1}</span>${ok?`<span class="voto ${c.cls?'d':'o'}">vota ${c.cls?'dengue':'não'}</span>`:`<span class="miniinfo">${nPerg(a.raiz)} pergunta${nPerg(a.raiz)>1?'s':''}</span>`}</h4><div class="miniinfo">fora (out-of-bag): ${a.fora.map(i=>i+1).join(', ')||'nenhum'}</div>${svgArvore(a.raiz,ok?{mini:true,cam:c.cam}:{mini:true})}</div>`;}).join('');
+ const pl=document.getElementById('placar');
+ if(!ok){pl.hidden=!n;pl.innerHTML=`Floresta em construção: <b>${n} de ${MAX}</b> árvores. A classificação de um paciente novo só começa quando a floresta estiver completa.`;return;}
+ pl.hidden=false;const vn=n-vd,dec=vd>vn?1:vd<vn?0:null;
+ pl.innerHTML=`<b>Classificação</b> · ${vd} voto${vd!==1?'s':''} para dengue, ${vn} para não<div class="barra"><i style="width:${vd/n*100}%"></i><u style="width:${vn/n*100}%"></u></div><span class="dec ${dec===1?'d':''}">${dec===null?'Empate.':'A floresta responde: '+(dec?'dengue':'não é dengue')}</span>`;}
+function botoes(){const b=document.getElementById('rfProx');
+ if(!cur){b.textContent=arvores.length>=MAX?'Floresta completa':`Plantar a árvore ${arvores.length+1}`;b.disabled=arvores.length>=MAX;}
+ else{b.textContent=passo<4?'Próximo passo':'Pôr a árvore na floresta';b.disabled=false;}
+ document.getElementById('rfResto').disabled=arvores.length>=MAX;}
+function avancar(){if(!cur){if(arvores.length>=MAX)return;cur=treinar();passo=1;}else if(passo<4)passo++;else{arvores.push(cur);cur=null;passo=0;}render();}
+function resto(){if(cur){arvores.push(cur);cur=null;passo=0;}while(arvores.length<MAX)arvores.push(treinar());render();}
+function recomecar(){rng=mulberry(SEED);arvores=[];cur=null;passo=0;render();}
+const SEED=5;
+document.getElementById('rfProx').onclick=avancar;document.getElementById('rfResto').onclick=resto;document.getElementById('rfRec').onclick=recomecar;
+[pFeb,pPre,pDor].forEach(e=>e.onchange=render);
+window.__rf={treinar,setSeed:s=>{rng=mulberry(s)},nPerg,prof};
 recomecar();
 })();
 </script></body></html>
