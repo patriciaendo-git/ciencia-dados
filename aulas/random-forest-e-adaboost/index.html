@@ -138,8 +138,8 @@ table.cmp tbody th{text-align:left;padding:8px 10px;vertical-align:top;font-weig
 table.cmp td{padding:8px 10px;vertical-align:top;border-top:1px solid var(--linha)}
 table.cmp tbody th{border-top:1px solid var(--linha)}
 .arv-larga{overflow-x:auto;margin-top:6px}
-figure.larga-fig{width:min(1060px,calc(100vw - 32px));position:relative;left:50%;margin-left:calc(-1*min(1060px,calc(100vw - 32px))/2)}
-.arv-svg{min-width:720px}
+figure.larga-fig{width:auto;position:static;left:auto;margin-left:0;margin-right:0}
+
 .arv-svg svg{display:block}
 .pergunta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;min-height:42px}
 .pergunta .pq{font-weight:700;font-size:1.05rem;margin-right:4px}
@@ -170,7 +170,8 @@ table.dic{min-width:560px}table.dic tbody th{width:18%}
 .gform{font-size:1rem;font-weight:500;text-align:center;margin:8px 0 12px;font-variant-numeric:tabular-nums}
 .gform i,.eqs i{font-style:italic;font-weight:500}
 .eqs sub,.gform sub{font-size:.72em;vertical-align:-.3em;line-height:0;margin-left:1px}
-.um{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:18px;align-items:start;margin-top:8px}
+.um{display:grid;grid-template-columns:1fr;gap:10px;align-items:start;margin-top:8px}
+.um>svg{max-width:340px;margin:0 auto}
 @media(max-width:720px){.um{grid-template-columns:1fr}}
 .um svg{width:100%;height:auto;display:block}
 .eqs{font-size:.92rem;line-height:1.5;font-variant-numeric:tabular-nums}
@@ -241,13 +242,30 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
 .sk svg{flex:none;width:28px;height:26px;margin-top:2px}
 .sk-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:2px}
 .sk p{margin:0}
+.fd{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin-right:8px;vertical-align:1px;font-style:normal;white-space:nowrap}
+.fd.real{background:var(--tinta);color:var(--fundo);border:1.5px solid var(--tinta)}
+.fd.sint{border:1.5px solid var(--tinta2);color:var(--tinta2)}
+.fd.teo{border:1.5px dashed var(--tinta2);color:var(--tinta2)}
+.pp{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--tinta);border-radius:10px;padding:14px 18px;margin:22px 0;background:var(--fundo)}
+.pp svg{flex:none;width:30px;height:30px;margin-top:2px}
+.pp-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta);margin-bottom:4px}
+.pp .pp-i{margin:0 0 10px;font-size:.95rem;line-height:1.6}
+.pp .pp-q{margin:0;font-weight:700;font-size:1.02rem;line-height:1.45}
+.pp .pp-d{margin:6px 0 0;font-size:.9rem;color:var(--tinta2);font-weight:400}
+main h2.sem-n{counter-increment:none}
+h2.sem-n::before{content:none}
+.coment h3{margin-top:28px}
+.coment .volta-pp{font-size:.88rem}
+.pp a,.coment a{color:var(--dengue-t)}
+.aprof{margin:28px 0 0;padding-top:12px;border-top:1px solid var(--linha);font-size:.9rem;color:var(--tinta2)}
+.aprof a{color:var(--dengue-t);font-weight:700}
 </style></head><body>
 <header class="abertura col">
   <div class="topo"><div class="logos"><img src="../../upe.png" alt="Universidade de Pernambuco (UPE)"><span class="sep"></span><img src="../../logo.png" alt="dotLAB" class="dotl"></div><a class="volta" href="../../index.html">Todas as aulas</a></div>
   <span class="selo">Ciência de Dados · Aula 07 · Random Forest e AdaBoost</span>
   <h1>Muitas árvores <em>simples</em> erram menos que uma?</h1>
   <p class="lead">Comitês de modelos: bagging, Random Forest e AdaBoost, com registros de casos suspeitos de dengue.</p>
-  <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">Versão 1.1 · novembro de 2026</span></div>
+  <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">Versão 1.4 · novembro de 2026</span></div>
 </header>
 <main>
 <section class="col">
@@ -256,7 +274,7 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
 </section>
 
 <section class="col">
-  <h2>Por que combinar modelos funciona</h2>
+  <h2>Por que combinar modelos</h2>
   <h3>Os tipos de comitê</h3>
   <p>Um <strong>comitê de modelos</strong> (<em>ensemble</em>) treina vários modelos e combina as respostas deles. Os comitês costumam ser organizados em três famílias, que diferem em como os modelos são treinados e em como as respostas são combinadas:</p>
   <div class="tab-scroll"><table class="cmp">
@@ -278,10 +296,11 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
     <div class="controle"><label for="nMod">Número de classificadores</label><input type="range" id="nMod" min="1" max="101" value="25" step="2"><output id="nModV" for="nMod">25</output></div>
     <svg id="curvaVoto" viewBox="0 0 640 280" width="100%" role="img" aria-label="Acerto da votação por maioria conforme o número de classificadores"></svg>
     <div class="leitura"><span>Um classificador: <b id="vUm">60%</b></span><span>Votação por maioria: <b id="vVoto">–</b></span></div>
-    <figcaption>Probabilidade de a maioria acertar, supondo erros independentes (distribuição binomial).</figcaption>
+    <figcaption><span class="fd teo">Cálculo teórico · sem dados</span>Probabilidade de a maioria acertar, supondo erros independentes (distribuição binomial).</figcaption>
   </figure>
-  <p>O gráfico depende de uma suposição forte: erros <strong>independentes</strong>. Se os classificadores errarem <strong>juntos</strong>, nos mesmos registros, a votação não ajuda: dez cópias do mesmo modelo erram exatamente como uma, e árvores treinadas nos mesmos dados fazem as mesmas perguntas e erram parecido. Por isso, todo comitê precisa de <strong>diversidade</strong>: modelos que errem em lugares diferentes. No bagging e no Random Forest, a diversidade vem da <strong>aleatoriedade</strong>: cada árvore vê uma amostra sorteada dos registros e, no Random Forest, só um sorteio dos atributos em cada divisão. O sorteio deixa cada árvore um pouco pior sozinha, mas faz as árvores errarem de jeitos diferentes, e a votação ganha com isso. Breiman (2001) mostrou que o erro da floresta cai quando as árvores são boas e, ao mesmo tempo, pouco parecidas entre si.</p>
-  <p>No boosting, a diversidade vem de outro lugar: cada modelo é treinado com <strong>pesos</strong> diferentes, que concentram a atenção nos registros que os anteriores erraram. No AdaBoost clássico, que veremos aqui, não há sorteio: com os mesmos dados, ele sempre produz os mesmos stumps. A aleatoriedade só entra quando, em vez de usar os pesos nas contas, sorteamos uma nova amostra em que os registros pesados têm mais chance de sair, ou em variações como o boosting estocástico.</p>
+  <p>O gráfico supõe erros <strong>independentes</strong>. Se os classificadores errarem <strong>juntos</strong>, nos mesmos registros, a votação não ajuda: dez cópias do mesmo modelo erram exatamente como uma. Por isso, todo comitê precisa de <strong>diversidade</strong>: modelos que errem em lugares diferentes.</p>
+  <p>No bagging e no Random Forest, a diversidade vem da <strong>aleatoriedade</strong>: cada árvore vê um sorteio dos registros e, no Random Forest, só um sorteio dos atributos em cada divisão. Cada árvore fica um pouco pior sozinha, mas as árvores passam a errar de jeitos diferentes, e a votação ganha com isso (Breiman, 2001). No boosting, a diversidade vem dos <strong>pesos</strong>, que concentram a atenção nos registros que os modelos anteriores erraram. O AdaBoost clássico não sorteia nada: com os mesmos dados, produz sempre os mesmos stumps.</p>
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=3" target="_blank" rel="noopener">Para aprofundar: seção 01 do material de estudo</a> · inclui a tabela da votação e o papel da aleatoriedade.</p>
 </section>
 
 <section class="col">
@@ -311,7 +330,7 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
       <tr><td>9</td><td>sim</td><td>normal</td><td>intensa</td><td class="pd d">sim</td></tr>
       <tr><td>10</td><td>sim</td><td>baixa</td><td>neutra</td><td class="pd o">não</td></tr>
     </tbody></table></div>
-  <p class="nota">Valores criados para o exemplo; não refletem a realidade. Cinco registros são de dengue e cinco não.</p>
+  <p class="nota"><span class="fd sint">Dados sintéticos</span>Valores criados para o exemplo; não refletem a realidade. Cinco registros são de dengue e cinco não.</p>
   <h3>Tabela 2: para o AdaBoost</h3>
   <p>São 8 registros com um atributo numérico, a contagem de plaquetas:</p>
   <div class="tab-scroll"><table class="cmp dic">
@@ -334,7 +353,9 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
       <tr><td>7</td><td>sim</td><td>não</td><td>172</td><td class="pd o">não</td></tr>
       <tr><td>8</td><td>sim</td><td>sim</td><td>165</td><td class="pd o">não</td></tr>
     </tbody></table></div>
-  <p class="nota">Valores criados para o exemplo; não refletem a realidade. Quatro registros são de dengue e quatro não. Sobre plaquetopenia e dengue: Brasil, Ministério da Saúde. <em>Dengue: diagnóstico e manejo clínico: adulto e criança</em>. 6. ed. Brasília, 2024.</p>
+  <p class="nota"><span class="fd sint">Dados sintéticos</span>Valores criados para o exemplo; não refletem a realidade. Quatro registros são de dengue e quatro não. Sobre plaquetopenia e dengue: Brasil, Ministério da Saúde. <em>Dengue: diagnóstico e manejo clínico: adulto e criança</em>. 6. ed. Brasília, 2024.</p>
+
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=5" target="_blank" rel="noopener">Para aprofundar: seção 02 do material de estudo</a> · traz as mesmas tabelas e dicionários, para estudar no papel.</p>
 </section>
 
 <section class="col">
@@ -355,10 +376,12 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
       <label>Dor abdominal <select id="pDor"><option selected>intensa</option><option>neutra</option></select></label></div>
     <div class="placar" id="placar" aria-live="polite"></div>
     <div class="floresta" id="floresta"></div>
-    <figcaption>Há duas fases: o treinamento constrói todas as árvores, e só depois a classificação passa o paciente novo por todas elas. Cada árvore pronta vira um cartão com os registros out-of-bag; na classificação, o cartão mostra o caminho do paciente em vermelho e o voto. Como nos slides da aula, cada pergunta abre um ramo para cada valor do atributo. Com só 10 registros as árvores ficam pequenas; numa base real, teriam muitos níveis. “Recomeçar” planta a mesma floresta de novo.</figcaption>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Tabela 1, criada para o exemplo. Há duas fases: o treinamento constrói todas as árvores, e só depois a classificação passa o paciente novo por todas elas. Cada árvore pronta vira um cartão com os registros out-of-bag; na classificação, o cartão mostra o caminho do paciente em vermelho e o voto. Como nos slides da aula, cada pergunta abre um ramo para cada valor do atributo. Com só 10 registros as árvores ficam pequenas; numa base real, teriam muitos níveis. “Recomeçar” planta a mesma floresta de novo.</figcaption>
   </figure>
   <p>Repare que nenhuma árvore é a “melhor”: algumas fazem perguntas ruins, porque o sorteio as deixou sem o atributo mais útil ou com uma amostra estranha. Mesmo assim, a votação costuma acertar mais do que a maioria das árvores sozinhas.</p>
   <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>O <code>RandomForestClassifier</code> tem três parâmetros centrais: <code>n_estimators</code> (número de árvores), <code>max_features</code> (atributos sorteados em cada divisão; por padrão, a raiz quadrada do total, o que daria 1 com os 3 atributos da Tabela 1) e <code>oob_score=True</code> (acurácia nos registros out-of-bag). As árvores crescem sem limite de profundidade (<code>max_depth=None</code>) e só fazem <strong>divisões binárias</strong>, por isso atributos categóricos precisam ser codificados antes. Na classificação, em vez da votação simples do artigo de Breiman, a floresta faz a <strong>média das probabilidades</strong> estimadas pelas árvores e escolhe a classe de maior média.</p></div></div>
+
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=7" target="_blank" rel="noopener">Para aprofundar: seção 03 do material de estudo</a> · inclui uma amostra bootstrap sorteada à mão e os detalhes do Random Forest.</p>
 </section>
 
 <section class="col">
@@ -366,10 +389,7 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
   <p>No <strong>boosting</strong>, os modelos são treinados <strong>em sequência</strong>, e cada um tenta corrigir os erros dos anteriores. O AdaBoost (<em>Adaptive Boosting</em>) é o exemplo clássico. Ele difere do Random Forest em três pontos: usa árvores de uma única pergunta, os <strong>stumps</strong>; a ordem importa, porque o erro de um stump define como o próximo será feito; e na votação final alguns stumps têm mais voz que outros. Antes de rodar o algoritmo, vale entender a ideia de <strong>peso</strong>, que é o coração do método.</p>
 
   <h3>Por que cada registro começa com peso 0,125</h3>
-  <p>Além dos atributos, o AdaBoost dá a cada registro um <strong>peso</strong> (<em>sample weight</em>): um número que diz quanto aquele registro <strong>conta</strong> no treinamento. O peso não é um dado do paciente, é uma informação do algoritmo.</p>
-  <p>No começo, o algoritmo ainda não sabe quais registros são difíceis, então trata todos igualmente. Os pesos sempre somam 1, como uma distribuição de probabilidade, e por isso cada um dos 8 registros começa com <strong>1/8 = 0,125</strong>.</p>
-  <p>O peso entra em duas contas. Na <strong>impureza de Gini</strong>, as proporções de cada classe passam a ser calculadas somando pesos em vez de contar registros. No <strong>erro</strong> de um stump, somamos os pesos dos registros que ele erra. Assim, um registro com peso 0,500 vale tanto quanto quatro registros com peso 0,125: errar nele custa caro.</p>
-
+  <p>Além dos atributos, o AdaBoost dá a cada registro um <strong>peso</strong> (<em>sample weight</em>), que diz quanto aquele registro <strong>conta</strong> no treinamento; não é um dado do paciente, é uma informação do algoritmo. No começo, todos os registros são tratados igualmente, e os pesos somam 1: cada um dos 8 registros começa com <strong>1/8 = 0,125</strong>. O peso entra na <strong>impureza de Gini</strong>, que passa a somar pesos em vez de contar registros, e no <strong>erro</strong> de cada stump, que é a soma dos pesos dos registros errados. Um registro com peso 0,500 vale tanto quanto quatro com peso 0,125: errar nele custa caro.</p>
   <h3>O passo a passo de cada rodada</h3>
   <ol>
     <li><strong>Escolher o stump.</strong> Um stump é uma árvore com uma única pergunta e duas folhas, um <strong>aprendiz fraco</strong> (<em>weak learner</em>). Testamos um stump por atributo (para as plaquetas, vários pontos de corte) e ficamos com o de menor impureza de Gini ponderada.</li>
@@ -378,14 +398,18 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
     <li><strong>Atualizar os pesos:</strong> multiplicar o peso dos registros errados por e<sup>α</sup> (aumenta) e o dos certos por e<sup>−α</sup> (diminui).</li>
     <li><strong>Normalizar:</strong> dividir todos os pesos pela soma, para voltarem a somar 1.</li>
   </ol>
+  <div class="pp" role="note" id="pp2"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">E se um stump tivesse erro 0,7, ou seja, errasse mais do que acertasse? Qual seria a voz dele, e o que o comitê faria com ela?</p><p class="pp-d">Calcule α = ½ · ln[(1 − erro) / erro] e observe o sinal. <a href="#com2">Comentário no fim da página</a>.</p></div></div>
   <p>Na rodada seguinte, os registros que acabaram de ser errados pesam mais, e o próximo stump é escolhido para acertá-los. Clique para ver as rodadas acontecendo.</p>
   <figure class="larga-fig">
     <div class="controle"><button type="button" class="bt sim" id="btProx">Começar a rodada 1</button><button type="button" class="bt" id="btRec">Recomeçar</button><span class="etapa" id="etapa"></span></div>
     <div class="passo" id="passo" aria-live="polite"></div>
     <div class="tab-scroll"><table class="ada" id="tabAda"></table></div>
     <div class="treinados" id="treinados"></div>
-    <figcaption>Oito registros criados para o exemplo; não refletem a realidade. Use “Próximo passo” para avançar: cada rodada tem seis passos, e o primeiro mostra um stump por vez. A coluna “Comitê” aparece quando o primeiro stump termina e mostra a votação de todos os stumps já treinados, cada um com a sua voz α.</figcaption>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Tabela 2: oito registros criados para o exemplo; não refletem a realidade. Use “Próximo passo” para avançar: cada rodada tem seis passos, e o primeiro mostra um stump por vez. A coluna “Comitê” aparece quando o primeiro stump termina e mostra a votação de todos os stumps já treinados, cada um com a sua voz α.</figcaption>
   </figure>
+  <div class="pp" role="note" id="pp1"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-i">Antes da pergunta, um pouco de biologia. As <strong>plaquetas</strong> são fragmentos de células do sangue que ajudam na coagulação. Num adulto saudável, a contagem fica entre cerca de 150 mil e 450 mil plaquetas por mm³ de sangue. Abaixo de 150 mil, fala-se em <strong>plaquetopenia</strong> (ou trombocitopenia). Na dengue, a queda das plaquetas é uma alteração frequente, sobretudo na fase crítica da doença, por volta do terceiro ao sétimo dia, e por isso a contagem de plaquetas é acompanhada no hemograma (Brasil, 2024). Em resumo: plaquetas baixas combinam com dengue, mas plaquetas normais não descartam a doença. Nos 8 registros da Tabela 2, que são sintéticos, o stump 1 cortou em 150 mil, exatamente o limite da plaquetopenia.</p><p class="pp-q">O stump 3 prevê dengue quando as plaquetas estão <em>acima</em> de 175 mil, o contrário do que a plaquetopenia sugere. O modelo aprendeu uma regra clínica errada?</p><p class="pp-d">Veja quais registros pesam mais no início da rodada 3 e em que folha cada um cai. <a href="#com1">Comentário no fim da página</a>.</p></div></div>
+
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=9" target="_blank" rel="noopener">Para aprofundar: seção 04 do material de estudo</a> · inclui a rodada 1 calculada à mão e os mesmos stumps no scikit-learn.</p>
 </section>
 <section class="col">
   <h2>Random Forest × AdaBoost</h2>
@@ -400,6 +424,8 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
       <tr><th scope="row">No scikit-learn</th><td><code>RandomForestClassifier</code>: <code>n_estimators</code>, <code>max_features</code>, <code>oob_score</code></td><td><code>AdaBoostClassifier</code>: <code>n_estimators</code>, <code>learning_rate</code></td></tr>
     </tbody></table></div>
   <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>No <code>AdaBoostClassifier</code>, a voz de cada stump aparece em <code>estimator_weights_</code> sem o ½ da fórmula: para o primeiro stump desta página, 1,946 em vez de 0,973. Como todos os stumps são multiplicados pelo mesmo fator, a votação dá o mesmo resultado.</p></div></div>
+  <p>Na simulação da Aula 06, com 4.000 registros de treinamento, nem a árvore, nem o Random Forest, nem o AdaBoost passam de 56% de acurácia no teste: um comitê não cria informação que não está nos atributos.</p>
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=13" target="_blank" rel="noopener">Para aprofundar: seção 05 do material de estudo</a> · inclui a tabela de acurácias da simulação.</p>
 </section>
 
 <section class="col">
@@ -415,12 +441,33 @@ table.ada tr.rep td:last-child{color:var(--vermelho)}
     <li><strong>Forças.</strong> Transforma aprendizes fracos num classificador forte. Tem poucos hiperparâmetros (o número de stumps e a taxa de aprendizado). Resiste bem ao sobreajuste quando os dados têm pouco ruído. Breiman chegou a chamar o boosting com árvores de “o melhor classificador pronto para uso do mundo”, como lembram Friedman, Hastie e Tibshirani<sup><a href="#ref4">4</a></sup>.</li>
     <li><strong>Fraquezas.</strong> É muito sensível a ruído e a valores atípicos (<em>outliers</em>): um registro com rótulo errado é errado de novo a cada rodada, seu peso cresce sem parar e os stumps seguintes passam a se dedicar a ele. Por isso, a qualidade dos dados importa ainda mais. O treinamento é sequencial e não pode ser feito em paralelo.</li>
   </ul>
+  <div class="pp" role="note" id="pp3"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">Suponha que o registro 4 esteja com o rótulo errado: o paciente não tinha dengue. Basta remover o registro e treinar de novo?</p><p class="pp-d">Pense em como saber que o rótulo está errado, e não só que o modelo errou. <a href="#com3">Comentário no fim da página</a>.</p></div></div>
   <p>Os comitês não criam informação. Se os atributos separam mal as classes, como os sinais clínicos da Aula 06, uma floresta inteira também vai separar mal. O ganho dos comitês está em <strong>aproveitar melhor</strong> a informação que já está nos dados.</p>
+
+  <p class="aprof"><a href="random-forest-e-adaboost-material-de-estudo.pdf#page=15" target="_blank" rel="noopener">Para aprofundar: seção 06 do material de estudo</a> · o material traz também os erros comuns da aula.</p>
+</section>
+
+<section class="col coment" id="comentarios">
+  <h2 class="sem-n">Comentários sobre as perguntas para pensar</h2>
+  <h3 id="com1">O stump 3 e a plaquetopenia</h3>
+  <p>O stump não aprendeu uma regra clínica errada, e também não aprendeu uma certa: nenhum stump aprende biologia. Cada stump do AdaBoost escolhe a pergunta que melhor separa os registros <strong>com os pesos daquela rodada</strong>. No início da rodada 3, os registros mais pesados são o 4 (0,292), errado pelo stump 1, e o 7 e o 8 (0,250 cada), errados pelo stump 2. Os outros cinco pesam 0,042 cada.</p>
+  <p>Abaixo de 175 mil ficam os registros 7 e 8, que não são dengue e pesam 0,500 juntos, e os registros 1, 2 e 3, que são dengue e pesam só 0,125: a folha fica com “não dengue”. Acima de 175 mil fica o registro 4, dengue com 0,292, contra os registros 5 e 6, que pesam 0,083: a folha fica com “dengue”. O stump erra os registros 1, 2, 3, 5 e 6, que juntos pesam só 0,208.</p>
+  <p>O stump 3 isolado não é uma regra para usar com pacientes: é uma correção do comitê para os casos difíceis da rodada. Quem classifica é a soma das vozes dos três stumps, e ela acerta os 8 registros. Lembre também que esses registros são sintéticos: só o limite de 150 mil para a plaquetopenia vem da literatura; o corte de 175 mil vem apenas desses dados e desses pesos. Ao interpretar um modelo treinado com dados reais, vale a mesma cautela: um corte estranho num aprendiz fraco diz mais sobre os pesos daquela rodada do que sobre a doença.</p>
+  <p class="volta-pp"><a href="#pp1">Voltar à pergunta</a></p>
+  <h3 id="com2">O stump que erra mais do que acerta</h3>
+  <p>A voz seria negativa: α = ½ · ln(0,3 / 0,7) = −0,424. Com duas classes, erro 0,5 é um cara ou coroa: α = 0, e o stump não tem voz. Abaixo de 0,5, a voz é positiva; acima de 0,5, é negativa, e o comitê <strong>inverte</strong> o voto do stump. Um stump que erra 70% das vezes é tão informativo quanto um que acerta 70%, desde que se faça o contrário do que ele diz. É como alguém que sempre mente: escutando ao contrário, ele ajuda. A atualização dos pesos também se inverte: os registros que ele errou perdem peso, em vez de ganhar.</p>
+  <p>Na prática, isso não acontece com os stumps desta aula. Cada folha recebe a classe de <strong>maior peso</strong> entre os registros que caem nela, então cada folha erra no máximo metade do seu peso, e o stump inteiro erra no máximo 0,5. Um erro acima de 0,5 só apareceria se as folhas fossem rotuladas ao contrário, ou com outro tipo de aprendiz fraco.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>O <code>AdaBoostClassifier</code> (algoritmo SAMME) não aceita voz negativa. Com K classes, um aprendiz com erro maior ou igual a 1 − 1/K (0,5 para duas classes) é descartado e o treinamento para ali; se isso acontecer logo no primeiro aprendiz, o ajuste falha com erro. A voz é calculada como ln[(1 − erro) / erro] + ln(K − 1), multiplicada pela taxa de aprendizado (<code>learning_rate</code>, 1 por padrão) e sem o ½ da aula. Com duas classes, ln(K − 1) = 0; por isso <code>estimator_weights_</code> mostra 1,946, 1,792 e 1,335, o dobro dos nossos valores.</p></div></div>
+  <p class="volta-pp"><a href="#pp2">Voltar à pergunta</a></p>
+  <h3 id="com3">O registro com rótulo errado</h3>
+  <p>O AdaBoost ajuda a <strong>encontrar</strong> o suspeito: depois da rodada 1, o registro 4 sozinho vale metade do peso do conjunto, e o stump 3 existe em boa parte para acertá-lo. Um registro que acumula muito peso é um bom candidato a revisão. Mas o modelo errar um registro não prova que o rótulo está errado. Um paciente com dengue e 180 mil plaquetas é plausível: nem todo caso tem plaquetopenia, sobretudo nos primeiros dias.</p>
+  <p>Remover um registro só porque o modelo o errou é perigoso. O treinamento fica mais bonito, mas o modelo aprende uma realidade mais simples do que a verdadeira e erra justamente os casos difíceis quando eles aparecerem. Antes de remover, confira a origem do dado. No SINAN, por exemplo, a ficha de notificação registra se o caso foi confirmado por <strong>critério laboratorial</strong> ou <strong>clínico-epidemiológico</strong>, e os do segundo tipo têm mais chance de erro de rótulo. Se o erro se confirmar, corrija ou remova o registro e documente a decisão. Se não der para confirmar, mantenha o registro e prefira um modelo menos sensível a ruído, como o Random Forest, ou limite o número de stumps do AdaBoost.</p>
+  <p class="volta-pp"><a href="#pp3">Voltar à pergunta</a></p>
 </section>
 
 </main>
 <footer class="col">
-  <p><strong>Dados.</strong> Os oito registros desta página foram criados para o exemplo e não refletem a realidade.</p>
+  <p><strong>Dados.</strong> <span class="fd sint">Dados sintéticos</span>As duas tabelas desta página foram criadas para o exemplo e não refletem a realidade. A Tabela 1 é a mesma da Aula 06.</p>
   <ol>
     <li id="ref1">Bonaccorso, G. <em>Machine Learning Algorithms</em>. Packt Publishing, 2017.</li>
     <li id="ref2">Chandramouli, S.; Dutt, S.; Das, A. K. <em>Machine Learning</em>. Pearson, 2018.</li>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aula 09 · SVM · Ciência de Dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fundo:#FFFFFF; --papel:#F6F2F2; --tinta:#282425; --tinta2:#6A6365; --linha:#E6DEDE; --suave:#F6F2F2;
+  --dengue:#D11615; --dengue-t:#D11615; --outro:#9C9496; --destaque:#282425; --destaque-tinta:#282425; --alerta:#6A6365;
+  --treino:#9C9496; --teste:#D11615; --vermelho:#D11615;
+  --display:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --texto:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+    --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+    --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+  --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+  --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--fundo);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.7;counter-reset:sec}
+:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
+button,input{font:inherit;color:inherit}
+
+.col{max-width:680px;margin:0 auto;padding:0 20px}
+.larga{max-width:880px;margin:0 auto;padding:0 20px}
+header.abertura{padding:40px 0 28px;border-bottom:2px solid var(--vermelho);margin-bottom:8px}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px}
+.topo img{height:64px;width:auto;display:block;background:#fff;border-radius:6px}
+.topo .logos{display:flex;align-items:center;gap:16px}.topo .logos .sep{width:1px;height:46px;background:var(--linha)}.topo img.dotl{height:56px;padding:3px}
+.topo .volta{font-size:.82rem;font-weight:600;color:var(--tinta2);text-decoration:none}
+.topo .volta:hover{color:var(--dengue-t)}
+.selo{display:block;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:14px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,3.2rem);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;max-width:18ch;text-wrap:balance}
+h1 em{font-style:normal;color:var(--dengue-t)}
+.lead{font-size:1.1rem;color:var(--tinta2);margin:0 0 18px}
+.creditos{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:.85rem;color:var(--tinta2)}
+.creditos b{color:var(--tinta);font-weight:600}
+.etq{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:999px;border:1px solid var(--vermelho);color:var(--dengue-t)}
+main h2{counter-increment:sec}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,3.4vw,1.7rem);line-height:1.2;margin:64px 0 16px;display:flex;align-items:baseline;gap:14px;text-wrap:balance}
+h2::before{content:counter(sec,decimal-leading-zero);font-weight:800;font-size:1.5em;color:var(--dengue-t);font-variant-numeric:tabular-nums;flex:none}
+h3{font-size:1rem;margin:24px 0 8px}
+p{margin:0 0 16px}
+.nota{font-size:.9rem;color:var(--tinta2)}
+.d{color:var(--dengue-t);font-weight:700}
+.o{color:var(--outro);font-weight:700}
+figure{margin:26px 0 30px;padding:22px;background:var(--papel);border:0;border-radius:10px}
+figcaption{font-size:.88rem;color:var(--tinta2);margin-top:12px}
+.destaque{background:var(--papel);border-left:5px solid var(--vermelho);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0}
+.numero{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,9vw,4.2rem);line-height:1;color:var(--tinta)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;background:var(--suave);padding:1px 5px;border-radius:4px}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:1.05rem;text-align:center;margin:12px 0;overflow-x:auto;white-space:nowrap}
+
+/* grade de fichas */
+.grade{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;max-width:520px}
+.grade i{display:block;aspect-ratio:3/4;border-radius:2px}
+.grade i.D{background:var(--dengue)} .grade i.O{background:var(--outro)}
+.legenda{display:flex;flex-wrap:wrap;gap:16px;font-size:.9rem;margin-top:12px}
+.legenda span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}
+.sw.D{background:var(--dengue)} .sw.O{background:var(--outro)}
+
+/* controles */
+.controle{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+.controle label{font-weight:700}
+input[type=range]{flex:1;min-width:180px;accent-color:var(--vermelho)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.chip{border:1px solid var(--linha);background:var(--fundo);border-radius:999px;padding:5px 12px;font-size:.84rem;font-weight:500;cursor:pointer}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.chip[aria-pressed="true"]{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+.botao{border:1px solid var(--vermelho);background:var(--vermelho);color:#fff;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.88rem}
+.botao.primario{background:var(--tinta);color:var(--papel)}
+.leitura{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:.95rem}
+.leitura b{font-family:var(--display);font-size:1.25rem}
+
+svg text{font-family:var(--texto)}
+.eixo{stroke:var(--linha)} .eixo-t{fill:var(--tinta2);font-size:12px}
+.rot{fill:var(--tinta);font-size:13px} .rot-q{fill:var(--tinta2);font-size:12px}
+
+/* pilhas da divisão */
+.pilhas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pilha h4{margin:0 0 6px;font-size:.95rem}
+.barra{display:flex;height:22px;border-radius:3px;overflow:hidden;border:1px solid var(--linha)}
+.barra i{display:block;height:100%}
+.pilha p{font-size:.88rem;color:var(--tinta2);margin:6px 0 0}
+
+/* árvore em lista */
+.arvore{list-style:none;margin:0;padding:0;font-size:.95rem}
+.arvore ul{list-style:none;margin:0;padding-left:22px;border-left:2px solid var(--linha);margin-left:8px}
+.arvore li{margin:6px 0}
+.no-q{font-weight:700}
+.ramo{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.folha{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.folha .barra{width:90px;height:12px}
+.folha .pv{font-size:.88rem}
+.no-ativo>.linha-no{background:color-mix(in srgb,var(--vermelho) 14%,transparent);border-radius:4px;padding:2px 6px;margin-left:-6px}
+.inativo>.linha-no{opacity:.45}
+.ficha{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px 14px;margin-bottom:16px}
+.ficha label{display:flex;align-items:center;gap:8px;font-size:.92rem;cursor:pointer}
+.ficha input{width:18px;height:18px;accent-color:var(--vermelho)}
+.veredito{font-size:1rem;padding:12px 16px;background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;margin-top:14px}
+
+.glossario{margin:0}
+.glossario dt{font-weight:700;margin-top:14px}
+.glossario dd{margin:2px 0 0;color:var(--tinta2)}
+pre.algoritmo{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--papel);border:0;border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:16px;overflow-x:auto;font-size:.85rem;line-height:1.55;margin:16px 0 8px}
+footer{margin:80px 0 0;padding:28px 0 40px;border-top:2px solid var(--vermelho);font-size:.85rem;color:var(--tinta2)}
+footer a{color:inherit}
+.rodape{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:22px;padding-top:14px;border-top:1px solid var(--linha)}
+.glossario dt{font-weight:600}
+footer ol{padding-left:1.2em}
+.carregar-status{font-size:.88rem;color:var(--tinta2);margin-top:8px}
+@media (max-width:560px){body{font-size:15.5px}figure{padding:14px}.pilhas{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.nota-comp{background:var(--papel);border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:18px 20px;margin:30px 0 8px}
+.etq-nc{display:block;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta2);margin-bottom:4px}
+.nota-comp h3{margin:0 0 12px;font-size:1.05rem}
+.nota-comp p{margin:12px 0 0;font-size:.95rem}
+.tab-scroll{overflow-x:auto}
+table.cmp{width:100%;min-width:520px;border-collapse:collapse;font-size:.85rem;line-height:1.45;background:var(--fundo)}
+table.cmp thead th{background:var(--tinta);color:var(--fundo);text-align:left;padding:8px 10px;vertical-align:bottom;font-weight:600}
+table.cmp thead th span{display:block;font-weight:400;font-size:.75rem;opacity:.75}
+table.cmp tbody th{text-align:left;padding:8px 10px;vertical-align:top;font-weight:700;width:24%}
+table.cmp td{padding:8px 10px;vertical-align:top;border-top:1px solid var(--linha)}
+table.cmp tbody th{border-top:1px solid var(--linha)}
+.arv-larga{overflow-x:auto;margin-top:6px}
+figure.larga-fig{width:auto;position:static;left:auto;margin-left:0;margin-right:0}
+
+.arv-svg svg{display:block}
+.pergunta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;min-height:42px}
+.pergunta .pq{font-weight:700;font-size:1.05rem;margin-right:4px}
+.bt{font:inherit;font-weight:600;font-size:.95rem;border-radius:8px;padding:6px 18px;cursor:pointer;border:2px solid var(--tinta);background:var(--fundo);color:var(--tinta)}
+.bt.sim{background:var(--tinta);color:var(--fundo)}
+.bt.rec{font-size:.85rem;border-color:var(--linha);color:var(--tinta2);padding:5px 12px}
+
+.wt{display:flex;align-items:center;gap:8px}.wt i{display:block;height:10px;background:var(--vermelho);border-radius:2px;min-width:2px}
+table.ada{width:100%;border-collapse:collapse;font-size:.85rem;background:var(--fundo)}
+table.ada th{background:var(--tinta);color:var(--fundo);text-align:left;padding:6px 8px;font-weight:600}
+table.ada td{padding:5px 8px;border-top:1px solid var(--linha)}
+table.ada tr.err td{background:color-mix(in srgb,var(--vermelho) 12%,transparent)}
+.cands{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.cand{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:.85rem;background:var(--fundo)}
+.cand.best{border:2px solid var(--vermelho)}
+.cand b{display:block}
+.contas{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.92rem;margin-top:10px}
+.bt{font:inherit;font-weight:600;font-size:.95rem;border-radius:8px;padding:6px 18px;cursor:pointer;border:2px solid var(--tinta);background:var(--fundo);color:var(--tinta)}
+.bt.sim{background:var(--tinta);color:var(--fundo)}.bt:disabled{opacity:.4;cursor:not-allowed}
+table.dic{min-width:560px}table.dic tbody th{width:18%}
+
+.etapa{font-size:.85rem;color:var(--tinta2);font-weight:600;margin-left:6px}
+.passo{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:14px 16px;margin:0 0 14px;font-size:.93rem;line-height:1.6}
+.passo h4{margin:0 0 6px;font-size:1rem}
+.passo .lin{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;background:var(--suave);border-radius:6px;padding:8px 10px;margin:8px 0;white-space:pre-wrap;line-height:1.55}
+.passo .alerta{font-size:.85rem;color:var(--tinta2);margin-top:6px}
+.stumps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:8px}
+.gform{font-size:1rem;font-weight:500;text-align:center;margin:8px 0 12px;font-variant-numeric:tabular-nums}
+.gform i,.eqs i{font-style:italic;font-weight:500}
+.eqs sub,.gform sub{font-size:.72em;vertical-align:-.3em;line-height:0;margin-left:1px}
+.um{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:18px;align-items:start;margin-top:8px}
+@media(max-width:720px){.um{grid-template-columns:1fr}}
+.um svg{width:100%;height:auto;display:block}
+.eqs{font-size:.92rem;line-height:1.5;font-variant-numeric:tabular-nums}
+.eqs .eq{margin:0}
+.eqs .eq .v{white-space:nowrap}
+.eqs .eq .sep{display:inline-block;width:18px}
+.eqs .bl{margin:0 0 12px}
+.eqs .rot{font-family:Poppins,sans-serif;font-size:.78rem;font-weight:600;color:var(--tinta2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px}
+.eq{display:block;line-height:2.4}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.2;font-size:.88em;font-weight:500;margin:0 1px}
+.fr>span:first-child{border-bottom:1.2px solid currentColor;padding:0 3px 1px}
+.fr>span:last-child{padding:1px 3px 0}
+.eq .res{font-weight:700}
+.eqs .tot{border-top:1px solid var(--linha);padding-top:10px}
+.eqs .tot .res{color:var(--vermelho)}
+.cortes{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font-size:.8rem}
+.cortes span{border:1px solid var(--linha);border-radius:6px;padding:2px 8px;background:var(--papel)}
+.cortes span.min{border:2px solid var(--vermelho);font-weight:700}
+.comp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
+.comp>div{text-align:center;font-size:.92rem}
+.comp>div.best b{color:var(--vermelho)}
+.st{border:1px solid var(--linha);border-radius:8px;padding:10px;font-size:.82rem;line-height:1.45;background:var(--papel)}
+.st.best{border:2px solid var(--vermelho)}
+.st b.q{display:block;font-size:.9rem;margin-bottom:4px}
+.st .g{font-weight:700;margin-top:4px}.st.best .g{color:var(--dengue-t)}
+table.ada td.wnew{font-weight:700}
+table.ada td,table.ada th{white-space:nowrap}
+table.ada tr.err td{background:color-mix(in srgb,var(--vermelho) 14%,transparent)}
+table.ada tr.lado-a td:first-child{box-shadow:inset 4px 0 0 var(--tinta)}
+.treinados{font-size:.88rem;margin-top:10px;color:var(--tinta2)}
+.treinados b{color:var(--tinta)}
+.pd{font-weight:700}.pd.d{color:var(--dengue-t)}.pd.o{color:var(--tinta2)}
+
+.paciente{background:var(--papel);border-radius:8px;padding:10px 14px}
+.paciente label{font-weight:600}.paciente select{font:inherit;padding:2px 6px;border-radius:6px;border:1px solid var(--linha);background:var(--fundo);color:var(--tinta)}
+.rot-p{font-weight:700;color:var(--vermelho)}
+.dica-p{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.paciente[hidden],.placar[hidden]{display:none}
+.placar{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:12px 16px;margin:0 0 14px;font-size:.95rem}
+.placar .barra{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--linha);margin:8px 0 4px;max-width:460px}
+.placar .barra i{display:block;background:var(--vermelho)}.placar .barra u{display:block;background:var(--outro)}
+.placar .dec{font-weight:700;font-size:1.05rem}.placar .dec.d{color:var(--dengue-t)}
+.floresta{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.arv{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:.78rem;line-height:1.45;background:var(--fundo)}
+.arv.nova{border:2px solid var(--tinta)}
+.arv h4{margin:0 0 4px;font-size:.85rem;display:flex;justify-content:space-between}
+.arv .voto{font-weight:700}.arv .voto.d{color:var(--dengue-t)}.arv .voto.o{color:var(--tinta2)}
+.arv .at span{display:inline-block;border:1px solid var(--linha);border-radius:5px;padding:0 5px;margin:1px 2px 1px 0}
+.arv .at span.fora{text-decoration:line-through;color:var(--tinta2);opacity:.6}
+.arv svg{width:100%;height:auto;display:block;margin-top:4px}
+table.ada.fixa{max-width:640px}
+
+.sorteios{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;font-size:.82rem}
+.sorteios span{border:1px solid var(--linha);border-radius:6px;padding:2px 8px;background:var(--papel)}
+table.ada tr.oob td{color:var(--tinta2);opacity:.55}
+table.ada tr.rep td:last-child{color:var(--vermelho)}
+.chips-at{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap}
+.chips-at span{border:2px solid var(--vermelho);border-radius:8px;padding:4px 14px;font-weight:700}
+.chips-at span.fora{border-color:var(--linha);color:var(--tinta2);text-decoration:line-through;font-weight:400}
+.um1{max-width:360px;margin:10px 0}
+.um1 svg,.comp svg{width:auto;max-width:100%;height:120px;display:block;margin:0 auto}
+.comp .eqs{text-align:left;margin-top:6px}
+.miniinfo{color:var(--tinta2);font-size:.74rem}
+.arv svg{max-width:100%!important;height:150px!important;width:auto!important;display:block;margin:6px auto 0}
+.arv-grande{margin:12px 0;overflow-x:auto}.arv-grande svg{display:block;margin:0 auto;width:100%;max-width:620px;height:auto}
+.divs{font-size:.85rem;margin:8px 0 0;padding-left:20px}.divs li{margin-bottom:4px}
+.sk{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--vermelho);border-radius:10px;padding:12px 16px;margin:18px 0;background:var(--fundo);font-size:.92rem;line-height:1.55}
+.sk svg{flex:none;width:28px;height:26px;margin-top:2px}
+.sk-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:2px}
+.sk p{margin:0}
+
+.svmfig{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+.svmfig>svg{max-width:460px;margin:0 auto}
+@media(max-width:760px){.svmfig{grid-template-columns:1fr}}
+.svmfig svg{width:100%;height:auto;display:block}
+.medidas{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.95rem}
+.medidas .nota{grid-column:1/-1}
+.medidas .m{background:var(--fundo);border-radius:8px;padding:10px 14px}
+.medidas .m b{display:block;font-family:var(--display);font-size:1.6rem;line-height:1.2}
+.medidas .ok b{color:var(--dengue-t)}
+.eqbox{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:12px 16px;margin:14px 0;font-size:1rem;line-height:1.9;font-variant-numeric:tabular-nums}
+.eqbox .res{color:var(--dengue-t);font-weight:700}
+.sk{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--vermelho);border-radius:10px;padding:12px 16px;margin:18px 0;background:var(--fundo);font-size:.92rem;line-height:1.55}
+.sk svg{flex:none;width:28px;height:26px;margin-top:2px}
+.sk-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:2px}
+.sk p{margin:0}
+.dois-hp{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:10px 0}
+.dois-hp svg{width:100%;height:auto;background:var(--fundo);border-radius:8px}
+.dois-hp p{font-size:.85rem;color:var(--tinta2);text-align:center;margin:4px 0 0}
+.fd{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin-right:8px;vertical-align:1px;font-style:normal;white-space:nowrap}
+.fd.real{background:var(--tinta);color:var(--fundo);border:1.5px solid var(--tinta)}
+.fd.sint{border:1.5px solid var(--tinta2);color:var(--tinta2)}
+.fd.teo{border:1.5px dashed var(--tinta2);color:var(--tinta2)}
+.pp{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--tinta);border-radius:10px;padding:14px 18px;margin:22px 0;background:var(--fundo)}
+.pp svg{flex:none;width:30px;height:30px;margin-top:2px}
+.pp-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta);margin-bottom:4px}
+.pp .pp-q{margin:0;font-weight:700;font-size:1.02rem;line-height:1.45}
+.pp .pp-d{margin:6px 0 0;font-size:.9rem;color:var(--tinta2);font-weight:400}
+main h2.sem-n{counter-increment:none}
+h2.sem-n::before{content:none}
+.coment h3{margin-top:28px}
+.coment .volta-pp{font-size:.88rem}
+.pp a,.coment a{color:var(--dengue-t)}
+.aprof{margin:28px 0 0;padding-top:12px;border-top:1px solid var(--linha);font-size:.9rem;color:var(--tinta2)}
+.aprof a{color:var(--dengue-t);font-weight:700}
+.duasfig svg{width:100%;height:auto;max-width:460px;margin:0 auto;display:block}
+svg .ln{stroke:var(--tinta);stroke-width:2.5}svg .lm{stroke:var(--tinta2);stroke-width:1.5;stroke-dasharray:6 5}svg .ax{stroke:var(--linha)}
+</style></head><body>
+<header class="abertura col">
+  <div class="topo"><div class="logos"><img src="../../upe.png" alt="Universidade de Pernambuco (UPE)"><span class="sep"></span><img src="../../logo.png" alt="dotLAB" class="dotl"></div><a class="volta" href="../../index.html">Todas as aulas</a></div>
+  <span class="selo">Ciência de Dados · Aula 09 · SVM</span>
+  <h1>Qual é a <em>melhor</em> fronteira?</h1>
+  <p class="lead">SVM (<em>Support Vector Machine</em>): hiperplano, margem, vetores de suporte e kernels, com exames de casos suspeitos de dengue.</p>
+  <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">Versão 1.0 · novembro de 2026</span></div>
+</header>
+<main>
+<section class="col">
+  <p>Na árvore de decisão, cada pergunta testa um atributo por vez, e a fronteira entre as classes vira uma escada. O <strong>SVM</strong> (<em>Support Vector Machine</em>) procura outra coisa: uma única fronteira, uma reta, um plano ou o equivalente em mais dimensões, que separe as classes com a <strong>maior folga possível</strong>. Quando os dados não podem ser separados por uma reta, o SVM usa um truque para separá-los num espaço com mais dimensões.</p>
+  <p>O SVM trabalha com duas classes. Nesta aula, chamamos uma delas de +1 (dengue) e a outra de −1 (não dengue). Com mais classes, a biblioteca combina vários SVMs de duas classes.</p>
+</section>
+
+<section class="col">
+  <h2>O que é um hiperplano</h2>
+  <div class="nota-comp"><span class="etq-nc">Geometria analítica, álgebra linear e SVM</span><p style="margin:0">Geometria analítica e álgebra linear podem parecer distantes do aprendizado de máquina, mas o SVM é construído quase inteiro com elas. Da <strong>geometria analítica</strong> vem a ideia: cada registro é um ponto, e separar as classes é encontrar uma reta ou um plano. A <strong>álgebra linear</strong> leva isso a qualquer número de atributos: cada registro vira um <strong>vetor</strong> e a fronteira, um <strong>hiperplano</strong>. No <strong>SVM</strong>, o vetor normal à reta vira o vetor de pesos <b>w̄</b>, e a distância de um ponto a uma reta, |ax₀ + by₀ + c| / √(a² + b²), vira a <strong>margem</strong>.</p></div>
+  <p>Num espaço de <em>n</em> dimensões, um <strong>hiperplano</strong> (<em>hyperplane</em>) é uma “fatia” de <em>n</em> − 1 dimensões: num plano (2 dimensões), é uma reta; no espaço (3 dimensões), é um plano. Ele divide o espaço em dois lados, e cada lado fica com uma classe. Não precisa passar pela origem; em álgebra linear, isso se chama subespaço <strong>afim</strong>.</p>
+  <div class="dois-hp"><div><svg viewBox="0 0 220 160"><line x1="20" y1="140" x2="200" y2="140" stroke="var(--tinta2)"/><line x1="20" y1="140" x2="20" y2="10" stroke="var(--tinta2)"/><text x="204" y="144" font-size="10" fill="var(--tinta2)">x₁</text><text x="10" y="12" font-size="10" fill="var(--tinta2)">x₂</text>
+<line x1="40" y1="20" x2="190" y2="135" stroke="var(--vermelho)" stroke-width="3"/><circle cx="50" cy="110" r="5" fill="var(--vermelho)"/><circle cx="70" cy="125" r="5" fill="var(--vermelho)"/><circle cx="45" cy="85" r="5" fill="var(--vermelho)"/><circle cx="85" cy="105" r="5" fill="var(--vermelho)"/><circle cx="150" cy="40" r="5" fill="var(--outro)"/><circle cx="170" cy="70" r="5" fill="var(--outro)"/><circle cx="130" cy="30" r="5" fill="var(--outro)"/><circle cx="185" cy="45" r="5" fill="var(--outro)"/></svg><p>Com 2 atributos, o hiperplano é uma reta</p></div><div><svg viewBox="0 0 220 160"><line x1="40" y1="130" x2="200" y2="130" stroke="var(--tinta2)"/><line x1="40" y1="130" x2="40" y2="10" stroke="var(--tinta2)"/><line x1="40" y1="130" x2="10" y2="155" stroke="var(--tinta2)"/>
+<polygon points="30,95 150,70 200,100 80,125" fill="var(--vermelho)" opacity=".35" stroke="var(--vermelho)" stroke-width="1.5"/><circle cx="70" cy="140" r="5" fill="var(--vermelho)"/><circle cx="110" cy="145" r="5" fill="var(--vermelho)"/><circle cx="150" cy="135" r="5" fill="var(--vermelho)"/><circle cx="90" cy="45" r="5" fill="var(--outro)"/><circle cx="140" cy="35" r="5" fill="var(--outro)"/><circle cx="170" cy="55" r="5" fill="var(--outro)"/><text x="204" y="134" font-size="10" fill="var(--tinta2)">x₁</text><text x="30" y="12" font-size="10" fill="var(--tinta2)">x₃</text><text x="2" y="152" font-size="10" fill="var(--tinta2)">x₂</text></svg><p>Com 3 atributos, é um plano</p></div></div>
+  <p>A equação do hiperplano é</p>
+  <div class="eqbox"><b>w̄</b><sup>T</sup> · <b>x̄</b> + b = 0, &nbsp;com <b>w̄</b> = (w<sub>1</sub>, w<sub>2</sub>, …, w<sub>m</sub>)</div>
+  <p>O vetor <b>x̄</b> reúne os <em>m</em> atributos de um registro. O <sup>T</sup> indica a <strong>transposta</strong>: <b>w̄</b><sup>T</sup> · <b>x̄</b> é o produto escalar w<sub>1</sub>x<sub>1</sub> + w<sub>2</sub>x<sub>2</sub> + … + w<sub>m</sub>x<sub>m</sub>. Com dois atributos, a equação é a reta ax + by + c = 0 da geometria analítica, com outros nomes. Os pesos <b>w̄</b> definem a inclinação do hiperplano (o vetor <b>w̄</b> é perpendicular a ele), e o termo <em>b</em> o desloca. Para classificar um registro, basta ver o sinal: se <b>w̄</b><sup>T</sup> · <b>x̄</b> + b &gt; 0, ele fica de um lado; se for &lt; 0, do outro.</p>
+
+  <p class="aprof"><a href="svm-material-de-estudo.pdf#page=2" target="_blank" rel="noopener">Para aprofundar: seção 01 do material de estudo</a> · inclui a ponte entre geometria analítica, álgebra linear e SVM com um exemplo numérico.</p>
+</section>
+
+<section class="col">
+  <h2>Os dados do exemplo</h2>
+  <p>A tabela tem 12 registros de casos suspeitos de dengue, criados para o exemplo, com dois resultados do <strong>hemograma</strong>:</p>
+  <div class="tab-scroll"><table class="cmp dic">
+    <thead><tr><th>Coluna</th><th>Valores</th><th>O que significa</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Plaquetas</th><td>mil por mm³</td><td>Abaixo de 150 mil por mm³ fala-se em <strong>plaquetopenia</strong>.</td></tr>
+      <tr><th scope="row">Leucócitos</th><td>mil por mm³</td><td>Glóbulos brancos. Abaixo de 4 mil por mm³ fala-se em <strong>leucopenia</strong>.</td></tr>
+      <tr><th scope="row">Dengue</th><td>sim (+1) / não (−1)</td><td>Classe (variável-alvo): se o caso foi confirmado como dengue.</td></tr>
+    </tbody></table></div>
+  <p class="nota">Leucopenia e plaquetopenia são as alterações mais frequentes no hemograma de pacientes com dengue (Oliveira et al., 2009, com 543 pacientes em Campo Grande, MS; Brasil, 2024).</p>
+  <div class="tab-scroll"><table class="ada fixa"><thead><tr><th>#</th><th>Plaquetas (mil/mm³)</th><th>Leucócitos (mil/mm³)</th><th>Dengue</th></tr></thead><tbody><tr><td>1</td><td>95</td><td>2,8</td><td class="pd d">sim</td></tr><tr><td>2</td><td>120</td><td>3,1</td><td class="pd d">sim</td></tr><tr><td>3</td><td>85</td><td>3,6</td><td class="pd d">sim</td></tr><tr><td>4</td><td>140</td><td>2,5</td><td class="pd d">sim</td></tr><tr><td>5</td><td>110</td><td>4,2</td><td class="pd d">sim</td></tr><tr><td>6</td><td>150</td><td>3,4</td><td class="pd d">sim</td></tr><tr><td>7</td><td>210</td><td>6,5</td><td class="pd o">não</td></tr><tr><td>8</td><td>250</td><td>7,8</td><td class="pd o">não</td></tr><tr><td>9</td><td>190</td><td>5,9</td><td class="pd o">não</td></tr><tr><td>10</td><td>230</td><td>5,2</td><td class="pd o">não</td></tr><tr><td>11</td><td>270</td><td>8,4</td><td class="pd o">não</td></tr><tr><td>12</td><td>175</td><td>7,1</td><td class="pd o">não</td></tr></tbody></table></div>
+  <p class="nota"><span class="fd sint">Dados sintéticos</span>Valores criados para o exemplo; não refletem a realidade.</p>
+  <h3>Por que padronizar os atributos</h3>
+  <p>O SVM mede <strong>distâncias</strong>. As plaquetas variam de 85 a 270, e os leucócitos, de 2,5 a 8,4: sem cuidado, uma diferença de 10 mil plaquetas pesaria mais que uma diferença de 5 mil leucócitos, só por causa da unidade. Por isso, antes de treinar, <strong>padronizamos</strong> cada atributo: subtraímos a média e dividimos pelo desvio-padrão. Assim, os dois passam a variar na mesma escala.</p>
+  <div class="eqbox">z = (x − média) / desvio-padrão<br>plaquetas: média 168,75 e desvio 59,34 &nbsp;·&nbsp; leucócitos: média 5,04 e desvio 1,97</div>
+  <p>Nos gráficos abaixo, os eixos mostram os valores originais, mas todas as distâncias são calculadas nos atributos padronizados.</p>
+
+  <p class="aprof"><a href="svm-material-de-estudo.pdf#page=4" target="_blank" rel="noopener">Para aprofundar: seção 02 do material de estudo</a> · inclui a padronização registro a registro.</p>
+</section>
+
+<section class="col">
+  <h2>A melhor reta: a margem máxima</h2>
+  <p>Muitas retas separam os dois grupos. Qual escolher? O SVM escolhe a que fica <strong>o mais longe possível</strong> dos registros mais próximos de cada classe. A distância entre a reta e esses registros, dos dois lados, é a <strong>margem</strong> (<em>margin</em>). Quanto maior a margem, mais folga a reta deixa para registros novos, um pouco diferentes dos de treinamento.</p>
+  <p>Gire e desloque a reta. Os números mostram se ela separa as classes e qual é a margem.</p>
+  <figure class="larga-fig">
+    <div class="controle"><label for="ang">Inclinação</label><input type="range" id="ang" min="0" max="179" value="20" step="1"><output id="angV">20°</output></div>
+    <div class="controle"><label for="pos">Posição</label><input type="range" id="pos" min="-1.5" max="1.5" value="0.6" step="0.01"><output id="posV"></output></div>
+    <div class="controle"><button type="button" class="bt sim" id="btSvm">Mostrar a reta do SVM</button><button type="button" class="bt" id="btRec">Voltar à minha reta</button></div>
+    <div class="svmfig"><svg id="plano" viewBox="0 0 460 460" role="img" aria-label="Registros de plaquetas e leucócitos com a reta de separação"></svg>
+      <div class="medidas"><div class="m" id="mSep">Separa as classes?<b>–</b></div><div class="m" id="mD">Registro de dengue mais próximo<b>–</b></div><div class="m" id="mN">Registro sem dengue mais próximo<b>–</b></div><div class="m" id="mM">Margem (2 × a menor distância)<b>–</b></div><p class="nota" id="mTxt"></p></div></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Os 12 registros da tabela. Vermelho: dengue (+1). Cinza: não dengue (−1). Distâncias medidas nos atributos padronizados. Na reta do SVM, as linhas tracejadas marcam a margem, e os registros circulados são os vetores de suporte.</figcaption>
+  </figure>
+  <h3>Vetores de suporte</h3>
+  <p>A reta do SVM depende só dos registros que encostam nas bordas da margem: os <strong>vetores de suporte</strong> (<em>support vectors</em>). Aqui são três: os registros 5 e 6, de dengue, e o 9, sem dengue. Se apagarmos qualquer outro registro, a reta não muda. Para escrever a margem de forma geral, os pesos são reescalados para que os vetores de suporte fiquem sobre dois hiperplanos paralelos:</p>
+  <div class="eqbox"><b>w̄</b><sup>T</sup> · <b>x̄</b> + b = +1 &nbsp;(borda da classe +1)<br><b>w̄</b><sup>T</sup> · <b>x̄</b> + b = −1 &nbsp;(borda da classe −1)<br>largura da margem = 2 / ‖<b>w̄</b>‖</div>
+  <p>Maximizar a margem 2/‖<b>w̄</b>‖ é o mesmo que minimizar ‖<b>w̄</b>‖. Por conveniência matemática, minimizamos ½‖<b>w̄</b>‖², com a condição de que todo registro fique do lado certo, fora da margem:</p>
+  <div class="eqbox">minimizar ½‖<b>w̄</b>‖² &nbsp;sujeito a &nbsp;y<sub>i</sub> (<b>w̄</b><sup>T</sup> · <b>x̄</b><sub>i</sub> + b) ≥ 1 para todo registro i</div>
+  <p>Como y<sub>i</sub> vale +1 ou −1, a condição diz ao mesmo tempo que os registros de dengue ficam acima da borda +1 e os outros abaixo da borda −1. Nos nossos dados padronizados, o SVM encontra <b>w̄</b> = (−0,720; −1,196) e b = −0,222, com margem 2/‖<b>w̄</b>‖ = <span class="res">1,433</span>.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>O <code>SVC(kernel="linear")</code> resolve esse problema. Depois do <code>fit</code>, os pesos ficam em <code>coef_</code>, o termo b em <code>intercept_</code> e os vetores de suporte em <code>support_vectors_</code> (os índices em <code>support_</code>). Com mais de duas classes, o <code>SVC</code> treina um SVM para cada par de classes (um-contra-um).</p></div></div>
+  <div class="pp" role="note" id="pp1"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">E se apagarmos o registro 6, um dos vetores de suporte? A margem fica maior, menor ou igual?</p><p class="pp-d">A reta se apoia nos registros que encostam na margem. O que acontece quando um desses apoios sai da tabela? <a href="#com1">Comentário no fim da página</a>.</p></div></div>
+  <p class="aprof"><a href="svm-material-de-estudo.pdf#page=5" target="_blank" rel="noopener">Para aprofundar: seção 03 do material de estudo</a> · inclui o problema de otimização e o código no scikit-learn.</p>
+</section>
+
+<section class="col">
+  <h2>Margem suave e o parâmetro C</h2>
+  <p>Nos dados reais, quase nunca existe uma reta que separe as classes sem nenhum erro. Acrescentamos à tabela um 13º registro, de dengue, com 205 mil plaquetas e 6,2 mil leucócitos: valores parecidos com os dos casos sem dengue. Agora nenhuma reta separa as classes, e a condição y<sub>i</sub> (<b>w̄</b><sup>T</sup> · <b>x̄</b><sub>i</sub> + b) ≥ 1 não pode valer para todos os registros.</p>
+  <p>A <strong>margem suave</strong> (<em>soft margin</em>) permite que alguns registros fiquem dentro da margem ou até do lado errado, mas cobra uma penalidade por isso. Cada registro ganha uma <strong>folga</strong> ξ<sub>i</sub> ≥ 0, que mede o quanto ele viola a margem, e o SVM passa a minimizar:</p>
+  <div class="eqbox">½‖<b>w̄</b>‖² + C · Σ ξ<sub>i</sub> &nbsp;sujeito a &nbsp;y<sub>i</sub> (<b>w̄</b><sup>T</sup> · <b>x̄</b><sub>i</sub> + b) ≥ 1 − ξ<sub>i</sub></div>
+  <p>O parâmetro <strong>C</strong> define o peso da penalidade. Com C pequeno, violar a margem custa pouco: a margem fica larga, e muitos registros ficam dentro dela. Com C grande, cada violação custa caro: a margem estreita para errar o mínimo possível. Escolha um valor de C.</p>
+  <figure class="larga-fig">
+    <div class="controle"><span style="font-weight:700" id="rotC">C</span><div class="chips" id="chipsC" role="group" aria-labelledby="rotC" style="margin:0"></div></div>
+    <div class="svmfig"><svg id="planoC" viewBox="0 0 460 460" role="img" aria-label="Margem suave com 13 registros"></svg>
+      <div class="medidas"><div class="m" id="cM">Largura da margem<b>–</b></div><div class="m" id="cV">Vetores de suporte<b>–</b></div><div class="m" id="cD">Registros dentro da margem ou do lado errado<b>–</b></div><div class="m" id="cE">Erros no treinamento<b>–</b></div><p class="nota" id="cTxt"></p></div></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Os 12 registros da tabela e o registro 13, de dengue, com valores típicos de quem não tem dengue. Atributos padronizados com as médias e os desvios da seção 02. Linhas tracejadas: bordas da margem; registros circulados: vetores de suporte.</figcaption>
+  </figure>
+  <p>Com C = 0,01, a margem é tão larga que 12 dos 13 registros ficam dentro dela, e a reta erra 6 dos 13: a penalidade é tão barata que o SVM quase desiste de separar as classes, um caso de <strong>subajuste</strong>. A partir de C = 1, a margem estreita e só o registro 13 continua do lado errado. Com C grande, a reta fica muito parecida com a da seção 03: o registro 13 não tem como ser acertado, e o SVM volta a se apoiar nos outros. Na prática, C é escolhido por <strong>validação cruzada</strong>.</p>
+  
+  <p class="aprof"><a href="svm-material-de-estudo.pdf#page=8" target="_blank" rel="noopener">Para aprofundar: seção 04 do material de estudo</a> · inclui o papel das folgas ξ e a tabela com os quatro valores de C.</p>
+</section>
+
+<section class="col">
+  <h2>Quando nenhuma reta serve</h2>
+  <p>Agora, um exemplo em que nenhuma reta funciona, nem com margem suave. São 40 pontos com dois atributos, x<sub>1</sub> e x<sub>2</sub>, nos quatro quadrantes: a classe +1 fica no 1º e no 3º quadrantes, e a classe −1, no 2º e no 4º. Qualquer reta deixa cerca de metade dos pontos do lado errado.</p>
+  <p>A saída vem do <strong>teorema de Cover</strong> (<em>Cover’s theorem</em>): um problema de classificação complexo, levado de forma não linear para um espaço com mais dimensões, tem mais chance de ser linearmente separável do que num espaço com poucas dimensões, desde que o espaço não esteja densamente povoado. A ideia é <strong>projetar</strong> os dados num espaço com mais dimensões e procurar o hiperplano lá. Para estes dados, usamos três novas coordenadas:</p>
+  <div class="eqbox">X<sub>1</sub> = x<sub>1</sub>² &nbsp;·&nbsp; X<sub>2</sub> = x<sub>2</sub>² &nbsp;·&nbsp; X<sub>3</sub> = √2 · x<sub>1</sub> · x<sub>2</sub></div>
+  <p>Clique para projetar. A figura mostra duas das três novas coordenadas, X<sub>1</sub> e X<sub>3</sub>.</p>
+  <figure class="larga-fig">
+    <div class="controle"><button type="button" class="bt sim" id="btProj">Projetar</button><button type="button" class="bt" id="btOrig">Voltar ao espaço original</button></div>
+    <div class="duasfig"><svg id="quadProj" viewBox="0 0 460 460" role="img" aria-label="Pontos dos quatro quadrantes, no espaço original ou projetado"></svg></div>
+    <p class="nota" id="projTxt"></p>
+    <figcaption><span class="fd sint">Dados sintéticos</span>40 pontos sorteados nos quatro quadrantes, sem significado clínico. Vermelho: classe +1. Cinza: classe −1.</figcaption>
+  </figure>
+  <p>No espaço projetado, o sinal de X<sub>3</sub> = √2 · x<sub>1</sub> · x<sub>2</sub> já separa as classes: o produto x<sub>1</sub> · x<sub>2</sub> é positivo no 1º e no 3º quadrantes e negativo no 2º e no 4º. O hiperplano X<sub>3</sub> = 0, uma reta na figura projetada, corresponde aos dois eixos cruzados quando voltamos ao espaço original.</p>
+  
+  <p class="aprof"><a href="svm-material-de-estudo.pdf#page=9" target="_blank" rel="noopener">Para aprofundar: seção 05 do material de estudo</a> · inclui o cálculo da projeção para alguns pontos.</p>
+</section>
+
+<section class="col">
+  <h2>O truque do kernel</h2>
+  <p>Preciso projetar os dados primeiro e depois rodar o SVM? Não. No treinamento e na classificação, o SVM só usa os registros dentro de <strong>produtos escalares</strong>, e existe um atalho para calcular o produto escalar no espaço projetado sem projetar nada. Esse atalho é uma função chamada <strong>kernel</strong>. Para a projeção da seção 05, o kernel é o <strong>polinomial</strong> de grau 2:</p>
+  <div class="eqbox">K(<b>x̄</b>, <b>z̄</b>) = (<b>x̄</b> · <b>z̄</b>)² = φ(<b>x̄</b>) · φ(<b>z̄</b>)</div>
+  <p>Confira com dois pontos, <b>x̄</b> = (1, 2) e <b>z̄</b> = (3, −1). No espaço original, <b>x̄</b> · <b>z̄</b> = 1·3 + 2·(−1) = 1, e K = 1² = <span class="res">1</span>. Projetando, φ(<b>x̄</b>) = (1, 4, 2√2) e φ(<b>z̄</b>) = (9, 1, −3√2), e φ(<b>x̄</b>) · φ(<b>z̄</b>) = 9 + 4 − 12 = <span class="res">1</span>. O mesmo resultado, sem calcular nenhuma coordenada nova. É o <strong>truque do kernel</strong> (<em>kernel trick</em>), que permite usar espaços com muitas dimensões, até infinitas, sem pagar o custo de projetar.</p>
+  <p>As bibliotecas trazem alguns kernels prontos:</p>
+  <div class="tab-scroll"><table class="cmp dic"><thead><tr><th>Kernel</th><th>Fórmula</th><th>Parâmetros</th></tr></thead><tbody>
+    <tr><th scope="row">Linear</th><td>K(<b>x̄</b>, <b>z̄</b>) = <b>x̄</b> · <b>z̄</b></td><td>Nenhum: é o SVM das seções 03 e 04, sem projeção.</td></tr>
+    <tr><th scope="row">Polinomial</th><td>K(<b>x̄</b>, <b>z̄</b>) = (γ <b>x̄</b> · <b>z̄</b> + c)<sup>d</sup></td><td>Grau d, γ e c. Com γ = 1, c = 0 e d = 2, é o kernel acima.</td></tr>
+    <tr><th scope="row">RBF (<em>Radial Basis Function</em>)</th><td>K(<b>x̄</b>, <b>z̄</b>) = exp(−γ ‖<b>x̄</b> − <b>z̄</b>‖²)</td><td>γ: o alcance da influência de cada registro.</td></tr>
+    <tr><th scope="row">Sigmoide</th><td>K(<b>x̄</b>, <b>z̄</b>) = tanh(γ <b>x̄</b> · <b>z̄</b> + c)</td><td>γ e c.</td></tr>
+  </tbody></table></div>
+  <p>No RBF, cada registro de treinamento influencia uma região em volta dele, e γ controla o tamanho dessa região. Com γ pequeno, a influência vai longe e a fronteira fica suave; com γ grande, cada registro só influencia a vizinhança imediata, e a fronteira contorna os registros um a um. Escolha um kernel e compare a acurácia no treinamento e num conjunto de teste com 1.000 pontos novos.</p>
+  <figure class="larga-fig">
+    <div class="controle"><span style="font-weight:700" id="rotK">Kernel</span><div class="chips" id="chipsK" role="group" aria-labelledby="rotK" style="margin:0"></div></div>
+    <div class="svmfig"><svg id="quadK" viewBox="0 0 460 460" role="img" aria-label="Regiões de decisão do SVM com o kernel escolhido"></svg>
+      <div class="medidas"><div class="m" id="kTr">Acurácia no treinamento<b>–</b></div><div class="m" id="kTe">Acurácia no teste<b>–</b></div><div class="m" id="kSv">Vetores de suporte<b>–</b></div><p class="nota" id="kTxt"></p></div></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Os 40 pontos da seção 05, com C = 1. Fundo vermelho claro: região classificada como +1; fundo cinza claro: −1. Pontos circulados: vetores de suporte. O teste usa 1.000 pontos sorteados da mesma forma.</figcaption>
+  </figure>
+  <div class="pp" role="note" id="pp2"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">Com γ = 10, o RBF acerta 100% do treinamento, mas só 88% do teste. Por quê?</p><p class="pp-d">Olhe o formato das regiões em volta de cada ponto e conte os vetores de suporte. <a href="#com2">Comentário no fim da página</a>.</p></div></div>
+  
+  <p class="aprof"><a href="svm-material-de-estudo.pdf#page=10" target="_blank" rel="noopener">Para aprofundar: seção 06 do material de estudo</a> · inclui a conta do kernel polinomial passo a passo.</p>
+</section>
+
+<section class="col">
+  <h2>SVM no scikit-learn</h2>
+  <p>No scikit-learn, o SVM para classificação é o <code>SVC</code>. Os hiperparâmetros principais são o <code>kernel</code>, o <code>C</code> e o <code>gamma</code>, usado pelos kernels polinomial, RBF e sigmoide.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>Os valores padrão do <code>SVC</code> são <code>kernel="rbf"</code>, <code>C=1.0</code> e <code>gamma="scale"</code>, que usa γ = 1 / (número de atributos × variância de <b>X</b>). Padronize os atributos com <code>StandardScaler</code> dentro de um <code>Pipeline</code> e escolha C e γ por validação cruzada, com <code>GridSearchCV</code>. O <code>SVC</code> não calcula probabilidades por padrão: <code>probability=True</code> ativa uma calibração extra, mais lenta. Com mais de duas classes, o <code>SVC</code> treina um SVM para cada par de classes (um-contra-um).</p></div></div>
+  
+  <p class="aprof"><a href="svm-material-de-estudo.pdf#page=12" target="_blank" rel="noopener">Para aprofundar: seção 07 do material de estudo</a> · inclui um exemplo de código curto, com padronização e busca de C e γ.</p>
+</section>
+
+<section class="col">
+  <h2>Forças e fraquezas</h2>
+  <ul>
+    <li><strong>Forças:</strong> a margem máxima tende a generalizar bem; a fronteira depende só dos vetores de suporte; com kernels, separa classes com fronteiras curvas; funciona bem com muitos atributos, mesmo quando há mais atributos que registros.</li>
+    <li><strong>Fraquezas:</strong> é sensível à escala dos atributos e exige padronização; C e γ precisam ser ajustados com cuidado; o treinamento fica lento com muitos registros (dezenas de milhares ou mais); não dá probabilidades diretamente; com kernels não lineares, o modelo é difícil de interpretar.</li>
+  </ul>
+  
+  <p class="aprof"><a href="svm-material-de-estudo.pdf#page=13" target="_blank" rel="noopener">Para aprofundar: seção 08 do material de estudo</a> · o material traz também os erros comuns da aula.</p>
+</section>
+
+<section class="col coment" id="comentarios">
+  <h2 class="sem-n">Comentários sobre as perguntas para pensar</h2>
+  <h3 id="com1">Apagar um vetor de suporte</h3>
+  <p>A margem fica <strong>maior</strong>. Sem o registro 6, o SVM encontra <b>w̄</b> = (−1,054; −0,673) e b = −0,330, com margem 1,600, e os vetores de suporte passam a ser só os registros 5 e 9. O registro 6 era um dos que “seguravam” a reta: estava encostado na borda da margem, e a reta não podia se aproximar dele. Sem ele, a reta gira e a faixa vazia entre as classes alarga.</p>
+  <p>Isso mostra uma propriedade importante do SVM: a solução depende <strong>só dos vetores de suporte</strong>. Apagar o registro 1, que está longe da margem, não muda nada; apagar o registro 6 muda a reta. Por isso o SVM é pouco afetado por registros distantes da fronteira, mas pode mudar bastante por causa de um único registro perto dela.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>Depois do <code>fit</code>, <code>support_</code> traz os índices dos vetores de suporte, <code>support_vectors_</code> os seus atributos e <code>n_support_</code> quantos há em cada classe. Em <code>dual_coef_</code> ficam os coeficientes α<sub>i</sub> · y<sub>i</sub> de cada vetor de suporte: no kernel linear, o vetor de pesos é a soma <b>w̄</b> = Σ α<sub>i</sub> y<sub>i</sub> <b>x̄</b><sub>i</sub>, e os registros que não são vetores de suporte têm α<sub>i</sub> = 0.</p></div></div>
+  <p class="volta-pp"><a href="#pp1">Voltar à pergunta</a></p>
+  <h3 id="com2">RBF com γ grande</h3>
+  <p>Com γ = 10, a influência de cada ponto de treinamento quase não sai da vizinhança dele. A fronteira deixa de ser uma curva suave e vira uma coleção de “ilhas” em volta dos pontos, e todos os 40 pontos viram vetores de suporte. O modelo decora o treinamento, acerta 100% dele e erra os pontos novos que caem fora dessas ilhas. É o <strong>sobreajuste</strong>, o mesmo fenômeno da árvore de decisão funda da Aula 06.</p>
+  <p>Com γ = 0,1, a influência vai longe, a fronteira fica suave e o teste chega a 99,9%, com 24 vetores de suporte. O polinomial de grau 2, que corresponde exatamente à projeção da seção 05, precisa de apenas 4 vetores de suporte. γ e C atuam juntos: com os dois grandes, o modelo fica mais complexo; com os dois pequenos, mais simples.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>Não escolha γ pela acurácia no treinamento. Use <code>GridSearchCV</code> com uma grade de valores de C e γ em escala logarítmica (por exemplo, 0,01, 0,1, 1, 10 e 100) e compare a acurácia na validação cruzada.</p></div></div>
+  <p class="volta-pp"><a href="#pp2">Voltar à pergunta</a></p>
+</section>
+
+</main>
+<footer class="col">
+  <p><strong>Dados.</strong> <span class="fd sint">Dados sintéticos</span>Todas as tabelas e todos os pontos desta página foram criados para o exemplo e não refletem a realidade.</p>
+  <p><strong>Referências.</strong></p>
+  <ol>
+    <li>Bonaccorso, G. <em>Machine Learning Algorithms</em>. Packt Publishing, 2017.</li>
+    <li>Cortes, C.; Vapnik, V. Support-vector networks. <em>Machine Learning</em> 20, 273–297 (1995).</li>
+    <li>Cover, T. M. Geometrical and statistical properties of systems of linear inequalities with applications in pattern recognition. <em>IEEE Transactions on Electronic Computers</em> EC-14(3), 326–334 (1965).</li>
+    <li>Oliveira, É. C. L. et al. Alterações hematológicas em pacientes com dengue. <em>Revista da Sociedade Brasileira de Medicina Tropical</em> 42(6), 682–685 (2009).</li>
+    <li>Brasil. Ministério da Saúde. <em>Dengue: diagnóstico e manejo clínico: adulto e criança</em>. 6. ed. Brasília, 2024.</li>
+    <li>scikit-learn. Support Vector Machines. <a href="https://scikit-learn.org/stable/modules/svm.html">scikit-learn.org/stable/modules/svm.html</a>.</li>
+  </ol>
+  
+<div class="rodape"><span>dotLAB · Grupo de Pesquisa em Transformação Digital · UPE</span><span>dotlabbrazil.com.br</span></div></footer>
+<script>
+(function(){
+const R=[[95,2.8,1],[120,3.1,1],[85,3.6,1],[140,2.5,1],[110,4.2,1],[150,3.4,1],[210,6.5,-1],[250,7.8,-1],[190,5.9,-1],[230,5.2,-1],[270,8.4,-1],[175,7.1,-1]];
+const MP=168.75,SP=59.34099904,ML=5.04166667,SL=1.97376896;
+const Z=R.map(([p,l,y])=>({z1:(p-MP)/SP,z2:(l-ML)/SL,y,p,l}));
+const W=[-0.72023754,-1.19571656],B=-0.222384091530881,NW=Math.hypot(W[0],W[1]),SV=[4,5,8];
+const svmAng=Math.atan2(-W[1],-W[0])*180/Math.PI, svmPos=-B/NW; // n=-w/|w|, c=-b/|w|
+const fmt=(x,d=2)=>x.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const S=460,PAD=46,ZMIN=-1.83,ZMAX=2.22;
+const X=z=>PAD+(z-ZMIN)/(ZMAX-ZMIN)*(S-PAD-10),Y=z=>S-PAD-(z-ZMIN)/(ZMAX-ZMIN)*(S-PAD-10);
+let modo='user';const ang=document.getElementById('ang'),pos=document.getElementById('pos');
+function linha(n,c,off,cls){// pontos de n·z + c = off dentro do quadro
+ const pts=[];const L=ZMIN-1,H=ZMAX+1;
+ if(Math.abs(n[1])>1e-6){for(const z1 of [L,H])pts.push([z1,(off-c-n[0]*z1)/n[1]]);}else{for(const z2 of [L,H])pts.push([(off-c-n[1]*z2)/n[0],z2]);}
+ return `<line x1="${X(pts[0][0])}" y1="${Y(pts[0][1])}" x2="${X(pts[1][0])}" y2="${Y(pts[1][1])}" class="${cls}"/>`;}
+function desenhar(){let n,c;
+ if(modo==='svm'){n=[-W[0]/NW,-W[1]/NW];c=-B/NW;}else{const a=ang.value*Math.PI/180;n=[Math.cos(a),Math.sin(a)];c=+pos.value;}
+ document.getElementById('angV').textContent=ang.value+'°';document.getElementById('posV').textContent=fmt(+pos.value);
+ const d=Z.map(r=>n[0]*r.z1+n[1]*r.z2+c);
+ const ladoD=d.filter((v,i)=>Z[i].y>0),ladoN=d.filter((v,i)=>Z[i].y<0);
+ const sep=(Math.min(...ladoD)>0&&Math.max(...ladoN)<0)||(Math.max(...ladoD)<0&&Math.min(...ladoN)>0);
+ let dD=Math.min(...ladoD.map(Math.abs)),dN=Math.min(...ladoN.map(Math.abs));if(modo==='svm'){dD=dN=1/NW;}const mg=2*Math.min(dD,dN);
+ let g='<style>.ln{stroke:var(--tinta);stroke-width:2.5}.lm{stroke:var(--tinta2);stroke-width:1.5;stroke-dasharray:6 5}.ax{stroke:var(--linha)}<\/style>';
+ g+=`<clipPath id="cp"><rect x="${PAD}" y="10" width="${S-PAD-10}" height="${S-PAD-10}"/></clipPath>`;
+ for(const p of [100,150,200,250]){const x=X((p-MP)/SP);g+=`<line x1="${x}" x2="${x}" y1="10" y2="${S-PAD}" class="ax"/><text x="${x}" y="${S-PAD+18}" font-size="12" text-anchor="middle" fill="var(--tinta2)">${p}</text>`;}
+ for(const l of [3,4,5,6,7,8]){const y=Y((l-ML)/SL);g+=`<line x1="${PAD}" x2="${S-10}" y1="${y}" y2="${y}" class="ax"/><text x="${PAD-6}" y="${y+4}" font-size="12" text-anchor="end" fill="var(--tinta2)">${l}</text>`;}
+ g+=`<text x="${(PAD+S)/2}" y="${S-8}" font-size="12" text-anchor="middle" fill="var(--tinta2)">plaquetas (mil/mm³)</text><text x="12" y="${S/2}" font-size="12" text-anchor="middle" fill="var(--tinta2)" transform="rotate(-90 12 ${S/2})">leucócitos (mil/mm³)</text>`;
+ g+='<g clip-path="url(#cp)">';
+ if(modo==='svm'){const m=1/NW;g+=linha(n,c,m,'lm')+linha(n,c,-m,'lm');}
+ else if(sep){const m=Math.min(dD,dN);g+=linha(n,c,m,'lm')+linha(n,c,-m,'lm');}
+ g+=linha(n,c,0,'ln')+'</g>';
+ Z.forEach((r,i)=>{const near=modo==='svm'?SV.includes(i):(sep&&Math.abs(Math.abs(d[i])-Math.min(dD,dN))<1e-9);
+  g+=`${near?`<circle cx="${X(r.z1)}" cy="${Y(r.z2)}" r="13" fill="none" stroke="var(--tinta)" stroke-width="2"/>`:''}<circle cx="${X(r.z1)}" cy="${Y(r.z2)}" r="8" fill="${r.y>0?'var(--vermelho)':'var(--outro)'}"/><text x="${X(r.z1)+12}" y="${Y(r.z2)-10}" font-size="11" fill="var(--tinta2)">${i+1}</text>`;});
+ document.getElementById('plano').innerHTML=g;
+ document.getElementById('mSep').innerHTML=`Separa as classes?<b>${sep?'sim':'não'}</b>`;document.getElementById('mSep').className='m'+(sep?' ok':'');
+ document.getElementById('mD').innerHTML=`Registro de dengue mais próximo<b>${fmt(dD,3)}</b>`;
+ document.getElementById('mN').innerHTML=`Registro sem dengue mais próximo<b>${fmt(dN,3)}</b>`;
+ document.getElementById('mM').innerHTML=`Margem (2 × a menor distância)<b>${sep?fmt(mg,3):'–'}</b>`;document.getElementById('mM').className='m'+(modo==='svm'?' ok':'');
+ document.getElementById('mTxt').textContent=modo==='svm'?'Esta é a maior margem possível: 1,433. As duas distâncias são iguais, e a reta passa exatamente no meio.':sep?'Tente aumentar a margem: a melhor reta deixa as duas distâncias iguais e o mais altas possível.':'A reta deixa registros do lado errado. Gire ou desloque até separar as classes.';}
+ang.oninput=pos.oninput=()=>{modo='user';desenhar();};
+document.getElementById('btSvm').onclick=()=>{modo='svm';desenhar();};
+document.getElementById('btRec').onclick=()=>{modo='user';desenhar();};
+desenhar();
+})();
+</script>
+<script>
+(function(){
+const MP=168.75,SP=59.34099904,ML=5.04166667,SL=1.97376896;
+const R=[[95,2.8,1],[120,3.1,1],[85,3.6,1],[140,2.5,1],[110,4.2,1],[150,3.4,1],[210,6.5,-1],[250,7.8,-1],[190,5.9,-1],[230,5.2,-1],[270,8.4,-1],[175,7.1,-1],[205,6.2,1]];
+const Z=R.map(([p,l,y])=>({z1:(p-MP)/SP,z2:(l-ML)/SL,y}));
+const CS=[["0,01",[-0.0868,-0.0907],0.8002],["0,1",[-0.4145,-0.4586],0.2086],["1",[-0.8983,-0.8651],-0.0033],["100",[-0.6978,-1.1624],-0.1868]];
+const fmt=(x,d=2)=>x.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const S=460,PAD=46,ZMIN=-1.83,ZMAX=2.22;
+const X=z=>PAD+(z-ZMIN)/(ZMAX-ZMIN)*(S-PAD-10),Y=z=>S-PAD-(z-ZMIN)/(ZMAX-ZMIN)*(S-PAD-10);
+function linha(w,b,off,cls){const L=ZMIN-3,H=ZMAX+3,p=[];if(Math.abs(w[1])>1e-6){for(const z1 of [L,H])p.push([z1,(off-b-w[0]*z1)/w[1]]);}else{for(const z2 of [L,H])p.push([(off-b-w[1]*z2)/w[0],z2]);}
+ return `<line x1="${X(p[0][0])}" y1="${Y(p[0][1])}" x2="${X(p[1][0])}" y2="${Y(p[1][1])}" class="${cls}"/>`;}
+let ci=2;
+function desC(){const [nome,w,b]=CS[ci];const f=Z.map(r=>w[0]*r.z1+w[1]*r.z2+b);
+ const sv=Z.map((r,i)=>r.y*f[i]<=1+1e-3);const dentro=Z.filter((r,i)=>r.y*f[i]<1-1e-3).length;const err=Z.filter((r,i)=>Math.sign(f[i])!==r.y).length;
+ let g=`<defs><clipPath id="clC"><rect x="${PAD}" y="10" width="${S-PAD-10}" height="${S-PAD-10}"/></clipPath></defs>`;
+ for(const p of [100,150,200,250]){const x=X((p-MP)/SP);g+=`<line x1="${x}" x2="${x}" y1="10" y2="${S-PAD}" class="ax"/><text x="${x}" y="${S-PAD+18}" font-size="11" text-anchor="middle" fill="var(--tinta2)">${p}</text>`;}
+ for(const l of [3,4,5,6,7,8]){const y=Y((l-ML)/SL);g+=`<line x1="${PAD}" x2="${S-10}" y1="${y}" y2="${y}" class="ax"/><text x="${PAD-6}" y="${y+4}" font-size="11" text-anchor="end" fill="var(--tinta2)">${l}</text>`;}
+ g+=`<text x="${(S+PAD)/2}" y="${S-6}" font-size="12" text-anchor="middle" fill="var(--tinta2)">plaquetas (mil/mm³)</text><text x="14" y="${(S-PAD)/2}" font-size="12" text-anchor="middle" fill="var(--tinta2)" transform="rotate(-90 14 ${(S-PAD)/2})">leucócitos (mil/mm³)</text>`;
+ g+=`<g clip-path="url(#clC)">${linha(w,b,1,'lm')}${linha(w,b,-1,'lm')}${linha(w,b,0,'ln')}</g>`;
+ Z.forEach((r,i)=>{g+=`${sv[i]?`<circle cx="${X(r.z1)}" cy="${Y(r.z2)}" r="13" fill="none" stroke="var(--tinta)" stroke-width="2"/>`:''}<circle cx="${X(r.z1)}" cy="${Y(r.z2)}" r="8" fill="${r.y>0?'var(--vermelho)':'var(--outro)'}"/><text x="${X(r.z1)+12}" y="${Y(r.z2)-10}" font-size="${i===12?13:11}" font-weight="${i===12?800:400}" fill="${i===12?'var(--tinta)':'var(--tinta2)'}">${i+1}</text>`;});
+ document.getElementById('planoC').innerHTML=g;
+ const nw=Math.hypot(w[0],w[1]);
+ document.getElementById('cM').innerHTML=`Largura da margem<b>${fmt(2/nw,2)}</b>`;
+ document.getElementById('cV').innerHTML=`Vetores de suporte<b>${sv.filter(Boolean).length}</b>`;
+ document.getElementById('cD').innerHTML=`Registros dentro da margem ou do lado errado<b>${dentro}</b>`;
+ document.getElementById('cE').innerHTML=`Erros no treinamento<b>${err} de 13</b>`;
+ document.getElementById('cTxt').textContent=['Penalidade barata: a margem é larguíssima, e quase todos os registros ficam dentro dela.','A margem ainda é larga, mas a reta já separa quase todos os registros.','A margem estreita: só o registro 13 continua do lado errado.','Penalidade cara: a reta fica quase igual à da seção 03. O registro 13 continua do lado errado, porque não há como acertá-lo com uma reta.'][ci];
+ document.getElementById('chipsC').innerHTML=CS.map((c,i)=>`<button type="button" class="chip" data-i="${i}" aria-pressed="${i===ci}">C = ${c[0]}</button>`).join('');}
+document.getElementById('chipsC').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b){ci=+b.dataset.i;desC();}});
+desC();
+
+const Q={"X":[[0.751,2.383],[1.654,-1.649],[-1.199,2.241],[-2.968,1.927],[-1.182,-1.329],[2.973,1.756],[0.733,2.934],[-1.708,-2.039],[0.675,-2.736],[-2.929,-1.846],[1.152,-1.796],[-0.783,-2.978],[1.98,-2.073],[-1.394,2.282],[0.838,1.451],[-0.832,0.589],[-2.644,-0.674],[-1.062,-2.099],[1.898,-0.723],[2.872,0.54],[0.63,0.828],[1.059,-2.095],[-0.358,-1.563],[-0.585,-2.42],[2.807,-1.71],[1.031,-1.197],[2.244,0.973],[-2.21,2.07],[2.67,2.424],[0.418,-2.127],[-1.845,2.567],[2.304,0.849],[0.418,-0.742],[-0.534,-1.563],[-2.772,2.257],[-1.067,1.508],[-2.849,-0.767],[-2.818,-2.263],[2.803,0.947],[2.237,-0.935]],"y":[1,-1,-1,-1,1,1,1,1,-1,1,-1,1,-1,-1,1,-1,1,1,-1,1,1,-1,1,1,-1,-1,1,-1,1,-1,-1,1,-1,1,-1,-1,1,1,1,-1],"cfg":{"linear":{"grid":"1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111","tr":0.525,"te":0.499,"sv":[1,2,3,8,10,12,13,15,18,21,24,25,27,29,30,32,34,35,39,0,4,5,6,7,9,11,14,16,17,19,20,22,23,26,28,31,33,36,37,38]},"poli":{"grid":"0000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111000000000000000000000000011111111111111111111111100000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111000000000000000000000000011111111111111111111111100000000000000000000000000111111111111111111111110000000000000000000000000011111111111111111111111000000000000000000000000001111111111111111111111100000000000000000000000000011111111111111111111110000000000000000000000000000111111111111111111111111100000000000000000000000001111111111111111111111111111110000000000000000000001111111111111111111111111111111110000000000000000000111111111111111111111111111111111000000000000000000000111111111111111111111111111111000000000000000000000000011111111111111111111111110000000000000000000000000000111111111111111111111100000000000000000000000000011111111111111111111111000000000000000000000000001111111111111111111111100000000000000000000000000111111111111111111111110000000000000000000000000011111111111111111111111100000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111000000000000000000000000011111111111111111111111100000000000000000000000001111111111111111111111111000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000","tr":1.0,"te":0.998,"sv":[15,32,20,22]},"rbf01":{"grid":"0000000000000000000000111111111111111111111111111000000000000000000000011111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111111111000000000000000000001111111111111111111111111111111111111000000000000111111111111111111111111111111111111111111111110000011111111111111111111111111111111111111111111110000000000000011111111111111111111111111111111111000000000000000000000111111111111111111111111111100000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111000000000000000000000000011111111111111111111111100000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111000000000000000000000000011111111111111111111111100000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111000000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000","tr":1.0,"te":0.999,"sv":[2,3,8,13,15,18,21,25,29,32,35,39,0,4,6,11,14,16,19,20,22,23,31,33]},"rbf1":{"grid":"0000000000000000000011111111111111111111111111111000000000000000000001111111111111111111111111111100000000000000000000011111111111111111111111111110000000000000000000001111111111111111111111111111000000000000000000000011111111111111111111111111100000000000000000000001111111111111111111111111110000000000000000000000111111111111111111111111111000000000000000000000011111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000000011111111111111111111111111000000000000000000000001111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111110000000000000000000000111111111111111111111111111111110000000000000000011111111111111111111111111111111110000000000000000111111111111111111111111111111111100000000000000001111111111111111111111111111111111000000000000000011111111111111111111111111111111110000000000000000000000000000111111111111111111111100000000000000000000000000000111111111111111111111000000000000000000000000000000111111111111111111111000000000000000000000000000000111111111111111111111100000000000000000000000000000011111111111111111111100000000000000000000000000001111111111111111111111000000000000000000000000000111111111111111111111110000000000000000000000000011111111111111111111111100000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111000000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111000000000000000000000000011111111111111111111111100000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111000000000000000000000000011111111111111111111111100000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111000000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111111000000000000000000000000","tr":1.0,"te":0.982,"sv":[2,3,8,12,15,18,24,29,30,32,35,0,4,5,6,7,9,11,14,16,19,20,22,23,26,28,33,36,37]},"rbf10":{"grid":"1111111111111111111111111111111111111111111111111111111110000011111111111111111111111111111111111111111110000000111111111111111111111111111111111111110010000000000011111111111111111111111111111111100000000000000000111111111111111111111111111111100000000000000000001111111111111111111111111111110000000000000000000111111111111111111111111111111000000000000000000001111111111111111111111111111100000000000000000000111111111111111111111111111110000000000000000000011111111111111111111111111111000000000000000000001111111111111111111111111111100000000000000000000011111111111111111111111111110000000000010000000001111111111111111111111111111000001111111000000000111111111111111111111111111111111111111100000000011111111111111111111111111111111111111111000000011111111111111111111111111111111111111111110000000111111111111111111111111111111111111111111000000001111111111111111111111111111111111111111100000000111111111111111111111111111111111111111110000000001111111111111111111111111111111111111111000000000111111111111111111111111111111111111111100000000111111111111111111111111111111111111111111000000011111111111111111111111111111111111111111110000011111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111110000011111100000011111111111111111111111111111110000000111100000000111111111111111111111111111111000000001110000000001111111111111111111111111111000000000000000000000011111111111111111111111111100000000000000000000001111111111111111111111111111000000000000000000000011111111111111111111111111100000000000000000000001111111111111111111111111111000000000000000000000001111111111111111111111111111000000000000000000000011111111111111111111111111110000000000000000000001111111111111111111111111100000000000000000000000111111111111111111111111100000000000000000000000011111111111111111111111110000000000000000000000001111111111111111111111110000000000000000000000000111111111111111111111111000000000000000000000000011111111111111111111111100000000000000000000000111111111111111111111111110000000000000000000111111111111111111111111111111100000000001100000111111111111111111111111111111110000000001111111111111111111111111111111111111111000000000111111111111111111111111111111111111111100000000011111111111111111111111111111111111111111000000011111111111111111111111111111111111111111110000011111111111111111","tr":1.0,"te":0.883,"sv":[1,2,3,8,10,12,13,15,18,21,24,25,27,29,30,32,34,35,39,0,4,5,6,7,9,11,14,16,17,19,20,22,23,26,28,31,33,36,37,38]}}};
+const QS=460,QP=40;
+function eixosQ(lx,ly,xmin,xmax,ymin,ymax){const fx=v=>QP+(v-xmin)/(xmax-xmin)*(QS-QP-10),fy=v=>QS-QP-(v-ymin)/(ymax-ymin)*(QS-QP-10);
+ let g=`<rect x="${QP}" y="10" width="${QS-QP-10}" height="${QS-QP-10}" fill="none" stroke="var(--linha)"/>`;
+ if(xmin<0&&xmax>0)g+=`<line x1="${fx(0)}" x2="${fx(0)}" y1="10" y2="${QS-QP}" class="ax"/>`;
+ if(ymin<0&&ymax>0)g+=`<line x1="${QP}" x2="${QS-10}" y1="${fy(0)}" y2="${fy(0)}" class="ax"/>`;
+ g+=`<text x="${(QS+QP)/2}" y="${QS-12}" font-size="13" text-anchor="middle" fill="var(--tinta2)">${lx}</text><text x="16" y="${(QS-QP)/2}" font-size="13" text-anchor="middle" fill="var(--tinta2)" transform="rotate(-90 16 ${(QS-QP)/2})">${ly}</text>`;return [g,fx,fy];}
+let proj=false;
+function desP(){let g,fx,fy;
+ if(!proj){[g,fx,fy]=eixosQ('x₁','x₂',-3.2,3.2,-3.2,3.2);Q.X.forEach((p,i)=>{g+=`<circle cx="${fx(p[0])}" cy="${fy(p[1])}" r="7" fill="${Q.y[i]>0?'var(--vermelho)':'var(--outro)'}"/>`;});
+  document.getElementById('projTxt').textContent='Espaço original: nenhuma reta separa as duas classes.';}
+ else{[g,fx,fy]=eixosQ('X₁ = x₁²','X₃ = √2 · x₁ · x₂',0,10,-13,13);g+=`<line x1="${QP}" x2="${QS-10}" y1="${fy(0)}" y2="${fy(0)}" class="ln"/>`;
+  Q.X.forEach((p,i)=>{g+=`<circle cx="${fx(p[0]*p[0])}" cy="${fy(Math.SQRT2*p[0]*p[1])}" r="7" fill="${Q.y[i]>0?'var(--vermelho)':'var(--outro)'}"/>`;});
+  document.getElementById('projTxt').textContent='Espaço projetado: a reta X₃ = 0 separa as classes. A classe +1 fica acima, e a −1, abaixo.';}
+ document.getElementById('quadProj').innerHTML=g;}
+document.getElementById('btProj').onclick=()=>{proj=true;desP();};document.getElementById('btOrig').onclick=()=>{proj=false;desP();};desP();
+
+const KS=[['linear','Linear'],['poli','Polinomial, grau 2'],['rbf01','RBF, γ = 0,1'],['rbf1','RBF, γ = 1'],['rbf10','RBF, γ = 10']];
+const KT={linear:'Uma reta não resolve: a acurácia fica perto de 50%, como um chute.',poli:'O kernel da seção 05: a fronteira acompanha os eixos cruzados, com apenas 4 vetores de suporte.',rbf01:'Fronteira suave: acerta o treinamento e generaliza bem.',rbf1:'A fronteira começa a se curvar em volta dos pontos.',rbf10:'Cada ponto vira uma ilha: acerta todo o treinamento e erra mais no teste.'};
+let ki='poli';const N=49;
+function desK(){const c=Q.cfg[ki];let [g,fx,fy]=eixosQ('x₁','x₂',-3.2,3.2,-3.2,3.2);const cw=(QS-QP-10)/N;let bg='';
+ for(let r=0;r<N;r++)for(let k=0;k<N;k++){bg+=`<rect x="${QP+k*cw}" y="${10+r*cw}" width="${cw+.5}" height="${cw+.5}" fill="${c.grid[r*N+k]==='1'?'var(--vermelho)':'var(--outro)'}" opacity=".18"/>`;}
+ g=bg+g;Q.X.forEach((p,i)=>{const sv=c.sv.includes(i);g+=`${sv?`<circle cx="${fx(p[0])}" cy="${fy(p[1])}" r="11" fill="none" stroke="var(--tinta)" stroke-width="2"/>`:''}<circle cx="${fx(p[0])}" cy="${fy(p[1])}" r="7" fill="${Q.y[i]>0?'var(--vermelho)':'var(--outro)'}"/>`;});
+ document.getElementById('quadK').innerHTML=g;
+ document.getElementById('kTr').innerHTML=`Acurácia no treinamento<b>${fmt(c.tr*100,1)}%</b>`;document.getElementById('kTe').innerHTML=`Acurácia no teste<b>${fmt(c.te*100,1)}%</b>`;
+ document.getElementById('kSv').innerHTML=`Vetores de suporte<b>${c.sv.length} de 40</b>`;document.getElementById('kTxt').textContent=KT[ki];
+ document.getElementById('chipsK').innerHTML=KS.map(([k,n])=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${k===ki}">${n}</button>`).join('');}
+document.getElementById('chipsK').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b){ki=b.dataset.k;desK();}});
+desK();
+})();
+</script></body></html>
