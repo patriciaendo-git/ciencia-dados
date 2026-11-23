@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aula 10 · Métricas de avaliação · Ciência de Dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fundo:#FFFFFF; --papel:#F6F2F2; --tinta:#282425; --tinta2:#6A6365; --linha:#E6DEDE; --suave:#F6F2F2;
+  --dengue:#D11615; --dengue-t:#D11615; --outro:#9C9496; --destaque:#282425; --destaque-tinta:#282425; --alerta:#6A6365;
+  --treino:#9C9496; --teste:#D11615; --vermelho:#D11615;
+  --display:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --texto:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+    --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+    --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+  --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+  --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--fundo);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.7;counter-reset:sec}
+:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
+button,input{font:inherit;color:inherit}
+
+.col{max-width:680px;margin:0 auto;padding:0 20px}
+.larga{max-width:880px;margin:0 auto;padding:0 20px}
+header.abertura{padding:40px 0 28px;border-bottom:2px solid var(--vermelho);margin-bottom:8px}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px}
+.topo img{height:64px;width:auto;display:block;background:#fff;border-radius:6px}
+.topo .logos{display:flex;align-items:center;gap:16px}.topo .logos .sep{width:1px;height:46px;background:var(--linha)}.topo img.dotl{height:56px;padding:3px}
+.topo .volta{font-size:.82rem;font-weight:600;color:var(--tinta2);text-decoration:none}
+.topo .volta:hover{color:var(--dengue-t)}
+.selo{display:block;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:14px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,3.2rem);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;max-width:18ch;text-wrap:balance}
+h1 em{font-style:normal;color:var(--dengue-t)}
+.lead{font-size:1.1rem;color:var(--tinta2);margin:0 0 18px}
+.creditos{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:.85rem;color:var(--tinta2)}
+.creditos b{color:var(--tinta);font-weight:600}
+.etq{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:999px;border:1px solid var(--vermelho);color:var(--dengue-t)}
+main h2{counter-increment:sec}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,3.4vw,1.7rem);line-height:1.2;margin:64px 0 16px;display:flex;align-items:baseline;gap:14px;text-wrap:balance}
+h2::before{content:counter(sec,decimal-leading-zero);font-weight:800;font-size:1.5em;color:var(--dengue-t);font-variant-numeric:tabular-nums;flex:none}
+h3{font-size:1rem;margin:24px 0 8px}
+p{margin:0 0 16px}
+.nota{font-size:.9rem;color:var(--tinta2)}
+.d{color:var(--dengue-t);font-weight:700}
+.o{color:var(--outro);font-weight:700}
+figure{margin:26px 0 30px;padding:22px;background:var(--papel);border:0;border-radius:10px}
+figcaption{font-size:.88rem;color:var(--tinta2);margin-top:12px}
+.destaque{background:var(--papel);border-left:5px solid var(--vermelho);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0}
+.numero{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,9vw,4.2rem);line-height:1;color:var(--tinta)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;background:var(--suave);padding:1px 5px;border-radius:4px}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:1.05rem;text-align:center;margin:12px 0;overflow-x:auto;white-space:nowrap}
+
+/* grade de fichas */
+.grade{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;max-width:520px}
+.grade i{display:block;aspect-ratio:3/4;border-radius:2px}
+.grade i.D{background:var(--dengue)} .grade i.O{background:var(--outro)}
+.legenda{display:flex;flex-wrap:wrap;gap:16px;font-size:.9rem;margin-top:12px}
+.legenda span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}
+.sw.D{background:var(--dengue)} .sw.O{background:var(--outro)}
+
+/* controles */
+.controle{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+.controle label{font-weight:700}
+input[type=range]{flex:1;min-width:180px;accent-color:var(--vermelho)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.chip{border:1px solid var(--linha);background:var(--fundo);border-radius:999px;padding:5px 12px;font-size:.84rem;font-weight:500;cursor:pointer}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.chip[aria-pressed="true"]{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+.botao{border:1px solid var(--vermelho);background:var(--vermelho);color:#fff;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.88rem}
+.botao.primario{background:var(--tinta);color:var(--papel)}
+.leitura{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:.95rem}
+.leitura b{font-family:var(--display);font-size:1.25rem}
+
+svg text{font-family:var(--texto)}
+.eixo{stroke:var(--linha)} .eixo-t{fill:var(--tinta2);font-size:12px}
+.rot{fill:var(--tinta);font-size:13px} .rot-q{fill:var(--tinta2);font-size:12px}
+
+/* pilhas da divisão */
+.pilhas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pilha h4{margin:0 0 6px;font-size:.95rem}
+.barra{display:flex;height:22px;border-radius:3px;overflow:hidden;border:1px solid var(--linha)}
+.barra i{display:block;height:100%}
+.pilha p{font-size:.88rem;color:var(--tinta2);margin:6px 0 0}
+
+/* árvore em lista */
+.arvore{list-style:none;margin:0;padding:0;font-size:.95rem}
+.arvore ul{list-style:none;margin:0;padding-left:22px;border-left:2px solid var(--linha);margin-left:8px}
+.arvore li{margin:6px 0}
+.no-q{font-weight:700}
+.ramo{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.folha{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.folha .barra{width:90px;height:12px}
+.folha .pv{font-size:.88rem}
+.no-ativo>.linha-no{background:color-mix(in srgb,var(--vermelho) 14%,transparent);border-radius:4px;padding:2px 6px;margin-left:-6px}
+.inativo>.linha-no{opacity:.45}
+.ficha{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px 14px;margin-bottom:16px}
+.ficha label{display:flex;align-items:center;gap:8px;font-size:.92rem;cursor:pointer}
+.ficha input{width:18px;height:18px;accent-color:var(--vermelho)}
+.veredito{font-size:1rem;padding:12px 16px;background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;margin-top:14px}
+
+.glossario{margin:0}
+.glossario dt{font-weight:700;margin-top:14px}
+.glossario dd{margin:2px 0 0;color:var(--tinta2)}
+pre.algoritmo{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--papel);border:0;border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:16px;overflow-x:auto;font-size:.85rem;line-height:1.55;margin:16px 0 8px}
+footer{margin:80px 0 0;padding:28px 0 40px;border-top:2px solid var(--vermelho);font-size:.85rem;color:var(--tinta2)}
+footer a{color:inherit}
+.rodape{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:22px;padding-top:14px;border-top:1px solid var(--linha)}
+.glossario dt{font-weight:600}
+footer ol{padding-left:1.2em}
+.carregar-status{font-size:.88rem;color:var(--tinta2);margin-top:8px}
+@media (max-width:560px){body{font-size:15.5px}figure{padding:14px}.pilhas{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.nota-comp{background:var(--papel);border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:18px 20px;margin:30px 0 8px}
+.etq-nc{display:block;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta2);margin-bottom:4px}
+.nota-comp h3{margin:0 0 12px;font-size:1.05rem}
+.nota-comp p{margin:12px 0 0;font-size:.95rem}
+.tab-scroll{overflow-x:auto}
+table.cmp{width:100%;min-width:520px;border-collapse:collapse;font-size:.85rem;line-height:1.45;background:var(--fundo)}
+table.cmp thead th{background:var(--tinta);color:var(--fundo);text-align:left;padding:8px 10px;vertical-align:bottom;font-weight:600}
+table.cmp thead th span{display:block;font-weight:400;font-size:.75rem;opacity:.75}
+table.cmp tbody th{text-align:left;padding:8px 10px;vertical-align:top;font-weight:700;width:24%}
+table.cmp td{padding:8px 10px;vertical-align:top;border-top:1px solid var(--linha)}
+table.cmp tbody th{border-top:1px solid var(--linha)}
+.arv-larga{overflow-x:auto;margin-top:6px}
+figure.larga-fig{width:auto;position:static;left:auto;margin-left:0;margin-right:0}
+
+.arv-svg svg{display:block}
+.pergunta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;min-height:42px}
+.pergunta .pq{font-weight:700;font-size:1.05rem;margin-right:4px}
+.bt{font:inherit;font-weight:600;font-size:.95rem;border-radius:8px;padding:6px 18px;cursor:pointer;border:2px solid var(--tinta);background:var(--fundo);color:var(--tinta)}
+.bt.sim{background:var(--tinta);color:var(--fundo)}
+.bt.rec{font-size:.85rem;border-color:var(--linha);color:var(--tinta2);padding:5px 12px}
+
+.wt{display:flex;align-items:center;gap:8px}.wt i{display:block;height:10px;background:var(--vermelho);border-radius:2px;min-width:2px}
+table.ada{width:100%;border-collapse:collapse;font-size:.85rem;background:var(--fundo)}
+table.ada th{background:var(--tinta);color:var(--fundo);text-align:left;padding:6px 8px;font-weight:600}
+table.ada td{padding:5px 8px;border-top:1px solid var(--linha)}
+table.ada tr.err td{background:color-mix(in srgb,var(--vermelho) 12%,transparent)}
+.cands{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.cand{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:.85rem;background:var(--fundo)}
+.cand.best{border:2px solid var(--vermelho)}
+.cand b{display:block}
+.contas{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.92rem;margin-top:10px}
+.bt{font:inherit;font-weight:600;font-size:.95rem;border-radius:8px;padding:6px 18px;cursor:pointer;border:2px solid var(--tinta);background:var(--fundo);color:var(--tinta)}
+.bt.sim{background:var(--tinta);color:var(--fundo)}.bt:disabled{opacity:.4;cursor:not-allowed}
+table.dic{min-width:560px}table.dic tbody th{width:18%}
+
+.etapa{font-size:.85rem;color:var(--tinta2);font-weight:600;margin-left:6px}
+.passo{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:14px 16px;margin:0 0 14px;font-size:.93rem;line-height:1.6}
+.passo h4{margin:0 0 6px;font-size:1rem}
+.passo .lin{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;background:var(--suave);border-radius:6px;padding:8px 10px;margin:8px 0;white-space:pre-wrap;line-height:1.55}
+.passo .alerta{font-size:.85rem;color:var(--tinta2);margin-top:6px}
+.stumps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:8px}
+.gform{font-size:1rem;font-weight:500;text-align:center;margin:8px 0 12px;font-variant-numeric:tabular-nums}
+.gform i,.eqs i{font-style:italic;font-weight:500}
+.eqs sub,.gform sub{font-size:.72em;vertical-align:-.3em;line-height:0;margin-left:1px}
+.um{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:18px;align-items:start;margin-top:8px}
+@media(max-width:720px){.um{grid-template-columns:1fr}}
+.um svg{width:100%;height:auto;display:block}
+.eqs{font-size:.92rem;line-height:1.5;font-variant-numeric:tabular-nums}
+.eqs .eq{margin:0}
+.eqs .eq .v{white-space:nowrap}
+.eqs .eq .sep{display:inline-block;width:18px}
+.eqs .bl{margin:0 0 12px}
+.eqs .rot{font-family:Poppins,sans-serif;font-size:.78rem;font-weight:600;color:var(--tinta2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px}
+.eq{display:block;line-height:2.4}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.2;font-size:.88em;font-weight:500;margin:0 1px}
+.fr>span:first-child{border-bottom:1.2px solid currentColor;padding:0 3px 1px}
+.fr>span:last-child{padding:1px 3px 0}
+.eq .res{font-weight:700}
+.eqs .tot{border-top:1px solid var(--linha);padding-top:10px}
+.eqs .tot .res{color:var(--vermelho)}
+.cortes{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font-size:.8rem}
+.cortes span{border:1px solid var(--linha);border-radius:6px;padding:2px 8px;background:var(--papel)}
+.cortes span.min{border:2px solid var(--vermelho);font-weight:700}
+.comp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
+.comp>div{text-align:center;font-size:.92rem}
+.comp>div.best b{color:var(--vermelho)}
+.st{border:1px solid var(--linha);border-radius:8px;padding:10px;font-size:.82rem;line-height:1.45;background:var(--papel)}
+.st.best{border:2px solid var(--vermelho)}
+.st b.q{display:block;font-size:.9rem;margin-bottom:4px}
+.st .g{font-weight:700;margin-top:4px}.st.best .g{color:var(--dengue-t)}
+table.ada td.wnew{font-weight:700}
+table.ada td,table.ada th{white-space:nowrap}
+table.ada tr.err td{background:color-mix(in srgb,var(--vermelho) 14%,transparent)}
+table.ada tr.lado-a td:first-child{box-shadow:inset 4px 0 0 var(--tinta)}
+.treinados{font-size:.88rem;margin-top:10px;color:var(--tinta2)}
+.treinados b{color:var(--tinta)}
+.pd{font-weight:700}.pd.d{color:var(--dengue-t)}.pd.o{color:var(--tinta2)}
+
+.paciente{background:var(--papel);border-radius:8px;padding:10px 14px}
+.paciente label{font-weight:600}.paciente select{font:inherit;padding:2px 6px;border-radius:6px;border:1px solid var(--linha);background:var(--fundo);color:var(--tinta)}
+.rot-p{font-weight:700;color:var(--vermelho)}
+.dica-p{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.paciente[hidden],.placar[hidden]{display:none}
+.placar{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:12px 16px;margin:0 0 14px;font-size:.95rem}
+.placar .barra{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--linha);margin:8px 0 4px;max-width:460px}
+.placar .barra i{display:block;background:var(--vermelho)}.placar .barra u{display:block;background:var(--outro)}
+.placar .dec{font-weight:700;font-size:1.05rem}.placar .dec.d{color:var(--dengue-t)}
+.floresta{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.arv{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:.78rem;line-height:1.45;background:var(--fundo)}
+.arv.nova{border:2px solid var(--tinta)}
+.arv h4{margin:0 0 4px;font-size:.85rem;display:flex;justify-content:space-between}
+.arv .voto{font-weight:700}.arv .voto.d{color:var(--dengue-t)}.arv .voto.o{color:var(--tinta2)}
+.arv .at span{display:inline-block;border:1px solid var(--linha);border-radius:5px;padding:0 5px;margin:1px 2px 1px 0}
+.arv .at span.fora{text-decoration:line-through;color:var(--tinta2);opacity:.6}
+.arv svg{width:100%;height:auto;display:block;margin-top:4px}
+table.ada.fixa{max-width:640px}
+
+.sorteios{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;font-size:.82rem}
+.sorteios span{border:1px solid var(--linha);border-radius:6px;padding:2px 8px;background:var(--papel)}
+table.ada tr.oob td{color:var(--tinta2);opacity:.55}
+table.ada tr.rep td:last-child{color:var(--vermelho)}
+.chips-at{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap}
+.chips-at span{border:2px solid var(--vermelho);border-radius:8px;padding:4px 14px;font-weight:700}
+.chips-at span.fora{border-color:var(--linha);color:var(--tinta2);text-decoration:line-through;font-weight:400}
+.um1{max-width:360px;margin:10px 0}
+.um1 svg,.comp svg{width:auto;max-width:100%;height:120px;display:block;margin:0 auto}
+.comp .eqs{text-align:left;margin-top:6px}
+.miniinfo{color:var(--tinta2);font-size:.74rem}
+.arv svg{max-width:100%!important;height:150px!important;width:auto!important;display:block;margin:6px auto 0}
+.arv-grande{margin:12px 0;overflow-x:auto}.arv-grande svg{display:block;margin:0 auto;width:100%;max-width:620px;height:auto}
+.divs{font-size:.85rem;margin:8px 0 0;padding-left:20px}.divs li{margin-bottom:4px}
+.sk{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--vermelho);border-radius:10px;padding:12px 16px;margin:18px 0;background:var(--fundo);font-size:.92rem;line-height:1.55}
+.sk svg{flex:none;width:28px;height:26px;margin-top:2px}
+.sk-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:2px}
+.sk p{margin:0}
+
+.svmfig{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+.svmfig>svg{max-width:460px;margin:0 auto}
+@media(max-width:760px){.svmfig{grid-template-columns:1fr}}
+.svmfig svg{width:100%;height:auto;display:block}
+.medidas{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.95rem}
+.medidas .nota{grid-column:1/-1}
+.medidas .m{background:var(--fundo);border-radius:8px;padding:10px 14px}
+.medidas .m b{display:block;font-family:var(--display);font-size:1.6rem;line-height:1.2}
+.medidas .ok b{color:var(--dengue-t)}
+.eqbox{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:12px 16px;margin:14px 0;font-size:1rem;line-height:1.9;font-variant-numeric:tabular-nums}
+.eqbox .res{color:var(--dengue-t);font-weight:700}
+.sk{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--vermelho);border-radius:10px;padding:12px 16px;margin:18px 0;background:var(--fundo);font-size:.92rem;line-height:1.55}
+.sk svg{flex:none;width:28px;height:26px;margin-top:2px}
+.sk-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:2px}
+.sk p{margin:0}
+.dois-hp{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:10px 0}
+.dois-hp svg{width:100%;height:auto;background:var(--fundo);border-radius:8px}
+.dois-hp p{font-size:.85rem;color:var(--tinta2);text-align:center;margin:4px 0 0}
+.fd{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin-right:8px;vertical-align:1px;font-style:normal;white-space:nowrap}
+.fd.real{background:var(--tinta);color:var(--fundo);border:1.5px solid var(--tinta)}
+.fd.sint{border:1.5px solid var(--tinta2);color:var(--tinta2)}
+.fd.teo{border:1.5px dashed var(--tinta2);color:var(--tinta2)}
+.pp{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--tinta);border-radius:10px;padding:14px 18px;margin:22px 0;background:var(--fundo)}
+.pp svg{flex:none;width:30px;height:30px;margin-top:2px}
+.pp-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta);margin-bottom:4px}
+.pp .pp-q{margin:0;font-weight:700;font-size:1.02rem;line-height:1.45}
+.pp .pp-d{margin:6px 0 0;font-size:.9rem;color:var(--tinta2);font-weight:400}
+main h2.sem-n{counter-increment:none}
+h2.sem-n::before{content:none}
+.coment h3{margin-top:28px}
+.coment .volta-pp{font-size:.88rem}
+.pp a,.coment a{color:var(--dengue-t)}
+.aprof{margin:28px 0 0;padding-top:12px;border-top:1px solid var(--linha);font-size:.9rem;color:var(--tinta2)}
+.aprof a{color:var(--dengue-t);font-weight:700}
+.duasfig svg{width:100%;height:auto;max-width:460px;margin:0 auto;display:block}
+svg .ln{stroke:var(--tinta);stroke-width:2.5}svg .lm{stroke:var(--tinta2);stroke-width:1.5;stroke-dasharray:6 5}svg .ax{stroke:var(--linha)}
+.mcwrap{max-width:460px;margin:0 auto;width:100%}
+.mc{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;font-size:.9rem;align-items:stretch}
+.mc .h{font-weight:700;color:var(--tinta2);font-size:.8rem;text-align:center;align-self:end;padding-bottom:2px}
+.mc .r{font-weight:700;color:var(--tinta2);font-size:.8rem;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;padding:0 4px}
+.mc .c{border-radius:10px;padding:14px 10px;text-align:center;background:var(--fundo);border:2px solid var(--linha)}
+.mc .c b{display:block;font-family:var(--display);font-size:1.7rem;line-height:1.1}
+.mc .c span{font-size:.78rem;color:var(--tinta2)}
+.mc .c.ok{border-color:var(--tinta)}
+.mc .c.err{border-color:var(--vermelho)}
+.mc .c.err b{color:var(--dengue-t)}
+.mc .tit{grid-column:2/4;text-align:center;font-weight:700;font-size:.85rem}
+</style></head><body>
+<header class="abertura col">
+  <div class="topo"><div class="logos"><img src="../../upe.png" alt="Universidade de Pernambuco (UPE)"><span class="sep"></span><img src="../../logo.png" alt="dotLAB" class="dotl"></div><a class="volta" href="../../index.html">Todas as aulas</a></div>
+  <span class="selo">Ciência de Dados · Aula 10 · Métricas de avaliação</span>
+  <h1>Acertar 54% é <em>bom</em> ou ruim?</h1>
+  <p class="lead">Matriz de confusão, acurácia, sensibilidade, especificidade, precisão, limiar de decisão e curva ROC, com a árvore de decisão da Aula 06.</p>
+  <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">Versão 1.1 · novembro de 2026</span></div>
+</header>
+<main>
+<section class="col">
+  <h2>Por que medir com cuidado</h2>
+  <p>Na Aula 06, a árvore de decisão de profundidade 3 acertou cerca de 54% dos registros de teste. É um bom resultado? Depende. Depende de quantos casos de dengue existem na base, de quais erros a árvore comete e do que vamos fazer com a resposta dela. Um modelo para <strong>triagem</strong>, que decide quem fazer o exame primeiro, e um modelo para <strong>confirmar</strong> um diagnóstico precisam ser avaliados de jeitos diferentes.</p>
+  <p>Nesta aula, vamos avaliar essa mesma árvore com mais de um número. Ela foi treinada com os 1.000 registros sintéticos da Aula 06 e vai ser testada com outros 6.000 registros, 3.000 de dengue e 3.000 de casos descartados, que ela nunca viu. Dengue é a <strong>classe positiva</strong>.</p>
+  
+  <p class="aprof"><a href="metricas-de-avaliacao-material-de-estudo.pdf#page=2" target="_blank" rel="noopener">Para aprofundar: seção 01 do material de estudo</a> · inclui o contexto dos dados e da árvore.</p>
+</section>
+
+<section class="col">
+  <h2>A matriz de confusão</h2>
+  <p>Num problema de classificação binária, uma das classes é chamada de <strong>positiva</strong> e a outra, de <strong>negativa</strong>. Comparando o rótulo de cada instância com a classe atribuída pelo classificador, toda previsão cai em uma de quatro categorias:</p>
+  <div class="tab-scroll"><table class="cmp dic"><thead><tr><th>Termo</th><th>Definição</th></tr></thead><tbody>
+    <tr><th scope="row">Verdadeiro positivo (VP)</th><td>Instância da classe positiva classificada como positiva (<em>true positive</em>).</td></tr>
+    <tr><th scope="row">Falso negativo (FN)</th><td>Instância da classe positiva classificada como negativa (<em>false negative</em>). É o <strong>erro do tipo II</strong>.</td></tr>
+    <tr><th scope="row">Falso positivo (FP)</th><td>Instância da classe negativa classificada como positiva (<em>false positive</em>). É o <strong>erro do tipo I</strong>.</td></tr>
+    <tr><th scope="row">Verdadeiro negativo (VN)</th><td>Instância da classe negativa classificada como negativa (<em>true negative</em>).</td></tr>
+  </tbody></table></div>
+  <p>As palavras “verdadeiro” e “falso” dizem se o classificador acertou; “positivo” e “negativo”, qual classe ele atribuiu. No nosso exemplo, a classe positiva é dengue e a negativa, caso descartado: um falso negativo é um caso de dengue que a árvore deixou passar, e um falso positivo é um alarme falso.</p>
+  <p>Organizadas numa tabela de duas linhas e duas colunas, essas contagens formam a <strong>matriz de confusão</strong> (<em>confusion matrix</em>).</p>
+  <p>Antes de montar a matriz da árvore, um detalhe. A árvore não responde direto “dengue” ou “descartado”: cada folha dá uma <strong>probabilidade estimada</strong> de dengue, que é a proporção de dengue entre os registros de treinamento que caíram nela, como vimos na Aula 06. Para transformar essa probabilidade numa resposta, usamos um <strong>limiar de decisão</strong> (<em>decision threshold</em>): se a probabilidade da folha passa do limiar, a árvore responde “dengue”; se não passa, responde “descartado”. O limiar mais usado é 50%, que equivale a ficar com a classe que é maioria na folha. Uma folha com 57% de dengue responde “dengue”; uma com 45%, “descartado”. Na seção 05, vamos ver o que acontece quando mudamos esse valor.</p>
+  <p>Para a árvore, com o limiar de 50%, a matriz de confusão fica assim:</p>
+  <figure>
+    <div class="mcwrap" id="mcFixa"></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>6.000 registros de teste simulados com as frequências reais do SINAN (Tabela 6 de da Silva Neto et al., 2022), metade de cada classe. Árvore de profundidade 3 da Aula 06.</figcaption>
+  </figure>
+  <p>A árvore acertou 1.375 casos de dengue e 1.886 casos descartados, e errou 2.739: deixou passar 1.625 casos de dengue e deu 1.114 alarmes falsos. Todas as métricas desta aula são contas feitas com esses quatro números.</p>
+  
+  <p class="aprof"><a href="metricas-de-avaliacao-material-de-estudo.pdf#page=3" target="_blank" rel="noopener">Para aprofundar: seção 02 do material de estudo</a> · inclui a matriz de confusão montada passo a passo.</p>
+</section>
+
+<section class="col">
+  <h2>Acurácia e o desbalanceamento</h2>
+  <p>A métrica mais conhecida é a <strong>acurácia</strong> (<em>accuracy</em>): a proporção de acertos.</p>
+  <div class="eqbox">acurácia = (VP + VN) / (VP + FP + FN + VN) = (1.375 + 1.886) / 6.000 = <span class="res">0,543</span></div>
+  <p>A acurácia funciona bem quando as classes têm o mesmo tamanho, como no nosso teste. Mas, na base completa do SINAN, 67% dos registros com desfecho são de dengue. Nesse caso, o <strong>classificador da classe majoritária</strong>, que responde sempre “dengue”, acerta 67% sem aprender nada. Mude a proporção de dengue no conjunto de teste e compare a árvore com ele.</p>
+  <figure class="larga-fig">
+    <div class="controle"><label for="prev">Proporção de dengue no teste</label><input type="range" id="prev" min="1" max="99" value="50" step="1"><output id="prevV">50%</output></div>
+    <div class="svmfig"><div class="mcwrap" id="mcPrev"></div>
+      <div class="medidas"><div class="m" id="pAcc">Acurácia da árvore<b>–</b></div><div class="m" id="pBase">Acurácia de “sempre dengue”<b>–</b></div><div class="m" id="pSens">Sensibilidade<b>–</b></div><div class="m" id="pPrec">Precisão<b>–</b></div><p class="nota" id="pTxt"></p></div></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Contagens para 1.000 registros de teste, mantendo a sensibilidade (45,8%) e a especificidade (62,9%) que a árvore teve no teste balanceado.</figcaption>
+  </figure>
+  <p>Com 67% de dengue, a árvore acerta só cerca de 51%, menos que o classificador que responde sempre “dengue”. A acurácia sozinha esconde esse problema, e também não diz que tipo de erro o modelo comete. Por isso precisamos de outras métricas.</p>
+  
+  <p class="aprof"><a href="metricas-de-avaliacao-material-de-estudo.pdf#page=4" target="_blank" rel="noopener">Para aprofundar: seção 03 do material de estudo</a> · inclui a conta da acurácia com 67% de dengue.</p>
+</section>
+
+<section class="col">
+  <h2>Sensibilidade, especificidade e precisão</h2>
+  <p>Cada uma dessas métricas olha para uma parte da matriz de confusão:</p>
+  <div class="tab-scroll"><table class="cmp dic"><thead><tr><th>Métrica</th><th>Fórmula</th><th>Pergunta que responde</th><th>Árvore</th></tr></thead><tbody>
+    <tr><th scope="row">Sensibilidade (<em>sensitivity</em> ou <em>recall</em>)</th><td>VP / (VP + FN)</td><td>Dos casos de dengue, quantos a árvore encontrou?</td><td>1.375 / 3.000 = 0,458</td></tr>
+    <tr><th scope="row">Especificidade (<em>specificity</em>)</th><td>VN / (VN + FP)</td><td>Dos casos descartados, quantos a árvore reconheceu?</td><td>1.886 / 3.000 = 0,629</td></tr>
+    <tr><th scope="row">Precisão (<em>precision</em>)</th><td>VP / (VP + FP)</td><td>Quando a árvore diz “dengue”, quantas vezes acerta?</td><td>1.375 / 2.489 = 0,552</td></tr>
+    <tr><th scope="row">F1 (<em>F1-score</em>)</th><td>2 · precisão · sensibilidade / (precisão + sensibilidade)</td><td>Um resumo que só é alto se as duas forem altas.</td><td>0,501</td></tr>
+  </tbody></table></div>
+  <p>Na saúde, a precisão também é chamada de <strong>valor preditivo positivo</strong> (VPP). Repare que a sensibilidade e a especificidade são calculadas dentro de cada classe real, e por isso não mudam com a proporção de dengue no teste. A precisão mistura as duas classes e muda: na figura da seção anterior, ela cai quando a dengue fica rara.</p>
+  <div class="pp" role="note" id="pp1"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">Um exame tem sensibilidade de 99% e especificidade de 95%, e a doença atinge 1% da população. Se o exame de uma pessoa der positivo, qual é a chance de ela ter a doença?</p><p class="pp-d">Faça a conta com 1.000 pessoas: quantas têm a doença, quantos positivos verdadeiros e quantos falsos o exame produz? <a href="#com1">Comentário no fim da página</a>.</p></div></div>
+  
+  <p class="aprof"><a href="metricas-de-avaliacao-material-de-estudo.pdf#page=5" target="_blank" rel="noopener">Para aprofundar: seção 04 do material de estudo</a> · inclui as contas de cada métrica com frações.</p>
+</section>
+
+<section class="col">
+  <h2>O limiar de decisão</h2>
+  <p>Até aqui, usamos o limiar de decisão de 50%, apresentado na seção 02. Mas o limiar é uma escolha nossa, e não precisa ser 50%. Uma forma de pensar nele é como o <strong>grau de certeza que exigimos</strong> da árvore antes de ela responder “dengue”.</p>
+  <ul>
+    <li><strong>Limiar alto: a árvore fica mais exigente.</strong> Ela só responde “dengue” quando a folha tem muita dengue. Dá menos alarmes falsos, e por isso a especificidade sobe e, quando ela diz “dengue”, costuma acertar mais vezes. Em troca, deixa passar mais casos de dengue: a sensibilidade cai.</li>
+    <li><strong>Limiar baixo: a árvore fica menos exigente.</strong> Um pouco de evidência já basta para responder “dengue”. Ela encontra mais casos, e a sensibilidade sobe, mas dá mais alarmes falsos: a especificidade cai.</li>
+  </ul>
+  <div class="destaque"><strong>Um limiar mais alto não deixa o modelo melhor: ele troca um tipo de erro pelo outro.</strong> Na árvore, subir o limiar de 50% para 80% faz a especificidade ir de 62,9% para 97,9%, mas a sensibilidade despenca de 45,8% para 3,6%, e a acurácia até cai, de 54,3% para 50,8%. Qual troca vale a pena depende do custo de cada erro, como veremos na seção 07.</div>
+  <p>Mova o limiar e acompanhe a matriz de confusão.</p>
+  <figure class="larga-fig">
+    <div class="controle"><label for="lim">Limiar de decisão</label><input type="range" id="lim" min="0" max="100" value="50" step="1"><output id="limV">50%</output></div>
+    <div class="svmfig"><div class="mcwrap" id="mcLim"></div>
+      <div class="medidas"><div class="m" id="lSens">Sensibilidade<b>–</b></div><div class="m" id="lEsp">Especificidade<b>–</b></div><div class="m" id="lPrec">Precisão<b>–</b></div><div class="m" id="lAcc">Acurácia<b>–</b></div><p class="nota" id="lTxt"></p></div></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Os 6.000 registros de teste. A árvore responde dengue quando a probabilidade da folha é maior ou igual ao limiar.</figcaption>
+  </figure>
+  <p>Repare que a matriz muda aos saltos: como a árvore tem só 7 folhas, ela dá só 6 probabilidades diferentes, e o resultado só muda quando o limiar cruza uma delas. Repare também que nenhum limiar melhora a sensibilidade e a especificidade ao mesmo tempo.</p>
+  
+  <p class="aprof"><a href="metricas-de-avaliacao-material-de-estudo.pdf#page=6" target="_blank" rel="noopener">Para aprofundar: seção 05 do material de estudo</a> · inclui a tabela com todos os limiares.</p>
+</section>
+
+<section class="col">
+  <h2>A curva ROC e a AUC</h2>
+  <p>A <strong>curva ROC</strong> (<em>Receiver Operating Characteristic</em>) mostra o efeito do limiar de decisão sobre a sensibilidade e a especificidade do classificador. Cada limiar corresponde a um ponto da curva: no eixo horizontal, a <strong>taxa de falsos positivos</strong> (1 − especificidade); no eixo vertical, a <strong>sensibilidade</strong>, também chamada de taxa de verdadeiros positivos. Percorrer a curva de baixo para cima equivale a diminuir o limiar: a sensibilidade aumenta, mas a especificidade diminui.</p>
+  <figure class="larga-fig">
+    <div class="duasfig"><svg id="roc" viewBox="0 0 460 460" role="img" aria-label="Curva ROC da árvore"></svg></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Curva ROC da árvore nos 6.000 registros de teste. O ponto vermelho é o limiar escolhido na seção anterior. A diagonal tracejada é um classificador que sorteia a resposta.</figcaption>
+  </figure>
+  <p>Um classificador perfeito passaria pelo canto de cima à esquerda: sensibilidade 1 sem nenhum falso positivo. Um classificador que sorteia a resposta fica sobre a diagonal. A <strong>área sob a curva ROC</strong>, a <strong>AUC</strong> (<em>Area Under the Curve</em>), resume a curva num número: 1 para o classificador perfeito e 0,5 para o sorteio. Ela também tem uma leitura direta: é a probabilidade de que um caso de dengue sorteado receba uma probabilidade maior que um caso descartado sorteado. A AUC da árvore é <span class="res">0,547</span>.</p>
+  <div class="pp" role="note" id="pp2"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">A AUC da árvore é 0,547. Isso quer dizer que ela é inútil?</p><p class="pp-d">Compare com 0,5 e lembre o que a Aula 06 mostrou sobre os sinais clínicos. <a href="#com2">Comentário no fim da página</a>.</p></div></div>
+  
+  <p class="aprof"><a href="metricas-de-avaliacao-material-de-estudo.pdf#page=7" target="_blank" rel="noopener">Para aprofundar: seção 06 do material de estudo</a> · inclui a curva ROC ponto a ponto.</p>
+</section>
+
+<section class="col">
+  <h2>Qual métrica usar</h2>
+  <p>Não existe uma métrica certa para todos os problemas. A escolha vem da pergunta e do custo de cada erro:</p>
+  <div class="tab-scroll"><table class="cmp dic"><thead><tr><th>Situação</th><th>Erro mais caro</th><th>Olhe para</th></tr></thead><tbody>
+    <tr><th scope="row">Triagem: decidir quem testar primeiro</th><td>Deixar passar um caso (FN)</td><td>Sensibilidade alta, com limiar baixo</td></tr>
+    <tr><th scope="row">Confirmação antes de um tratamento caro ou arriscado</th><td>Alarme falso (FP)</td><td>Especificidade e precisão altas</td></tr>
+    <tr><th scope="row">Classes desbalanceadas</th><td>Ignorar a classe rara</td><td>Sensibilidade, precisão, F1 ou acurácia balanceada; nunca só a acurácia</td></tr>
+    <tr><th scope="row">Comparar modelos antes de escolher o limiar</th><td>—</td><td>AUC</td></tr>
+  </tbody></table></div>
+  <p>A <strong>acurácia balanceada</strong> (<em>balanced accuracy</em>) é a média da sensibilidade e da especificidade. Para a árvore, (0,458 + 0,629) / 2 = 0,543. Ela não muda com a proporção de cada classe no teste e, para o classificador que responde sempre “dengue”, vale 0,5, como deve ser.</p>
+  
+  <p class="aprof"><a href="metricas-de-avaliacao-material-de-estudo.pdf#page=8" target="_blank" rel="noopener">Para aprofundar: seção 07 do material de estudo</a> · inclui exemplos de cada situação.</p>
+</section>
+
+<section class="col">
+  <h2>Como avaliar: desbalanceamento no treino e no teste</h2>
+  <p>Já vimos que a acurácia engana quando as classes têm tamanhos diferentes. Falta decidir como montar os conjuntos de treinamento e de teste quando a base é desbalanceada, como a do SINAN, com 67% de dengue. A literatura de aprendizado de máquina e de modelos de predição clínica converge em alguns pontos.</p>
+  <p>Antes, dois termos que vão aparecer bastante:</p>
+  <ul>
+    <li><strong>Prevalência</strong> (<em>prevalence</em>): a proporção de instâncias da classe positiva num conjunto de dados ou numa população. Na base completa do SINAN, a prevalência de dengue entre os registros com desfecho é de 67%; nos 6.000 registros de teste desta aula, é de 50%, porque o teste foi montado com metade de cada classe. Em epidemiologia, a prevalência é a proporção de pessoas com a doença numa população em um dado momento; aqui, usamos a mesma ideia para a proporção de cada classe nos dados.</li>
+    <li><strong>Divisão estratificada</strong> (<em>stratified split</em>): uma divisão em treinamento e teste que mantém a mesma proporção de cada classe nas duas partes. Os registros são separados por classe, em <strong>estratos</strong>, e cada estrato é sorteado separadamente, como na amostragem estratificada da Aula 05. Com 1.000 registros, 670 de dengue e 330 descartados, e 30% para teste, o teste fica com 201 casos de dengue e 99 descartados, e o treinamento com 469 e 231: 67% de dengue nos dois. Num sorteio simples, sem estratos, o teste poderia sair com 63% ou 71% de dengue só por acaso, e a diferença seria maior quanto menor a base ou mais rara a classe positiva.</li>
+  </ul>
+  <div class="tab-scroll"><table class="cmp dic"><thead><tr><th>Etapa</th><th>Boa prática</th><th>Por quê</th></tr></thead><tbody>
+    <tr><th scope="row">Separar o teste</th><td>Separar o conjunto de teste <strong>antes de qualquer tratamento</strong>, com divisão <strong>estratificada</strong>, mantendo a proporção real das classes.</td><td>O teste deve representar a população em que o modelo será usado. Acurácia, precisão e F1 dependem da prevalência: um teste balanceado artificialmente mede o modelo numa população que não existe.</td></tr>
+    <tr><th scope="row">Balancear o treino</th><td>É opcional. Se usar subamostragem, sobreamostragem ou SMOTE, aplique <strong>só no treinamento</strong> e, na validação cruzada, <strong>dentro de cada dobra</strong>.</td><td>Reamostrar antes de separar põe cópias, ou registros sintéticos parecidos, no treino e no teste ao mesmo tempo, e a avaliação fica otimista demais (Santos et al., 2018).</td></tr>
+    <tr><th scope="row">Usar as probabilidades</th><td>Em saúde, prefira treinar com a proporção real e <strong>ajustar o limiar de decisão</strong> (seção 05) ou dar <strong>pesos às classes</strong>.</td><td>Balancear o treino faz o modelo superestimar a probabilidade da classe minoritária, sem melhorar a AUC (van den Goorbergh et al., 2022).</td></tr>
+    <tr><th scope="row">Relatar os resultados</th><td>Informe a prevalência do teste, a matriz de confusão, a sensibilidade, a especificidade, a precisão e a AUC; com uma classe rara, também a curva de precisão e sensibilidade.</td><td>Sensibilidade, especificidade e AUC não dependem da prevalência; precisão e acurácia, sim. Com classes raras, a curva ROC pode parecer melhor do que o modelo é (Saito e Rehmsmeier, 2015).</td></tr>
+  </tbody></table></div>
+  <div class="destaque"><strong>Em resumo: o teste fica com a proporção real; o balanceamento, se houver, acontece só no treinamento.</strong> Separe o teste primeiro, trate o desbalanceamento dentro do treino e da validação cruzada, ajuste o limiar quando for preciso e relate as métricas junto com a prevalência.</div>
+  <p class="nota">E nesta disciplina? Nas Aulas 06 e 10, o conjunto de teste é balanceado por uma escolha didática: com metade de cada classe, qualquer acerto acima de 50% vem dos sinais clínicos, e as contas ficam mais fáceis de acompanhar. Num estudo de verdade, o teste teria 67% de dengue, e a seção 03 mostra o que muda.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p><code>train_test_split(X, y, test_size=0.3, stratify=y)</code> e <code>StratifiedKFold</code> mantêm a proporção das classes. Muitos modelos aceitam <code>class_weight="balanced"</code>, que dá mais peso aos erros na classe minoritária sem mexer nos dados. Para reamostrar dentro da validação cruzada, use o <code>Pipeline</code> da biblioteca <code>imbalanced-learn</code>, que aplica a reamostragem só nas dobras de treinamento.</p></div></div>
+  
+  <p class="aprof"><a href="metricas-de-avaliacao-material-de-estudo.pdf#page=9" target="_blank" rel="noopener">Para aprofundar: seção 08 do material de estudo</a> · inclui a discussão com as referências.</p>
+</section>
+
+<section class="col">
+  <h2>Métricas no scikit-learn</h2>
+  <p>O módulo <code>sklearn.metrics</code> calcula todas as métricas desta aula a partir das classes reais e das previsões, ou das probabilidades, no caso da AUC.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p><code>confusion_matrix(y_teste, y_prev)</code> devolve a matriz com as classes reais nas linhas e as previstas nas colunas, na ordem de <code>classes_</code>: para 0 e 1, a primeira linha é [VN, FP] e a segunda, [FN, VP]. <code>classification_report</code> mostra precisão, sensibilidade (<code>recall</code>) e F1 de cada classe. A AUC usa probabilidades, não classes: <code>roc_auc_score(y_teste, modelo.predict_proba(X_teste)[:, 1])</code>. Nas buscas de hiperparâmetros, a métrica é escolhida pelo parâmetro <code>scoring</code>, com nomes como <code>"accuracy"</code>, <code>"recall"</code>, <code>"f1"</code>, <code>"balanced_accuracy"</code> e <code>"roc_auc"</code>.</p></div></div>
+  
+  <p class="aprof"><a href="metricas-de-avaliacao-material-de-estudo.pdf#page=11" target="_blank" rel="noopener">Para aprofundar: seção 09 do material de estudo</a> · inclui um exemplo de código curto.</p>
+</section>
+
+<section class="col coment" id="comentarios">
+  <h2 class="sem-n">Comentários sobre as perguntas para pensar</h2>
+  <h3 id="com1">Um teste positivo para uma doença rara</h3>
+  <p>A chance é bem menor do que parece: cerca de 17%. Faça a conta com 1.000 pessoas. Com prevalência de 1%, 10 têm a doença e 990 não têm. Com sensibilidade de 99%, o teste encontra cerca de 9,9 dos 10 doentes. Com especificidade de 95%, ele erra 5% dos 990 saudáveis: 49,5 alarmes falsos. Dos 59,4 positivos, só 9,9 são doentes: precisão = 9,9 / 59,4 ≈ 0,17.</p>
+  <p>O teste é bom, mas a doença é rara: os poucos erros nos muitos saudáveis superam os acertos nos poucos doentes. É por isso que a precisão, ou valor preditivo positivo, depende da prevalência, e a sensibilidade e a especificidade não. É também por isso que um teste positivo para uma doença rara costuma ser confirmado com um segundo exame.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>Para ver a precisão e a sensibilidade em todos os limiares, use <code>precision_recall_curve</code>. Quando a classe positiva é rara, a curva de precisão e sensibilidade costuma ser mais informativa que a curva ROC, porque mostra os alarmes falsos em relação aos positivos previstos.</p></div></div>
+  <p class="volta-pp"><a href="#pp1">Voltar à pergunta</a></p>
+  <h3 id="com2">Uma AUC de 0,547</h3>
+  <p>Não é inútil, mas está perto do sorteio. Uma AUC de 0,547 quer dizer que, sorteando um caso de dengue e um descartado, a árvore dá a probabilidade maior ao caso de dengue em cerca de 55% das vezes, contra 50% de um sorteio. É o mesmo recado da Aula 06: os sinais clínicos dos registros, sozinhos, separam pouco a dengue dos outros casos. O problema não é o algoritmo, é a informação disponível nos atributos.</p>
+  <p>Repare também nos pontos da curva. As duas folhas com 100% de dengue no treinamento acertam só 61% dos registros de teste que caem nelas (67 de 110). Folhas pequenas exageram a confiança, e a curva ROC no conjunto de teste mostra isso. Para melhorar a AUC, o caminho é melhorar os dados, como no estudo de Tanner et al. (2008), que usou exames de sangue, e não trocar a métrica.</p>
+  <p class="volta-pp"><a href="#pp2">Voltar à pergunta</a></p>
+</section>
+</main>
+
+<footer class="col">
+  <p><strong>Dados.</strong> <span class="fd sint">Dados sintéticos</span>Registros simulados a partir das frequências reais do SINAN (Tabela 6 de da Silva Neto et al., 2022), os mesmos da Aula 06. O exemplo da pergunta para pensar é hipotético.</p>
+  <p><strong>Referências.</strong></p>
+  <ol>
+    <li>Chandramouli, S.; Dutt, S.; Das, A. K. <em>Machine Learning</em>. Pearson, 2018.</li>
+    <li>da Silva Neto, S. R. et al. Arboviral disease record data — Dengue and Chikungunya, Brazil, 2013–2020. <em>Scientific Data</em> 9, 198 (2022).</li>
+    <li>Fawcett, T. An introduction to ROC analysis. <em>Pattern Recognition Letters</em> 27(8), 861–874 (2006).</li>
+    <li>Han, J.; Kamber, M. <em>Data Mining: Concepts and Techniques</em>. 2. ed. Morgan Kaufmann, 2006.</li>
+    <li>Saito, T.; Rehmsmeier, M. The precision-recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets. <em>PLoS ONE</em> 10(3), e0118432 (2015).</li>
+    <li>Santos, M. S. et al. Cross-validation for imbalanced datasets: avoiding overoptimistic and overfitting approaches. <em>IEEE Computational Intelligence Magazine</em> 13(4), 59–76 (2018).</li>
+    <li>Tanner, L. et al. Decision tree algorithms predict the diagnosis and outcome of dengue fever in the early phase of illness. <em>PLoS Neglected Tropical Diseases</em> 2(3), e196 (2008).</li>
+    <li>van den Goorbergh, R. et al. The harm of class imbalance corrections for risk prediction models: illustration and simulation using logistic regression. <em>Journal of the American Medical Informatics Association</em> 29(9), 1525–1534 (2022).</li>
+    <li>scikit-learn. Metrics and scoring. <a href="https://scikit-learn.org/stable/modules/model_evaluation.html">scikit-learn.org/stable/modules/model_evaluation.html</a>.</li>
+  </ol>
+  <p class="nota"><strong>Sobre este material.</strong> Este material foi preparado pela Profa. Patricia Takako Endo a partir do seu próprio material de aula, com o apoio do Claude, assistente de inteligência artificial da Anthropic.</p>
+  <div class="rodape"><span>dotLAB · Grupo de Pesquisa em Transformação Digital · UPE</span><span>dotlabbrazil.com.br</span></div>
+</footer>
+<script>
+(function(){
+const FOLHAS=[[0.4496,3338,1525],[0.8,62,42],[0.5523,1626,847],[0.2917,173,100],[0.566,691,419],[1.0,32,18],[1.0,78,49]];
+const SENS=1375/3000,ESP=1886/3000;
+const fmt=(x,d=1)=>x.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pct=(x,d=1)=>Number.isFinite(x)?fmt(x*100,d)+'%':'–';
+const int=x=>Math.round(x).toLocaleString('pt-BR');
+function matriz(id,vp,fn,fp,vn){
+ document.getElementById(id).innerHTML=`<div class="mc"><span></span><span class="tit">A árvore previu</span>
+  <span></span><span class="h">dengue</span><span class="h">descartado</span>
+  <span class="r">real: dengue</span><div class="c ok"><span>VP</span><b>${int(vp)}</b><span>acertou</span></div><div class="c err"><span>FN</span><b>${int(fn)}</b><span>deixou passar</span></div>
+  <span class="r">real: descartado</span><div class="c err"><span>FP</span><b>${int(fp)}</b><span>alarme falso</span></div><div class="c ok"><span>VN</span><b>${int(vn)}</b><span>acertou</span></div></div>`;}
+function contar(t){let vp=0,fp=0,fn=0,vn=0;for(const [p,n,d] of FOLHAS){if(p>=t){vp+=d;fp+=n-d;}else{fn+=d;vn+=n-d;}}return {vp,fp,fn,vn};}
+matriz('mcFixa',1375,1625,1114,1886);
+
+// prevalência
+const prev=document.getElementById('prev');
+function desPrev(){const q=prev.value/100,N=1000,D=N*q,O=N-D;const vp=SENS*D,fn=D-vp,vn=ESP*O,fp=O-vn;
+ matriz('mcPrev',vp,fn,fp,vn);document.getElementById('prevV').textContent=prev.value+'%';
+ const acc=(vp+vn)/N,base=q;
+ document.getElementById('pAcc').innerHTML=`Acurácia da árvore<b>${pct(acc)}</b>`;
+ document.getElementById('pBase').innerHTML=`Acurácia de “sempre dengue”<b>${pct(base)}</b>`;
+ document.getElementById('pSens').innerHTML=`Sensibilidade<b>${pct(SENS)}</b>`;
+ document.getElementById('pPrec').innerHTML=`Precisão<b>${pct(vp/(vp+fp))}</b>`;
+ document.getElementById('pBase').className='m'+(base>acc?' ok':'');
+ document.getElementById('pTxt').textContent=base>acc?'O classificador que responde sempre “dengue” acerta mais que a árvore, sem aprender nada.':'Com poucas doenças no teste, “sempre dengue” erra quase tudo, mas a precisão da árvore também cai: a maioria dos positivos vira alarme falso.';}
+prev.addEventListener('input',desPrev);desPrev();
+
+// limiar
+const lim=document.getElementById('lim');
+const S=460,P=48,X=v=>P+v*(S-P-14),Y=v=>S-P-v*(S-P-14);
+const LIMS=[1.01,...[...new Set(FOLHAS.map(f=>f[0]))].sort((a,b)=>b-a)];
+const PONTOS=LIMS.map(t=>{const c=contar(t);return [c.fp/3000,c.vp/3000,t];});
+function desROC(t){const c=contar(t),fx=c.fp/3000,sy=c.vp/3000;
+ let g=`<rect x="${P}" y="14" width="${S-P-14}" height="${S-P-14}" fill="none" stroke="var(--linha)"/>`;
+ for(const v of [0,.25,.5,.75,1]){g+=`<line x1="${X(v)}" x2="${X(v)}" y1="14" y2="${S-P}" class="ax"/><line x1="${P}" x2="${S-14}" y1="${Y(v)}" y2="${Y(v)}" class="ax"/><text x="${X(v)}" y="${S-P+18}" font-size="11" text-anchor="middle" fill="var(--tinta2)">${fmt(v,2)}</text><text x="${P-8}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="var(--tinta2)">${fmt(v,2)}</text>`;}
+ g+=`<line x1="${X(0)}" y1="${Y(0)}" x2="${X(1)}" y2="${Y(1)}" class="lm"/>`;
+ g+=`<polyline points="${PONTOS.map(p=>X(p[0])+','+Y(p[1])).join(' ')}" fill="none" stroke="var(--tinta)" stroke-width="2.5"/>`;
+ PONTOS.forEach(p=>{g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="5" fill="var(--tinta)"/>`;});
+ g+=`<circle cx="${X(fx)}" cy="${Y(sy)}" r="9" fill="var(--vermelho)"/>`;
+ g+=`<text x="${(S+P)/2}" y="${S-8}" font-size="12" text-anchor="middle" fill="var(--tinta2)">taxa de falsos positivos (1 − especificidade)</text><text x="14" y="${(S-P)/2}" font-size="12" text-anchor="middle" fill="var(--tinta2)" transform="rotate(-90 14 ${(S-P)/2})">sensibilidade</text>`;
+ g+=`<text x="${X(.62)}" y="${Y(.2)}" font-size="13" fill="var(--tinta)" font-weight="700">AUC = 0,547</text>`;
+ document.getElementById('roc').innerHTML=g;}
+function desLim(){const t=lim.value/100,c=contar(t);matriz('mcLim',c.vp,c.fn,c.fp,c.vn);document.getElementById('limV').textContent=lim.value+'%';
+ const s=c.vp/3000,e=c.vn/3000,pr=c.vp+c.fp?c.vp/(c.vp+c.fp):NaN;
+ document.getElementById('lSens').innerHTML=`Sensibilidade<b>${pct(s)}</b>`;document.getElementById('lEsp').innerHTML=`Especificidade<b>${pct(e)}</b>`;
+ document.getElementById('lPrec').innerHTML=`Precisão<b>${pct(pr)}</b>`;document.getElementById('lAcc').innerHTML=`Acurácia<b>${pct((c.vp+c.vn)/6000)}</b>`;
+ document.getElementById('lTxt').textContent=c.vp+c.fp===0?'Com o limiar acima de todas as probabilidades, a árvore nunca diz “dengue”: nenhum alarme falso, mas nenhum caso encontrado.':c.fn+c.vn===0?'Com o limiar abaixo de todas as probabilidades, a árvore diz “dengue” para todos: encontra todos os casos, mas todo descartado vira alarme falso.':s>e?'Limiar baixo: a árvore encontra mais casos de dengue, à custa de mais alarmes falsos.':'Limiar alto: menos alarmes falsos, mas mais casos de dengue passam sem ser apontados.';
+ desROC(t);}
+lim.addEventListener('input',desLim);desLim();
+})();
+
+</script>
+</body></html>

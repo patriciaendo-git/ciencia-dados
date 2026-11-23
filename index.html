@@ -117,20 +117,23 @@ const AULAS = [
   {n:"07", t:"Random Forest e AdaBoost", d:"Comitês de modelos: bagging, Random Forest, boosting e AdaBoost, rodada a rodada.", slides:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-slides.pdf", pag:32, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/random-forest-e-adaboost/index.html", ver:"Versão 1.4 · novembro de 2026"}, apostila:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-material-de-estudo.pdf", pag:18, ver:"Versão 1.4 · novembro de 2026"}, colab:null},
   {n:"08", t:"kNN", d:"Classificação pelos vizinhos mais próximos: distâncias e escolha de k.", slides:{}, apostila:{}, colab:null},
   {n:"09", t:"SVM", d:"Hiperplano, margem, vetores de suporte, margem suave e o truque do kernel.", slides:{arq:"aulas/svm/svm-slides.pdf", pag:24, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/svm/index.html", ver:"Versão 1.0 · novembro de 2026"}, apostila:{arq:"aulas/svm/svm-material-de-estudo.pdf", pag:15, ver:"Versão 1.0 · novembro de 2026"}, colab:null},
-  {n:"10", t:"k-means", d:"Agrupamento passo a passo e escolha do número de grupos.", slides:{}, apostila:{}, colab:null}
+  {n:"10", t:"Métricas de avaliação", d:"Matriz de confusão, acurácia, sensibilidade, especificidade, precisão, limiar de decisão e curva ROC.", slides:{arq:"aulas/metricas-de-avaliacao/metricas-de-avaliacao-slides.pdf", pag:25, ver:"Versão 1.1 · novembro de 2026"}, material:{pagina:"aulas/metricas-de-avaliacao/index.html", ver:"Versão 1.1 · novembro de 2026"}, apostila:{arq:"aulas/metricas-de-avaliacao/metricas-de-avaliacao-material-de-estudo.pdf", pag:13, ver:"Versão 1.1 · novembro de 2026"}, colab:null},
+  {n:"11", t:"Configuração de hiperparâmetros", d:"Treino, validação e teste; validação cruzada; busca em grade e busca aleatória.", slides:{}, apostila:{}, colab:null},
+  {n:"12", t:"k-means", d:"Agrupamento passo a passo e escolha do número de grupos.", slides:{}, apostila:{}, colab:null}
 ];
 const GRUPOS = [
   {t:"Fundamentos", d:"O que é ciência de dados, de onde vêm os dados e como se organiza um projeto.", ns:["01","02","03"]},
   {t:"Aprendizado de máquina", d:"Os conceitos que sustentam todos os modelos da disciplina.", ns:["04","05"]},
   {t:"Classificação", d:"Algoritmos de aprendizado supervisionado, do mais simples aos comitês de modelos.", ns:["06","07","08","09"]},
-  {t:"Agrupamento", d:"Aprendizado não supervisionado: encontrar grupos nos dados.", ns:["10"]}
+  {t:"Avaliação e ajuste de modelos", d:"Como medir o desempenho de um classificador e escolher os seus hiperparâmetros.", ns:["10","11"]},
+  {t:"Agrupamento", d:"Aprendizado não supervisionado: encontrar grupos nos dados.", ns:["12"]}
 ];
 const TIPOS = [["slides","Slides"],["material","Página interativa"],["apostila","Material de estudo"],["colab","Colab"]];
 
 function preencher(box, m, tipo){
   if(m.pagina){
     const v=(m.ver||"").match(/Versão\s*([\d.]+)/);
-    box.innerHTML=`<span class="meta2"></span><a class="btn pri">Abrir</a>`;
+    box.innerHTML=`<span class="meta2"></span><a class="btn pri">Abrir ↗</a>`;
     box.querySelector(".meta2").textContent=(tipo==="apresentacao"?"Slides interativos":"Página interativa")+(v?` · versão ${v[1]}`:"");
     box.querySelector("a").href=m.pagina;
     return true;
@@ -139,11 +142,10 @@ function preencher(box, m, tipo){
     const v=(m.ver||"").match(/Versão\s*([\d.]+)/);
     const pptx = (m.arq||"").endsWith(".pptx");
     const info = m.link ? "Notebook no Google Colab" : `${pptx?"PowerPoint":"PDF"} · ${m.pag} ${tipo==="slides"?"slides":"páginas"}`;
-    box.innerHTML=`<span class="meta2"></span><a class="btn sec" target="_blank" rel="noopener">Abrir</a>${m.arq?'<button class="btn pri" type="button" hidden>Baixar</button>':''}<span class="msg" aria-live="polite"></span>`;
+    box.innerHTML=`<span class="meta2"></span><a class="btn sec" target="_blank" rel="noopener">Abrir ↗</a><span class="msg" aria-live="polite"></span>`;
     box.querySelector(".meta2").textContent=info+(v?` · versão ${v[1]}`:"");
     box.querySelector("a").href=m.arq||m.link;
-    if(pptx){ box.querySelector("a").textContent="Baixar"; box.querySelector("a").removeAttribute("target"); const b=box.querySelector("button"); if(b) b.remove(); }
-    const bt=box.querySelector("button"); if(bt) bt.dataset.arq=m.arq;
+    if(pptx){ box.querySelector("a").textContent="Baixar"; box.querySelector("a").removeAttribute("target"); }
     return true;
   }
   box.innerHTML=`<span class="st">${m.st==="rev"?"Em revisão":"Em preparação"}</span>`;
@@ -177,27 +179,6 @@ GRUPOS.forEach(gr=>{
   });
 });
 
-/* download pelo viewer do Claude, quando disponível */
-(async()=>{
-  let dl=null;
-  try{ dl = window.claude ? await window.claude.use("downloads") : null; }catch(e){ dl=null; }
-  if(!dl) return;
-  document.querySelectorAll("button[data-arq]").forEach(bt=>{
-    bt.hidden=false;
-    bt.addEventListener("click", async()=>{
-      const msg=bt.closest(".act").querySelector(".msg"); msg.textContent="";
-      try{
-        const r=await fetch(bt.dataset.arq); if(!r.ok) throw new Error();
-        await dl.save({filename: bt.dataset.arq.split("/").pop(), data: await r.blob()});
-        msg.textContent="Arquivo salvo.";
-      }catch(e){
-        const c=e&&e.code;
-        if(c==="declined") msg.textContent="";
-        else if(c==="rate_limited") msg.textContent="Já há um download aguardando confirmação.";
-        else { msg.textContent="Não foi possível baixar aqui. Use Abrir."; if(c==="unavailable"||c==="not_granted") bt.hidden=true; }
-      }
-    });
-  });
-})();
+
 </script>
 </body></html>
