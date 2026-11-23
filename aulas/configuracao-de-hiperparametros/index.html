@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aula 11 · Configuração de hiperparâmetros · Ciência de Dados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fundo:#FFFFFF; --papel:#F6F2F2; --tinta:#282425; --tinta2:#6A6365; --linha:#E6DEDE; --suave:#F6F2F2;
+  --dengue:#D11615; --dengue-t:#D11615; --outro:#9C9496; --destaque:#282425; --destaque-tinta:#282425; --alerta:#6A6365;
+  --treino:#9C9496; --teste:#D11615; --vermelho:#D11615;
+  --display:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --texto:"Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+    --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+    --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --fundo:#161415; --papel:#221F20; --tinta:#F2EDED; --tinta2:#A79FA1; --linha:#3A3537; --suave:#2A2627;
+  --dengue:#FF6B6A; --dengue-t:#FF6B6A; --outro:#7D7578; --destaque:#F2EDED; --destaque-tinta:#F2EDED; --alerta:#A79FA1;
+  --treino:#7D7578; --teste:#FF6B6A; --vermelho:#FF6B6A;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--fundo);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.7;counter-reset:sec}
+:focus-visible{outline:3px solid var(--vermelho);outline-offset:2px}
+button,input{font:inherit;color:inherit}
+
+.col{max-width:680px;margin:0 auto;padding:0 20px}
+.larga{max-width:880px;margin:0 auto;padding:0 20px}
+header.abertura{padding:40px 0 28px;border-bottom:2px solid var(--vermelho);margin-bottom:8px}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px}
+.topo img{height:64px;width:auto;display:block;background:#fff;border-radius:6px}
+.topo .logos{display:flex;align-items:center;gap:16px}.topo .logos .sep{width:1px;height:46px;background:var(--linha)}.topo img.dotl{height:56px;padding:3px}
+.topo .volta{font-size:.82rem;font-weight:600;color:var(--tinta2);text-decoration:none}
+.topo .volta:hover{color:var(--dengue-t)}
+.selo{display:block;font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:14px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,3.2rem);line-height:1.08;letter-spacing:-.015em;margin:0 0 16px;max-width:18ch;text-wrap:balance}
+h1 em{font-style:normal;color:var(--dengue-t)}
+.lead{font-size:1.1rem;color:var(--tinta2);margin:0 0 18px}
+.creditos{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;font-size:.85rem;color:var(--tinta2)}
+.creditos b{color:var(--tinta);font-weight:600}
+.etq{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:999px;border:1px solid var(--vermelho);color:var(--dengue-t)}
+main h2{counter-increment:sec}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(1.35rem,3.4vw,1.7rem);line-height:1.2;margin:64px 0 16px;display:flex;align-items:baseline;gap:14px;text-wrap:balance}
+h2::before{content:counter(sec,decimal-leading-zero);font-weight:800;font-size:1.5em;color:var(--dengue-t);font-variant-numeric:tabular-nums;flex:none}
+h3{font-size:1rem;margin:24px 0 8px}
+p{margin:0 0 16px}
+.nota{font-size:.9rem;color:var(--tinta2)}
+.d{color:var(--dengue-t);font-weight:700}
+.o{color:var(--outro);font-weight:700}
+figure{margin:26px 0 30px;padding:22px;background:var(--papel);border:0;border-radius:10px}
+figcaption{font-size:.88rem;color:var(--tinta2);margin-top:12px}
+.destaque{background:var(--papel);border-left:5px solid var(--vermelho);border-radius:0 10px 10px 0;padding:14px 18px;margin:24px 0}
+.numero{font-family:var(--display);font-weight:800;font-size:clamp(2.6rem,9vw,4.2rem);line-height:1;color:var(--tinta)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:.86em;background:var(--suave);padding:1px 5px;border-radius:4px}
+.formula{font-family:Georgia,"Times New Roman",serif;font-size:1.05rem;text-align:center;margin:12px 0;overflow-x:auto;white-space:nowrap}
+
+/* grade de fichas */
+.grade{display:grid;grid-template-columns:repeat(20,1fr);gap:3px;max-width:520px}
+.grade i{display:block;aspect-ratio:3/4;border-radius:2px}
+.grade i.D{background:var(--dengue)} .grade i.O{background:var(--outro)}
+.legenda{display:flex;flex-wrap:wrap;gap:16px;font-size:.9rem;margin-top:12px}
+.legenda span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:2px;display:inline-block}
+.sw.D{background:var(--dengue)} .sw.O{background:var(--outro)}
+
+/* controles */
+.controle{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+.controle label{font-weight:700}
+input[type=range]{flex:1;min-width:180px;accent-color:var(--vermelho)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.chip{border:1px solid var(--linha);background:var(--fundo);border-radius:999px;padding:5px 12px;font-size:.84rem;font-weight:500;cursor:pointer}
+.chip:disabled{opacity:.4;cursor:not-allowed}
+.chip[aria-pressed="true"]{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+.botao{border:1px solid var(--vermelho);background:var(--vermelho);color:#fff;padding:8px 16px;border-radius:8px;font-weight:600;cursor:pointer;font-size:.88rem}
+.botao.primario{background:var(--tinta);color:var(--papel)}
+.leitura{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:.95rem}
+.leitura b{font-family:var(--display);font-size:1.25rem}
+
+svg text{font-family:var(--texto)}
+.eixo{stroke:var(--linha)} .eixo-t{fill:var(--tinta2);font-size:12px}
+.rot{fill:var(--tinta);font-size:13px} .rot-q{fill:var(--tinta2);font-size:12px}
+
+/* pilhas da divisão */
+.pilhas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.pilha h4{margin:0 0 6px;font-size:.95rem}
+.barra{display:flex;height:22px;border-radius:3px;overflow:hidden;border:1px solid var(--linha)}
+.barra i{display:block;height:100%}
+.pilha p{font-size:.88rem;color:var(--tinta2);margin:6px 0 0}
+
+/* árvore em lista */
+.arvore{list-style:none;margin:0;padding:0;font-size:.95rem}
+.arvore ul{list-style:none;margin:0;padding-left:22px;border-left:2px solid var(--linha);margin-left:8px}
+.arvore li{margin:6px 0}
+.no-q{font-weight:700}
+.ramo{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.folha{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.folha .barra{width:90px;height:12px}
+.folha .pv{font-size:.88rem}
+.no-ativo>.linha-no{background:color-mix(in srgb,var(--vermelho) 14%,transparent);border-radius:4px;padding:2px 6px;margin-left:-6px}
+.inativo>.linha-no{opacity:.45}
+.ficha{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px 14px;margin-bottom:16px}
+.ficha label{display:flex;align-items:center;gap:8px;font-size:.92rem;cursor:pointer}
+.ficha input{width:18px;height:18px;accent-color:var(--vermelho)}
+.veredito{font-size:1rem;padding:12px 16px;background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;margin-top:14px}
+
+.glossario{margin:0}
+.glossario dt{font-weight:700;margin-top:14px}
+.glossario dd{margin:2px 0 0;color:var(--tinta2)}
+pre.algoritmo{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--papel);border:0;border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:16px;overflow-x:auto;font-size:.85rem;line-height:1.55;margin:16px 0 8px}
+footer{margin:80px 0 0;padding:28px 0 40px;border-top:2px solid var(--vermelho);font-size:.85rem;color:var(--tinta2)}
+footer a{color:inherit}
+.rodape{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:22px;padding-top:14px;border-top:1px solid var(--linha)}
+.glossario dt{font-weight:600}
+footer ol{padding-left:1.2em}
+.carregar-status{font-size:.88rem;color:var(--tinta2);margin-top:8px}
+@media (max-width:560px){body{font-size:15.5px}figure{padding:14px}.pilhas{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.nota-comp{background:var(--papel);border-left:5px solid var(--tinta);border-radius:0 10px 10px 0;padding:18px 20px;margin:30px 0 8px}
+.etq-nc{display:block;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta2);margin-bottom:4px}
+.nota-comp h3{margin:0 0 12px;font-size:1.05rem}
+.nota-comp p{margin:12px 0 0;font-size:.95rem}
+.tab-scroll{overflow-x:auto}
+table.cmp{width:100%;min-width:520px;border-collapse:collapse;font-size:.85rem;line-height:1.45;background:var(--fundo)}
+table.cmp thead th{background:var(--tinta);color:var(--fundo);text-align:left;padding:8px 10px;vertical-align:bottom;font-weight:600}
+table.cmp thead th span{display:block;font-weight:400;font-size:.75rem;opacity:.75}
+table.cmp tbody th{text-align:left;padding:8px 10px;vertical-align:top;font-weight:700;width:24%}
+table.cmp td{padding:8px 10px;vertical-align:top;border-top:1px solid var(--linha)}
+table.cmp tbody th{border-top:1px solid var(--linha)}
+.arv-larga{overflow-x:auto;margin-top:6px}
+figure.larga-fig{width:auto;position:static;left:auto;margin-left:0;margin-right:0}
+
+.arv-svg svg{display:block}
+.pergunta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;min-height:42px}
+.pergunta .pq{font-weight:700;font-size:1.05rem;margin-right:4px}
+.bt{font:inherit;font-weight:600;font-size:.95rem;border-radius:8px;padding:6px 18px;cursor:pointer;border:2px solid var(--tinta);background:var(--fundo);color:var(--tinta)}
+.bt.sim{background:var(--tinta);color:var(--fundo)}
+.bt.rec{font-size:.85rem;border-color:var(--linha);color:var(--tinta2);padding:5px 12px}
+
+.wt{display:flex;align-items:center;gap:8px}.wt i{display:block;height:10px;background:var(--vermelho);border-radius:2px;min-width:2px}
+table.ada{width:100%;border-collapse:collapse;font-size:.85rem;background:var(--fundo)}
+table.ada th{background:var(--tinta);color:var(--fundo);text-align:left;padding:6px 8px;font-weight:600}
+table.ada td{padding:5px 8px;border-top:1px solid var(--linha)}
+table.ada tr.err td{background:color-mix(in srgb,var(--vermelho) 12%,transparent)}
+.cands{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:14px 0}
+.cand{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:.85rem;background:var(--fundo)}
+.cand.best{border:2px solid var(--vermelho)}
+.cand b{display:block}
+.contas{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:10px 14px;font-size:.92rem;margin-top:10px}
+.bt{font:inherit;font-weight:600;font-size:.95rem;border-radius:8px;padding:6px 18px;cursor:pointer;border:2px solid var(--tinta);background:var(--fundo);color:var(--tinta)}
+.bt.sim{background:var(--tinta);color:var(--fundo)}.bt:disabled{opacity:.4;cursor:not-allowed}
+table.dic{min-width:560px}table.dic tbody th{width:18%}
+
+.etapa{font-size:.85rem;color:var(--tinta2);font-weight:600;margin-left:6px}
+.passo{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:14px 16px;margin:0 0 14px;font-size:.93rem;line-height:1.6}
+.passo h4{margin:0 0 6px;font-size:1rem}
+.passo .lin{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;background:var(--suave);border-radius:6px;padding:8px 10px;margin:8px 0;white-space:pre-wrap;line-height:1.55}
+.passo .alerta{font-size:.85rem;color:var(--tinta2);margin-top:6px}
+.stumps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:8px}
+.gform{font-size:1rem;font-weight:500;text-align:center;margin:8px 0 12px;font-variant-numeric:tabular-nums}
+.gform i,.eqs i{font-style:italic;font-weight:500}
+.eqs sub,.gform sub{font-size:.72em;vertical-align:-.3em;line-height:0;margin-left:1px}
+.um{display:grid;grid-template-columns:minmax(260px,330px) 1fr;gap:18px;align-items:start;margin-top:8px}
+@media(max-width:720px){.um{grid-template-columns:1fr}}
+.um svg{width:100%;height:auto;display:block}
+.eqs{font-size:.92rem;line-height:1.5;font-variant-numeric:tabular-nums}
+.eqs .eq{margin:0}
+.eqs .eq .v{white-space:nowrap}
+.eqs .eq .sep{display:inline-block;width:18px}
+.eqs .bl{margin:0 0 12px}
+.eqs .rot{font-family:Poppins,sans-serif;font-size:.78rem;font-weight:600;color:var(--tinta2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:2px}
+.eq{display:block;line-height:2.4}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.2;font-size:.88em;font-weight:500;margin:0 1px}
+.fr>span:first-child{border-bottom:1.2px solid currentColor;padding:0 3px 1px}
+.fr>span:last-child{padding:1px 3px 0}
+.eq .res{font-weight:700}
+.eqs .tot{border-top:1px solid var(--linha);padding-top:10px}
+.eqs .tot .res{color:var(--vermelho)}
+.cortes{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;font-size:.8rem}
+.cortes span{border:1px solid var(--linha);border-radius:6px;padding:2px 8px;background:var(--papel)}
+.cortes span.min{border:2px solid var(--vermelho);font-weight:700}
+.comp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
+.comp>div{text-align:center;font-size:.92rem}
+.comp>div.best b{color:var(--vermelho)}
+.st{border:1px solid var(--linha);border-radius:8px;padding:10px;font-size:.82rem;line-height:1.45;background:var(--papel)}
+.st.best{border:2px solid var(--vermelho)}
+.st b.q{display:block;font-size:.9rem;margin-bottom:4px}
+.st .g{font-weight:700;margin-top:4px}.st.best .g{color:var(--dengue-t)}
+table.ada td.wnew{font-weight:700}
+table.ada td,table.ada th{white-space:nowrap}
+table.ada tr.err td{background:color-mix(in srgb,var(--vermelho) 14%,transparent)}
+table.ada tr.lado-a td:first-child{box-shadow:inset 4px 0 0 var(--tinta)}
+.treinados{font-size:.88rem;margin-top:10px;color:var(--tinta2)}
+.treinados b{color:var(--tinta)}
+.pd{font-weight:700}.pd.d{color:var(--dengue-t)}.pd.o{color:var(--tinta2)}
+
+.paciente{background:var(--papel);border-radius:8px;padding:10px 14px}
+.paciente label{font-weight:600}.paciente select{font:inherit;padding:2px 6px;border-radius:6px;border:1px solid var(--linha);background:var(--fundo);color:var(--tinta)}
+.rot-p{font-weight:700;color:var(--vermelho)}
+.dica-p{color:var(--tinta2);font-size:.85rem;margin-right:6px}
+.paciente[hidden],.placar[hidden]{display:none}
+.placar{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:12px 16px;margin:0 0 14px;font-size:.95rem}
+.placar .barra{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--linha);margin:8px 0 4px;max-width:460px}
+.placar .barra i{display:block;background:var(--vermelho)}.placar .barra u{display:block;background:var(--outro)}
+.placar .dec{font-weight:700;font-size:1.05rem}.placar .dec.d{color:var(--dengue-t)}
+.floresta{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.arv{border:1px solid var(--linha);border-radius:8px;padding:8px 10px;font-size:.78rem;line-height:1.45;background:var(--fundo)}
+.arv.nova{border:2px solid var(--tinta)}
+.arv h4{margin:0 0 4px;font-size:.85rem;display:flex;justify-content:space-between}
+.arv .voto{font-weight:700}.arv .voto.d{color:var(--dengue-t)}.arv .voto.o{color:var(--tinta2)}
+.arv .at span{display:inline-block;border:1px solid var(--linha);border-radius:5px;padding:0 5px;margin:1px 2px 1px 0}
+.arv .at span.fora{text-decoration:line-through;color:var(--tinta2);opacity:.6}
+.arv svg{width:100%;height:auto;display:block;margin-top:4px}
+table.ada.fixa{max-width:640px}
+
+.sorteios{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;font-size:.82rem}
+.sorteios span{border:1px solid var(--linha);border-radius:6px;padding:2px 8px;background:var(--papel)}
+table.ada tr.oob td{color:var(--tinta2);opacity:.55}
+table.ada tr.rep td:last-child{color:var(--vermelho)}
+.chips-at{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap}
+.chips-at span{border:2px solid var(--vermelho);border-radius:8px;padding:4px 14px;font-weight:700}
+.chips-at span.fora{border-color:var(--linha);color:var(--tinta2);text-decoration:line-through;font-weight:400}
+.um1{max-width:360px;margin:10px 0}
+.um1 svg,.comp svg{width:auto;max-width:100%;height:120px;display:block;margin:0 auto}
+.comp .eqs{text-align:left;margin-top:6px}
+.miniinfo{color:var(--tinta2);font-size:.74rem}
+.arv svg{max-width:100%!important;height:150px!important;width:auto!important;display:block;margin:6px auto 0}
+.arv-grande{margin:12px 0;overflow-x:auto}.arv-grande svg{display:block;margin:0 auto;width:100%;max-width:620px;height:auto}
+.divs{font-size:.85rem;margin:8px 0 0;padding-left:20px}.divs li{margin-bottom:4px}
+.sk{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--vermelho);border-radius:10px;padding:12px 16px;margin:18px 0;background:var(--fundo);font-size:.92rem;line-height:1.55}
+.sk svg{flex:none;width:28px;height:26px;margin-top:2px}
+.sk-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:2px}
+.sk p{margin:0}
+
+.svmfig{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
+.svmfig>svg{max-width:460px;margin:0 auto}
+@media(max-width:760px){.svmfig{grid-template-columns:1fr}}
+.svmfig svg{width:100%;height:auto;display:block}
+.medidas{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:.95rem}
+.medidas .nota{grid-column:1/-1}
+.medidas .m{background:var(--fundo);border-radius:8px;padding:10px 14px}
+.medidas .m b{display:block;font-family:var(--display);font-size:1.6rem;line-height:1.2}
+.medidas .ok b{color:var(--dengue-t)}
+.eqbox{background:var(--fundo);border-left:5px solid var(--vermelho);border-radius:0 8px 8px 0;padding:12px 16px;margin:14px 0;font-size:1rem;line-height:1.9;font-variant-numeric:tabular-nums}
+.eqbox .res{color:var(--dengue-t);font-weight:700}
+.sk{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--vermelho);border-radius:10px;padding:12px 16px;margin:18px 0;background:var(--fundo);font-size:.92rem;line-height:1.55}
+.sk svg{flex:none;width:28px;height:26px;margin-top:2px}
+.sk-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dengue-t);margin-bottom:2px}
+.sk p{margin:0}
+.dois-hp{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:10px 0}
+.dois-hp svg{width:100%;height:auto;background:var(--fundo);border-radius:8px}
+.dois-hp p{font-size:.85rem;color:var(--tinta2);text-align:center;margin:4px 0 0}
+.fd{display:inline-block;font-size:.68rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:2px 9px;border-radius:999px;margin-right:8px;vertical-align:1px;font-style:normal;white-space:nowrap}
+.fd.real{background:var(--tinta);color:var(--fundo);border:1.5px solid var(--tinta)}
+.fd.sint{border:1.5px solid var(--tinta2);color:var(--tinta2)}
+.fd.teo{border:1.5px dashed var(--tinta2);color:var(--tinta2)}
+.pp{display:flex;gap:14px;align-items:flex-start;border:2px solid var(--tinta);border-radius:10px;padding:14px 18px;margin:22px 0;background:var(--fundo)}
+.pp svg{flex:none;width:30px;height:30px;margin-top:2px}
+.pp-t{display:block;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta);margin-bottom:4px}
+.pp .pp-q{margin:0;font-weight:700;font-size:1.02rem;line-height:1.45}
+.pp .pp-d{margin:6px 0 0;font-size:.9rem;color:var(--tinta2);font-weight:400}
+main h2.sem-n{counter-increment:none}
+h2.sem-n::before{content:none}
+.coment h3{margin-top:28px}
+.coment .volta-pp{font-size:.88rem}
+.pp a,.coment a{color:var(--dengue-t)}
+.aprof{margin:28px 0 0;padding-top:12px;border-top:1px solid var(--linha);font-size:.9rem;color:var(--tinta2)}
+.aprof a{color:var(--dengue-t);font-weight:700}
+.duasfig svg{width:100%;height:auto;max-width:460px;margin:0 auto;display:block}
+svg .ln{stroke:var(--tinta);stroke-width:2.5}svg .lm{stroke:var(--tinta2);stroke-width:1.5;stroke-dasharray:6 5}svg .ax{stroke:var(--linha)}
+.mcwrap{max-width:460px;margin:0 auto;width:100%}
+.mc{display:grid;grid-template-columns:auto 1fr 1fr;gap:6px;font-size:.9rem;align-items:stretch}
+.mc .h{font-weight:700;color:var(--tinta2);font-size:.8rem;text-align:center;align-self:end;padding-bottom:2px}
+.mc .r{font-weight:700;color:var(--tinta2);font-size:.8rem;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;padding:0 4px}
+.mc .c{border-radius:10px;padding:14px 10px;text-align:center;background:var(--fundo);border:2px solid var(--linha)}
+.mc .c b{display:block;font-family:var(--display);font-size:1.7rem;line-height:1.1}
+.mc .c span{font-size:.78rem;color:var(--tinta2)}
+.mc .c.ok{border-color:var(--tinta)}
+.mc .c.err{border-color:var(--vermelho)}
+.mc .c.err b{color:var(--dengue-t)}
+.mc .tit{grid-column:2/4;text-align:center;font-weight:700;font-size:.85rem}
+</style></head><body>
+<header class="abertura col">
+  <div class="topo"><div class="logos"><img src="../../upe.png" alt="Universidade de Pernambuco (UPE)"><span class="sep"></span><img src="../../logo.png" alt="dotLAB" class="dotl"></div><a class="volta" href="../../index.html">Todas as aulas</a></div>
+  <span class="selo">Ciência de Dados · Aula 11 · Configuração de hiperparâmetros</span>
+  <h1>Como escolher os <em>hiperparâmetros</em>?</h1>
+  <p class="lead">Parâmetros e hiperparâmetros, treinamento, validação e teste, validação cruzada, busca em grade e busca aleatória.</p>
+  <div class="creditos"><span><b>Profa. Patricia Takako Endo</b> · Universidade de Pernambuco, Caruaru</span><span class="etq">Versão 1.0 · novembro de 2026</span></div>
+</header>
+<main>
+<section class="col">
+  <h2>Parâmetros e hiperparâmetros</h2>
+  <p>Todo modelo tem dois tipos de valores. Os <strong>parâmetros</strong> (<em>parameters</em>) são aprendidos com os dados durante o treinamento: as perguntas e os cortes de uma árvore de decisão, a voz α de cada stump do AdaBoost, os pesos <b>w̄</b> e o termo <em>b</em> do SVM. Os <strong>hiperparâmetros</strong> (<em>hyperparameters</em>) são escolhidos <strong>antes</strong> do treinamento e controlam como o modelo aprende: eles não saem dos dados, saem de uma decisão nossa.</p>
+  <div class="tab-scroll"><table class="cmp dic"><thead><tr><th>Modelo</th><th>Parâmetros (aprendidos)</th><th>Hiperparâmetros (escolhidos)</th></tr></thead><tbody>
+    <tr><th scope="row">Árvore de decisão (Aula 06)</th><td>Perguntas e cortes de cada nó</td><td><code>max_depth</code>, <code>min_samples_leaf</code>, <code>criterion</code></td></tr>
+    <tr><th scope="row">Random Forest (Aula 07)</th><td>As árvores da floresta</td><td><code>n_estimators</code>, <code>max_features</code>, <code>max_depth</code></td></tr>
+    <tr><th scope="row">AdaBoost (Aula 07)</th><td>Os stumps e a voz α de cada um</td><td><code>n_estimators</code>, <code>learning_rate</code></td></tr>
+    <tr><th scope="row">SVM (Aula 09)</th><td><b>w̄</b>, <em>b</em> e os vetores de suporte</td><td><code>kernel</code>, <code>C</code>, <code>gamma</code></td></tr>
+  </tbody></table></div>
+  <p>Já vimos o efeito de vários hiperparâmetros: a profundidade da árvore decide entre subajuste e sobreajuste; o C do SVM decide a largura da margem; o γ do RBF decide se a fronteira é suave ou contorna cada ponto. A <strong>configuração de hiperparâmetros</strong> (<em>hyperparameter tuning</em>) é o processo de escolher esses valores de forma sistemática, com dados, e sem enganar a nós mesmos na hora de avaliar.</p>
+  
+  <p class="aprof"><a href="configuracao-de-hiperparametros-material-de-estudo.pdf#page=2" target="_blank" rel="noopener">Para aprofundar: seção 01 do material de estudo</a> · inclui exemplos de parâmetros e hiperparâmetros de cada modelo.</p>
+</section>
+
+<section class="col">
+  <h2>Por que não escolher pelo teste</h2>
+  <p>A ideia mais simples seria treinar o modelo com vários valores de um hiperparâmetro, medir cada um no conjunto de teste e ficar com o melhor. O problema é que, assim, o conjunto de teste passa a fazer parte da escolha. O valor escolhido é justamente o que se saiu melhor <em>naqueles</em> registros, em parte por mérito e em parte por sorte, e a métrica dele no teste deixa de ser uma estimativa honesta do desempenho em dados novos: fica <strong>otimista</strong>.</p>
+  <p>Por isso, como vimos na Aula 05, os dados são divididos em três papéis:</p>
+  <div class="tab-scroll"><table class="cmp dic"><thead><tr><th>Conjunto</th><th>Para que serve</th><th>Quando é usado</th></tr></thead><tbody>
+    <tr><th scope="row">Treinamento</th><td>Aprender os parâmetros do modelo.</td><td>Em cada configuração testada.</td></tr>
+    <tr><th scope="row">Validação</th><td>Comparar as configurações e escolher os hiperparâmetros.</td><td>Durante a busca, quantas vezes for preciso.</td></tr>
+    <tr><th scope="row">Teste</th><td>Estimar o desempenho do modelo final em dados novos.</td><td><strong>Uma única vez</strong>, no fim, depois de tudo escolhido.</td></tr>
+  </tbody></table></div>
+  <div class="destaque"><p style="margin:0 0 10px"><strong>O conjunto de teste não participa de nenhuma escolha.</strong> Nem dos hiperparâmetros, nem do limiar de decisão, nem da padronização dos atributos. Se participar, ele vira mais um conjunto de validação, e o resultado final deixa de valer para dados novos.</p>
+  <p style="margin:0 0 6px">Quando informação que não estaria disponível no momento da previsão entra no treinamento ou nas escolhas do modelo, temos <strong>vazamento de dados</strong> (<em>data leakage</em>). O modelo parece ótimo na avaliação e falha na prática (Kaufman et al., 2012). Os casos mais comuns:</p>
+  <ul style="margin:0">
+    <li><strong>Escolher pelo teste:</strong> hiperparâmetros, limiar ou atributos escolhidos olhando o resultado no conjunto de teste.</li>
+    <li><strong>Preparar antes de separar:</strong> padronizar com a média e o desvio de toda a base, ou balancear as classes antes de separar o teste. Os números do teste entram no treinamento.</li>
+    <li><strong>Atributos que entregam a resposta:</strong> como o resultado do exame laboratorial para prever dengue (Aula 06), ou uma informação registrada depois do desfecho.</li>
+    <li><strong>Registros repetidos ou ligados:</strong> o mesmo paciente no treinamento e no teste, ou, com dados no tempo, treinar com o futuro para prever o passado.</li>
+  </ul></div>
+  
+  <p class="aprof"><a href="configuracao-de-hiperparametros-material-de-estudo.pdf#page=3" target="_blank" rel="noopener">Para aprofundar: seção 02 do material de estudo</a> · inclui a divisão em três conjuntos com números.</p>
+</section>
+
+<section class="col">
+  <h2>Validação cruzada para escolher</h2>
+  <p>Separar um único conjunto de validação desperdiça dados e deixa a escolha à mercê de uma divisão. A alternativa é a <strong>validação cruzada com k dobras</strong> (<em>k-fold cross-validation</em>), também da Aula 05, aplicada só ao conjunto de treinamento. Para cada configuração candidata:</p>
+  <ol>
+    <li>dividimos o treinamento em <em>k</em> dobras, de forma estratificada;</li>
+    <li>treinamos o modelo <em>k</em> vezes, cada vez com <em>k</em> − 1 dobras, e medimos na dobra que ficou de fora;</li>
+    <li>a nota da configuração é a <strong>média</strong> das <em>k</em> medidas, acompanhada do <strong>desvio-padrão</strong>, que mostra o quanto ela varia de uma dobra para outra.</li>
+  </ol>
+  <p>Vamos usar o exemplo dos quadrantes da Aula 09, agora mais realista: 200 pontos de treinamento, com 10% dos rótulos trocados de propósito para simular <strong>ruído</strong>, e um SVM com kernel RBF e C = 1. Mova o valor de γ e compare a acurácia no treinamento com a acurácia na validação cruzada, com 5 dobras.</p>
+  <figure class="larga-fig">
+    <div class="controle"><label for="gam">γ</label><input type="range" id="gam" min="0" max="10" value="5" step="1"><output id="gamV"></output></div>
+    <div class="svmfig"><svg id="curvaVal" viewBox="0 0 460 340" role="img" aria-label="Acurácia no treinamento e na validação cruzada conforme γ"></svg>
+      <div class="medidas"><div class="m" id="vTr">Acurácia no treinamento<b>–</b></div><div class="m" id="vCv">Validação cruzada (média)<b>–</b></div><div class="m" id="vSd">Desvio entre as dobras<b>–</b></div><div class="m" id="vDobras">As 5 dobras<b>–</b></div><p class="nota" id="vTxt"></p></div></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>200 pontos nos quatro quadrantes, com 10% dos rótulos trocados; SVM com kernel RBF e C = 1; validação cruzada estratificada com 5 dobras. Os pontos claros são as 5 dobras de cada γ.</figcaption>
+  </figure>
+  <p>Essa figura é uma <strong>curva de validação</strong> (<em>validation curve</em>). Com γ pequeno, o modelo é simples demais e erra no treinamento e na validação: <strong>subajuste</strong>. Com γ grande, ele decora o treinamento, inclusive o ruído, e a acurácia de validação despenca: <strong>sobreajuste</strong>. O melhor γ fica no meio, onde a validação cruzada é máxima, e não onde o treinamento é máximo.</p>
+  
+  <p class="aprof"><a href="configuracao-de-hiperparametros-material-de-estudo.pdf#page=4" target="_blank" rel="noopener">Para aprofundar: seção 03 do material de estudo</a> · inclui a validação cruzada dobra a dobra.</p>
+</section>
+
+<section class="col">
+  <h2>A métrica da busca</h2>
+  <p>Para comparar configurações, a busca precisa de uma métrica, e a escolha da métrica muda o resultado. Voltamos à árvore de decisão com os sinais clínicos, agora como recomendado na Aula 10: 3.000 registros com a prevalência real, cerca de 66% de dengue, e um conjunto de teste separado de forma estratificada. Com validação cruzada de 5 dobras nos 2.100 registros de treinamento, testamos profundidades de 1 a 10. Escolha a métrica da busca.</p>
+  <figure class="larga-fig">
+    <div class="controle"><span style="font-weight:700" id="rotM">Métrica</span><div class="chips" id="chipsM" role="group" aria-labelledby="rotM" style="margin:0"></div></div>
+    <div class="svmfig"><svg id="curvaMet" viewBox="0 0 460 300" role="img" aria-label="Métrica na validação cruzada por profundidade da árvore"></svg>
+      <div class="medidas"><div class="m" id="mProf">Profundidade escolhida<b>–</b></div><div class="m" id="mVal">Valor na validação cruzada<b>–</b></div><div class="m" id="mRec">Sensibilidade dessa árvore<b>–</b></div><div class="m" id="mBal">Acurácia balanceada dessa árvore<b>–</b></div><p class="nota" id="mTxt"></p></div></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>3.000 registros simulados com as frequências reais do SINAN (Tabela 6 de da Silva Neto et al., 2022) e 66% de dengue; 2.100 de treinamento, avaliados por validação cruzada estratificada com 5 dobras.</figcaption>
+  </figure>
+  <p>Pela acurácia, a busca escolhe uma árvore rasa que responde “dengue” para quase todo mundo: sensibilidade perto de 100% e acurácia balanceada de 0,50, como o classificador da classe majoritária da Aula 10. Pela AUC, que não depende do limiar nem da prevalência, a busca prefere uma árvore mais funda, que ordena melhor os casos. A métrica certa vem da pergunta do problema, como discutimos na Aula 10, e precisa ser decidida <strong>antes</strong> da busca.</p>
+  
+  <p class="aprof"><a href="configuracao-de-hiperparametros-material-de-estudo.pdf#page=6" target="_blank" rel="noopener">Para aprofundar: seção 04 do material de estudo</a> · inclui a tabela com as três métricas por profundidade.</p>
+</section>
+
+<section class="col">
+  <h2>Busca em grade</h2>
+  <p>Com mais de um hiperparâmetro, precisamos testar combinações. Na <strong>busca em grade</strong> (<em>grid search</em>), escolhemos uma lista de valores para cada hiperparâmetro e testamos todas as combinações, cada uma com validação cruzada. Para o SVM, com 6 valores de C e 6 de γ, são 36 combinações e 180 treinamentos com 5 dobras. Os valores costumam seguir uma <strong>escala logarítmica</strong> (0,01, 0,1, 1, 10…), porque o efeito de C e γ muda por ordens de grandeza. Toque numa célula.</p>
+  <figure class="larga-fig">
+    <div class="svmfig"><svg id="grade" viewBox="0 0 460 420" role="img" aria-label="Acurácia na validação cruzada para cada combinação de C e γ"></svg>
+      <div class="medidas"><div class="m" id="gSel">Combinação<b>–</b></div><div class="m" id="gVal">Validação cruzada<b>–</b></div><p class="nota" id="gTxt"></p></div></div>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Os 200 pontos da seção 03. Cada célula é a acurácia média na validação cruzada com 5 dobras; quanto mais escura, maior. A célula com borda vermelha é a melhor.</figcaption>
+  </figure>
+  <p>A melhor combinação é C = 1 e γ = 1, com 0,825 na validação cruzada. Repare na faixa diagonal de valores altos: C e γ interagem, e um γ maior pede um C menor, e vice-versa. A busca em grade é simples e fácil de explicar, mas o número de combinações cresce depressa: com 4 hiperparâmetros e 6 valores para cada, já seriam 1.296 combinações.</p>
+  <div class="pp" role="note" id="pp1"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">A melhor combinação da grade teve 0,825 na validação cruzada, e outra teve 0,815. Dá para dizer que a primeira é melhor?</p><p class="pp-d">Toque na melhor célula e olhe o número depois do ±. <a href="#com1">Comentário no fim da página</a>.</p></div></div>
+  
+  <p class="aprof"><a href="configuracao-de-hiperparametros-material-de-estudo.pdf#page=7" target="_blank" rel="noopener">Para aprofundar: seção 05 do material de estudo</a> · inclui a grade completa com os desvios.</p>
+</section>
+
+<section class="col">
+  <h2>Busca aleatória</h2>
+  <p>Na <strong>busca aleatória</strong> (<em>random search</em>), em vez de uma grade, sorteamos um número fixo de combinações dentro de intervalos, também em escala logarítmica. Bergstra e Bengio (2012) mostraram que, com o mesmo número de tentativas, a busca aleatória costuma encontrar configurações tão boas quanto a grade, ou melhores, porque em geral só alguns hiperparâmetros importam de verdade, e o sorteio testa muito mais valores diferentes de cada um.</p>
+  <figure class="larga-fig">
+    <div class="controle"><button type="button" class="bt sim" id="btGrade">Mostrar a grade</button><button type="button" class="bt" id="btAleat">Mostrar a busca aleatória</button></div>
+    <div class="duasfig"><svg id="mapa" viewBox="0 0 460 420" role="img" aria-label="Mapa da acurácia de validação com os pontos testados"></svg></div>
+    <p class="nota" id="aTxt"></p>
+    <figcaption><span class="fd sint">Dados sintéticos</span>O fundo mostra a acurácia na validação cruzada num mapa fino de C e γ (26 × 26 combinações), só para referência. Os pontos são as combinações que cada busca testou.</figcaption>
+  </figure>
+  <p>A busca aleatória com só 20 sorteios encontrou C ≈ 3,3 e γ ≈ 0,58, com 0,820 na validação cruzada, praticamente empatada com a melhor da grade, que testou 36 combinações. No conjunto de teste, com 2.000 pontos novos, as duas ficam em 0,82. Ela também testou valores que a grade nunca veria, entre 0,1 e 1, por exemplo. Para buscas ainda mais eficientes existem métodos que usam os resultados anteriores para escolher a próxima tentativa, como a <strong>otimização bayesiana</strong>, mas eles ficam fora desta aula.</p>
+  
+  <p class="aprof"><a href="configuracao-de-hiperparametros-material-de-estudo.pdf#page=8" target="_blank" rel="noopener">Para aprofundar: seção 06 do material de estudo</a> · inclui a lista dos 20 sorteios.</p>
+</section>
+
+<section class="col">
+  <h2>Combinando as duas buscas</h2>
+  <p>As duas buscas podem trabalhar juntas, numa estratégia <strong>do grosso para o fino</strong> (<em>coarse-to-fine</em>): primeiro, uma busca aleatória em intervalos amplos, para descobrir em que região do espaço estão as boas configurações; depois, uma busca em grade mais fina, só em volta da melhor região encontrada. A ideia é antiga e recomendada, por exemplo, no guia prático dos autores da biblioteca LIBSVM para escolher C e γ (Hsu; Chang; Lin, 2003). Ela gasta poucas tentativas onde o desempenho é ruim e concentra o esforço onde ele é bom.</p>
+  <p>Nos nossos dados, a busca aleatória apontou C ≈ 3,3 e γ ≈ 0,58. Uma grade de 5 × 5 em volta desse ponto, meio fator de 10 para cada lado, encontrou C ≈ 1,9 e γ ≈ 0,18, com <span class="res">0,845</span> na validação cruzada, acima dos 0,820 da busca aleatória. Parece um ganho. Mas, no conjunto de teste, essa configuração acertou <span class="res">0,801</span>, menos que os 0,82 das buscas anteriores.</p>
+  <figure class="larga-fig">
+    <div class="duasfig"><svg id="mapaFina" viewBox="0 0 460 420" role="img" aria-label="Busca aleatória seguida de uma grade fina em volta do melhor ponto"></svg></div>
+    <p class="nota" id="fTxt"></p>
+    <figcaption><span class="fd sint">Dados sintéticos</span>Os 200 pontos da seção 03. Círculos vazados: os 20 sorteios da busca aleatória. Retângulo tracejado: a região refinada, com uma grade de 5 × 5 em volta do melhor sorteio. Ponto vermelho: a melhor configuração da grade fina. O fundo é o mesmo mapa de referência da seção 06.</figcaption>
+  </figure>
+  <p>O que aconteceu? O ganho de 0,025 na validação cruzada é menor que o desvio-padrão entre as 5 dobras, de cerca de 0,04: as notas de uma mesma configuração variam mais de uma dobra para outra do que a diferença entre as configurações. Ou seja, a grade fina testou mais 25 combinações quase equivalentes e ficou com a que teve mais sorte nas dobras. Repare também que a melhor configuração ficou na <strong>borda</strong> da grade fina, no menor γ testado, o que indica que a região deveria ser ampliada antes de concluir alguma coisa.</p>
+  <div class="destaque"><strong>A estratégia faz sentido, com três cuidados.</strong> Primeiro, refinar só vale a pena quando as diferenças entre as configurações são maiores que o <strong>desvio-padrão entre as dobras</strong> da validação cruzada (seção 03), o número depois do ± na grade da seção 05: aqui, cerca de 0,04. Segundo, se a melhor configuração cair na borda da região refinada, amplie a região. Terceiro, cada rodada de busca é mais uma escolha feita com os mesmos dados, e a nota da vencedora fica cada vez mais otimista: o teste, usado uma única vez no fim, continua sendo a única medida honesta.</div>
+  
+  <p class="aprof"><a href="configuracao-de-hiperparametros-material-de-estudo.pdf#page=8" target="_blank" rel="noopener">Para aprofundar: seção 07 do material de estudo</a> · inclui a grade fina completa.</p>
+</section>
+
+<section class="col">
+  <h2>O fluxo completo</h2>
+  <p>Juntando tudo o que vimos nas Aulas 10 e 11, o fluxo para treinar e avaliar um modelo com hiperparâmetros é este:</p>
+  <ol>
+    <li><strong>Separar o teste</strong> antes de qualquer outra coisa, de forma estratificada, com a proporção real das classes.</li>
+    <li><strong>Escolher a métrica</strong> de acordo com o problema.</li>
+    <li><strong>Definir o espaço de busca</strong>: quais hiperparâmetros e quais valores ou intervalos.</li>
+    <li><strong>Buscar com validação cruzada</strong> no treinamento, em grade ou aleatória. Toda etapa que aprende com os dados, como a padronização dos atributos ou um balanceamento, fica <strong>dentro</strong> de cada dobra.</li>
+    <li><strong>Retreinar</strong> o modelo com a melhor configuração, usando todo o conjunto de treinamento.</li>
+    <li><strong>Avaliar uma única vez</strong> no teste e relatar o resultado com a métrica escolhida.</li>
+  </ol>
+  <div class="destaque"><strong>A validação cruzada escolhe; o teste avalia.</strong> A nota da melhor configuração na validação cruzada também é um pouco otimista, porque ela foi a vencedora entre muitas. O número que vale para dados novos é o do teste, medido uma única vez.</div>
+  <div class="pp" role="note" id="pp2"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="var(--tinta)"/><text x="13" y="18.5" text-anchor="middle" font-size="16" font-weight="800" fill="var(--fundo)" font-family="Poppins,sans-serif">?</text></svg><div><span class="pp-t">Para pensar</span><p class="pp-q">Por que a nota da melhor configuração na validação cruzada tende a ser maior que o desempenho real do modelo?</p><p class="pp-d">Pense no que acontece quando escolhemos a maior entre 36 notas que têm um pouco de acaso. <a href="#com2">Comentário no fim da página</a>.</p></div></div>
+  
+  <p class="aprof"><a href="configuracao-de-hiperparametros-material-de-estudo.pdf#page=9" target="_blank" rel="noopener">Para aprofundar: seção 08 do material de estudo</a> · inclui o fluxo num diagrama.</p>
+</section>
+
+<section class="col">
+  <h2>Configuração de hiperparâmetros no scikit-learn</h2>
+  <p>O scikit-learn faz a busca, a validação cruzada e o retreinamento numa única chamada.</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p><code>GridSearchCV(modelo, param_grid, cv=5, scoring="roc_auc")</code> testa todas as combinações de <code>param_grid</code>; <code>RandomizedSearchCV(modelo, param_distributions, n_iter=20, ...)</code> sorteia <code>n_iter</code> combinações, por exemplo com <code>loguniform(1e-2, 1e3)</code> do <code>scipy.stats</code>. Em classificação, <code>cv=5</code> já usa dobras estratificadas. Depois do <code>fit</code>, <code>best_params_</code> traz a melhor combinação, <code>best_score_</code> a nota dela na validação cruzada e <code>cv_results_</code> todas as notas, com médias e desvios. Com <code>refit=True</code>, o padrão, o modelo é retreinado com a melhor combinação em todo o treinamento e fica pronto para <code>score(X_teste, y_teste)</code>. Coloque a padronização num <code>Pipeline</code> com o modelo, para que ela seja calculada dentro de cada dobra.</p></div></div>
+  
+  <p class="aprof"><a href="configuracao-de-hiperparametros-material-de-estudo.pdf#page=10" target="_blank" rel="noopener">Para aprofundar: seção 09 do material de estudo</a> · inclui um exemplo de código curto.</p>
+</section>
+
+<section class="col coment" id="comentarios">
+  <h2 class="sem-n">Comentários sobre as perguntas para pensar</h2>
+  <h3 id="com1">0,825 contra 0,815</h3>
+  <p>Não dá para afirmar. A diferença entre as duas combinações é de 0,01, e o desvio-padrão da melhor delas entre as 5 dobras é de 0,045: as notas de cada dobra variam bem mais que a diferença entre as configurações. Com 200 registros, cada dobra tem só 40, e um ou dois acertos a mais numa dobra já mudam a média. Na prática, várias combinações da faixa diagonal da grade são equivalentes.</p>
+  <p>Quando há empate técnico, um critério comum é ficar com a configuração <strong>mais simples</strong>, que tende a generalizar melhor: no SVM, a de C menor ou γ menor; na árvore, a mais rasa. Uma regra usada na literatura é a do “um desvio-padrão”: escolher o modelo mais simples cuja média fica a menos de um desvio-padrão da melhor (Hastie; Tibshirani; Friedman, 2009).</p>
+  <div class="sk" role="note"><svg viewBox="0 0 24 22" aria-hidden="true"><path d="M12 1.5 23 20.5H1z" fill="var(--vermelho)"/><rect x="10.8" y="7.5" width="2.4" height="7" rx="1.2" fill="#fff"/><circle cx="12" cy="17.3" r="1.4" fill="#fff"/></svg><div><span class="sk-t">No scikit-learn</span><p>Em <code>cv_results_</code>, as colunas <code>mean_test_score</code> e <code>std_test_score</code> trazem a média e o desvio de cada combinação. O parâmetro <code>refit</code> também aceita uma função, que permite implementar a regra de um desvio-padrão e escolher a combinação mais simples entre as equivalentes.</p></div></div>
+  <p class="volta-pp"><a href="#pp1">Voltar à pergunta</a></p>
+  <h3 id="com2">Por que a melhor nota da validação cruzada é otimista</h3>
+  <p>Porque ela foi escolhida justamente por ser a maior. Cada nota da validação cruzada tem um pouco de acaso; ao testar 36 combinações e ficar com a maior, ficamos também com a que teve mais sorte. É o mesmo efeito de escolher pelo teste, em menor escala: a nota da vencedora, como estimativa de desempenho, tende a ser maior que o desempenho real (Varma; Simon, 2006; Cawley; Talbot, 2010).</p>
+  <p>Por isso o teste fica separado e é usado uma única vez. Quando não há dados para um teste separado, a solução é a <strong>validação cruzada aninhada</strong> (<em>nested cross-validation</em>): uma validação cruzada de fora estima o desempenho, e, dentro de cada dobra de fora, outra validação cruzada escolhe os hiperparâmetros.</p>
+  <p class="volta-pp"><a href="#pp2">Voltar à pergunta</a></p>
+</section>
+</main>
+
+<footer class="col">
+  <p><strong>Dados.</strong> <span class="fd sint">Dados sintéticos</span>Os pontos dos quadrantes foram sorteados para o exemplo, com 10% dos rótulos trocados. Os registros clínicos foram simulados com as frequências reais do SINAN (Tabela 6 de da Silva Neto et al., 2022), com 66% de dengue.</p>
+  <p><strong>Referências.</strong></p>
+  <ol>
+    <li>Bergstra, J.; Bengio, Y. Random search for hyper-parameter optimization. <em>Journal of Machine Learning Research</em> 13, 281–305 (2012).</li>
+    <li>Cawley, G. C.; Talbot, N. L. C. On over-fitting in model selection and subsequent selection bias in performance evaluation. <em>Journal of Machine Learning Research</em> 11, 2079–2107 (2010).</li>
+    <li>Chandramouli, S.; Dutt, S.; Das, A. K. <em>Machine Learning</em>. Pearson, 2018.</li>
+    <li>da Silva Neto, S. R. et al. Arboviral disease record data — Dengue and Chikungunya, Brazil, 2013–2020. <em>Scientific Data</em> 9, 198 (2022).</li>
+    <li>Hastie, T.; Tibshirani, R.; Friedman, J. <em>The Elements of Statistical Learning</em>. 2. ed. Springer, 2009.</li>
+    <li>Hsu, C.-W.; Chang, C.-C.; Lin, C.-J. <em>A Practical Guide to Support Vector Classification</em>. National Taiwan University, 2003. <a href="https://www.csie.ntu.edu.tw/~cjlin/papers/guide/guide.pdf">csie.ntu.edu.tw/~cjlin/papers/guide/guide.pdf</a>.</li>
+    <li>Kaufman, S.; Rosset, S.; Perlich, C.; Stitelman, O. Leakage in data mining: formulation, detection, and avoidance. <em>ACM Transactions on Knowledge Discovery from Data</em> 6(4), 15 (2012).</li>
+    <li>Varma, S.; Simon, R. Bias in error estimation when using cross-validation for model selection. <em>BMC Bioinformatics</em> 7, 91 (2006).</li>
+    <li>scikit-learn. Tuning the hyper-parameters of an estimator. <a href="https://scikit-learn.org/stable/modules/grid_search.html">scikit-learn.org/stable/modules/grid_search.html</a>.</li>
+  </ol>
+  <p class="nota"><strong>Sobre este material.</strong> Este material foi preparado pela Profa. Patricia Takako Endo a partir do seu próprio material de aula, com o apoio do Claude, assistente de inteligência artificial da Anthropic.</p>
+  <div class="rodape"><span>dotLAB · Grupo de Pesquisa em Transformação Digital · UPE</span><span>dotlabbrazil.com.br</span></div>
+</footer>
+<script>
+(function(){
+const SV={"X": [[-2.486, -1.579], [1.808, 0.493], [-2.435, -0.401], [-0.126, -2.042], [1.407, -2.318], [-0.653, 0.1], [-0.416, 0.521], [1.427, 2.738], [-1.295, 0.891], [1.177, -1.244], [-2.991, 2.841], [-1.21, -1.116], [2.35, 0.511], [-0.172, 1.64], [-2.818, 1.242], [-0.755, -2.455], [0.963, 2.589], [-1.757, 0.781], [-1.211, 1.451], [1.333, -1.688], [1.979, 0.946], [1.097, 1.92], [-0.429, 1.552], [2.271, -2.386], [2.099, -0.636], [-0.122, -2.122], [1.191, -1.248], [2.227, -1.348], [0.371, -0.602], [0.677, -1.82], [-1.918, 1.481], [1.513, 0.402], [2.526, -1.765], [2.105, -1.986], [2.786, 0.742], [0.641, 2.823], [1.722, 1.74], [-2.675, -0.784], [-2.491, -1.839], [-1.717, 2.152], [-2.239, -1.219], [-0.043, 2.097], [2.791, 1.249], [-1.718, 0.27], [1.236, -2.689], [1.079, -0.79], [0.538, 1.017], [1.015, 0.138], [0.328, -1.811], [-0.029, -2.248], [-0.116, 0.217], [1.645, -0.638], [-2.882, 0.166], [-1.769, 1.448], [-0.668, -0.717], [2.457, -0.642], [-0.907, -0.912], [-0.115, -2.44], [0.28, 2.529], [0.378, 1.463], [2.683, 2.053], [1.464, 1.879], [1.921, -1.477], [-0.108, -0.944], [-1.43, 0.429], [-1.093, 0.712], [0.494, -2.374], [-0.345, -0.661], [1.24, -2.471], [-1.986, 0.076], [-0.572, 0.992], [-1.003, -1.817], [2.591, -1.537], [-2.118, -1.321], [-0.962, -1.649], [0.218, 2.622], [-2.244, -0.509], [1.009, 2.308], [2.999, -2.138], [0.224, 2.287], [-2.682, 0.53], [-1.957, 1.607], [2.626, 0.23], [-2.946, -2.614], [-0.506, 2.084], [-1.579, 1.015], [-0.568, -1.409], [1.223, -1.15], [-0.769, 1.592], [-0.029, 1.704], [0.098, -2.04], [-0.338, 2.237], [0.39, 2.789], [-2.993, -0.958], [1.614, 1.117], [0.366, 0.982], [2.259, 1.101], [0.283, 0.375], [0.998, -1.057], [1.017, 0.69], [1.715, -0.119], [-2.838, 0.222], [2.146, 0.84], [0.861, -0.654], [-0.861, 1.313], [-2.533, 2.199], [2.258, 2.775], [-2.186, -2.308], [2.364, -0.593], [-1.378, -0.707], [0.957, -2.031], [-0.077, 0.96], [1.325, -2.926], [1.865, -0.395], [-0.385, 0.374], [-1.319, 2.32], [-1.727, 0.256], [-1.992, 0.697], [2.411, 2.296], [-2.192, 0.749], [2.355, -1.798], [-0.512, 1.279], [1.429, -0.293], [0.832, 1.014], [-0.881, 0.912], [0.465, 1.184], [0.07, -0.981], [-0.394, 2.535], [-1.875, -2.11], [-2.927, 2.113], [2.932, -1.581], [-1.403, -1.81], [0.601, -0.089], [1.923, -1.742], [2.268, -0.216], [1.847, 1.812], [2.465, -0.007], [0.658, 0.366], [-1.858, 0.009], [2.56, 2.453], [-2.871, 0.98], [-1.039, -2.184], [-2.163, 1.77], [2.755, 0.121], [-0.699, 0.059], [1.976, 1.48], [-2.615, -1.725], [2.206, -0.042], [0.946, 1.665], [0.82, 1.403], [0.274, -1.624], [-1.877, 2.961], [-2.937, 1.145], [2.284, -1.612], [-2.709, -0.605], [-1.02, -0.23], [-0.436, 2.652], [-2.284, 2.664], [-2.726, 2.629], [-1.002, 1.363], [-2.981, -0.316], [1.067, 0.77], [1.838, -2.079], [-0.593, 0.682], [-2.828, 2.014], [-0.503, -1.524], [-1.665, 0.906], [-2.713, -1.533], [-1.176, -1.449], [1.384, 0.555], [2.424, 1.206], [-1.233, -1.055], [-2.261, -1.545], [0.628, 1.386], [-1.225, -0.935], [1.817, 2.751], [-2.492, -2.572], [1.555, -0.026], [-0.45, 0.801], [1.562, -2.581], [2.771, 2.748], [-0.5, -0.183], [-1.366, 0.525], [-1.769, 0.208], [2.426, 0.037], [1.963, -1.925], [2.301, -2.261], [-1.723, 1.321], [-1.188, -2.287], [-2.479, 1.76], [-2.881, -2.662], [2.673, 1.693], [-0.777, -1.846], [2.203, 1.726], [1.011, 0.182], [0.152, 2.868], [0.134, -2.496], [-2.551, 0.573], [1.396, 0.769], [1.457, -1.235]], "y": [1, 1, 1, 1, -1, -1, -1, 1, -1, -1, -1, 1, 1, -1, -1, 1, 1, -1, -1, -1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, 1, -1, -1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, 1, 1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, -1, -1, 1, 1, 1, -1, 1, 1, -1, 1, -1, -1, 1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, 1, 1, -1, 1, -1, -1, -1, -1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, 1, 1, -1, 1, 1, -1, -1, -1, 1, 1, -1, -1, 1, -1, -1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, -1], "Cs": [0.01, 0.1, 1, 10, 100, 1000], "Gs": [0.001, 0.01, 0.1, 1, 10, 100], "grid": [[[0.555, 0.01], [0.555, 0.01], [0.555, 0.01], [0.56, 0.012], [0.58, 0.019], [0.755, 0.019]], [[0.555, 0.01], [0.555, 0.01], [0.565, 0.012], [0.76, 0.02], [0.815, 0.034], [0.815, 0.041]], [[0.555, 0.01], [0.715, 0.02], [0.805, 0.01], [0.82, 0.029], [0.81, 0.034], [0.81, 0.046]], [[0.555, 0.01], [0.76, 0.041], [0.825, 0.045], [0.795, 0.066], [0.735, 0.089], [0.72, 0.058]], [[0.555, 0.01], [0.555, 0.01], [0.765, 0.041], [0.725, 0.042], [0.725, 0.042], [0.725, 0.042]], [[0.555, 0.01], [0.555, 0.01], [0.585, 0.025], [0.59, 0.02], [0.59, 0.02], [0.59, 0.02]]], "vc": [[0.001, 0.555, 0.555, [0.55, 0.55, 0.55, 0.55, 0.575]], [0.003, 0.555, 0.555, [0.55, 0.55, 0.55, 0.55, 0.575]], [0.01, 0.59, 0.565, [0.575, 0.575, 0.55, 0.55, 0.575]], [0.03, 0.759, 0.755, [0.725, 0.75, 0.75, 0.775, 0.775]], [0.1, 0.831, 0.805, [0.8, 0.8, 0.8, 0.825, 0.8]], [0.3, 0.847, 0.83, [0.85, 0.9, 0.8, 0.8, 0.8]], [1, 0.86, 0.825, [0.85, 0.9, 0.8, 0.8, 0.775]], [3, 0.886, 0.81, [0.825, 0.9, 0.75, 0.8, 0.775]], [10, 0.948, 0.765, [0.75, 0.825, 0.7, 0.775, 0.775]], [30, 0.995, 0.68, [0.675, 0.65, 0.65, 0.625, 0.8]], [100, 0.997, 0.585, [0.6, 0.575, 0.55, 0.575, 0.625]]], "lc": [-2.0, -1.8, -1.6, -1.4, -1.2, -1.0, -0.7999999999999998, -0.5999999999999999, -0.3999999999999999, -0.19999999999999996, 0.0, 0.20000000000000018, 0.40000000000000036, 0.6000000000000001, 0.8000000000000003, 1.0, 1.2000000000000002, 1.4000000000000004, 1.6, 1.8000000000000003, 2.0, 2.2, 2.4000000000000004, 2.6000000000000005, 2.8000000000000007, 3.0], "lg": [-3.0, -2.8, -2.6, -2.4, -2.2, -2.0, -1.7999999999999998, -1.5999999999999999, -1.4, -1.2, -1.0, -0.7999999999999998, -0.5999999999999996, -0.3999999999999999, -0.19999999999999973, 0.0, 0.20000000000000018, 0.40000000000000036, 0.6000000000000001, 0.8000000000000003, 1.0, 1.2000000000000002, 1.4000000000000004, 1.6000000000000005, 1.8000000000000007, 2.0], "dense": [[0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.55, 0.56, 0.565, 0.565, 0.565, 0.57, 0.58, 0.62, 0.655, 0.675, 0.74, 0.755], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.55, 0.56, 0.565, 0.565, 0.565, 0.58, 0.62, 0.65, 0.675, 0.74, 0.755, 0.77, 0.795], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.55, 0.56, 0.565, 0.565, 0.58, 0.615, 0.65, 0.675, 0.74, 0.755, 0.775, 0.79, 0.79, 0.805], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.55, 0.56, 0.565, 0.575, 0.61, 0.645, 0.675, 0.735, 0.765, 0.775, 0.79, 0.795, 0.805, 0.815, 0.805], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.55, 0.56, 0.57, 0.6, 0.64, 0.675, 0.73, 0.765, 0.775, 0.79, 0.795, 0.805, 0.815, 0.8, 0.805, 0.815], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.55, 0.565, 0.59, 0.65, 0.68, 0.74, 0.76, 0.775, 0.79, 0.795, 0.81, 0.815, 0.81, 0.81, 0.82, 0.805, 0.815], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.55, 0.585, 0.645, 0.675, 0.73, 0.77, 0.775, 0.79, 0.795, 0.81, 0.805, 0.81, 0.815, 0.81, 0.81, 0.82, 0.82, 0.83], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.55, 0.56, 0.605, 0.67, 0.72, 0.77, 0.78, 0.78, 0.795, 0.805, 0.805, 0.815, 0.805, 0.81, 0.83, 0.825, 0.835, 0.83, 0.825, 0.82], [0.555, 0.555, 0.555, 0.555, 0.555, 0.55, 0.585, 0.66, 0.7, 0.755, 0.78, 0.78, 0.795, 0.815, 0.815, 0.825, 0.805, 0.83, 0.83, 0.83, 0.835, 0.825, 0.825, 0.815, 0.825, 0.825], [0.555, 0.555, 0.555, 0.555, 0.55, 0.595, 0.695, 0.74, 0.775, 0.785, 0.8, 0.82, 0.81, 0.825, 0.815, 0.825, 0.835, 0.825, 0.83, 0.835, 0.825, 0.825, 0.82, 0.825, 0.81, 0.805], [0.555, 0.555, 0.555, 0.555, 0.58, 0.715, 0.785, 0.79, 0.805, 0.81, 0.805, 0.835, 0.825, 0.835, 0.835, 0.82, 0.83, 0.82, 0.815, 0.815, 0.81, 0.81, 0.81, 0.81, 0.805, 0.81], [0.555, 0.555, 0.555, 0.555, 0.655, 0.8, 0.81, 0.815, 0.815, 0.83, 0.84, 0.83, 0.835, 0.825, 0.82, 0.815, 0.815, 0.815, 0.81, 0.81, 0.82, 0.815, 0.81, 0.805, 0.8, 0.785], [0.555, 0.555, 0.555, 0.555, 0.735, 0.81, 0.81, 0.83, 0.825, 0.825, 0.835, 0.83, 0.82, 0.82, 0.815, 0.815, 0.82, 0.815, 0.815, 0.815, 0.8, 0.795, 0.785, 0.785, 0.76, 0.755], [0.555, 0.555, 0.555, 0.555, 0.715, 0.8, 0.82, 0.815, 0.82, 0.83, 0.83, 0.825, 0.83, 0.825, 0.815, 0.815, 0.815, 0.815, 0.8, 0.79, 0.79, 0.785, 0.785, 0.77, 0.755, 0.74], [0.555, 0.555, 0.555, 0.555, 0.615, 0.8, 0.81, 0.83, 0.835, 0.83, 0.83, 0.825, 0.825, 0.82, 0.82, 0.815, 0.81, 0.795, 0.79, 0.765, 0.77, 0.745, 0.735, 0.725, 0.71, 0.71], [0.555, 0.555, 0.555, 0.555, 0.555, 0.76, 0.81, 0.835, 0.83, 0.825, 0.825, 0.825, 0.825, 0.82, 0.82, 0.795, 0.775, 0.78, 0.765, 0.74, 0.735, 0.735, 0.73, 0.73, 0.72, 0.72], [0.555, 0.555, 0.555, 0.555, 0.555, 0.6, 0.785, 0.825, 0.825, 0.83, 0.83, 0.825, 0.82, 0.805, 0.79, 0.775, 0.755, 0.76, 0.74, 0.725, 0.725, 0.725, 0.715, 0.715, 0.72, 0.72], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.655, 0.81, 0.82, 0.83, 0.825, 0.795, 0.78, 0.77, 0.76, 0.76, 0.74, 0.73, 0.715, 0.72, 0.715, 0.72, 0.72, 0.72, 0.72, 0.72], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.56, 0.73, 0.805, 0.815, 0.8, 0.77, 0.765, 0.755, 0.73, 0.71, 0.705, 0.71, 0.705, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72, 0.72], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.59, 0.76, 0.785, 0.78, 0.77, 0.765, 0.73, 0.725, 0.725, 0.725, 0.73, 0.73, 0.73, 0.735, 0.735, 0.735, 0.735, 0.735, 0.735], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.56, 0.64, 0.76, 0.765, 0.76, 0.735, 0.73, 0.725, 0.725, 0.725, 0.725, 0.725, 0.725, 0.725, 0.725, 0.725, 0.725, 0.725, 0.725], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.68, 0.735, 0.745, 0.735, 0.735, 0.735, 0.73, 0.73, 0.73, 0.73, 0.73, 0.73, 0.73, 0.73, 0.73, 0.73, 0.73], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.605, 0.7, 0.705, 0.695, 0.695, 0.695, 0.7, 0.705, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.58, 0.68, 0.68, 0.685, 0.685, 0.685, 0.685, 0.685, 0.685, 0.685, 0.685, 0.685, 0.685, 0.685, 0.685, 0.685, 0.685], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.565, 0.61, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65, 0.65], [0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.555, 0.585, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59, 0.59]], "rs": [[1.125, 1.486, 0.695], [1.878, -1.874, 0.805], [-0.499, 1.368, 0.555], [-1.974, 1.106, 0.555], [1.985, -0.66, 0.81], [-0.485, -1.608, 0.585], [-0.726, -0.775, 0.815], [0.523, -0.233, 0.82], [2.978, 0.963, 0.725], [1.111, 1.945, 0.595], [-0.923, -2.199, 0.555], [1.063, -2.78, 0.565], [-1.822, -0.426, 0.555], [0.331, 1.586, 0.685], [1.146, -0.429, 0.815], [0.484, -1.762, 0.765], [-1.941, -2.038, 0.555], [1.46, -1.997, 0.795], [-0.152, -2.981, 0.555], [2.15, -2.228, 0.8]], "fine": [[0.023, -0.733, 0.835, 0.034], [0.273, -0.733, 0.845, 0.043], [0.523, -0.733, 0.82, 0.048], [0.773, -0.733, 0.82, 0.048], [1.023, -0.733, 0.815, 0.041], [0.023, -0.483, 0.835, 0.037], [0.273, -0.483, 0.825, 0.047], [0.523, -0.483, 0.825, 0.047], [0.773, -0.483, 0.82, 0.048], [1.023, -0.483, 0.815, 0.051], [0.023, -0.233, 0.835, 0.046], [0.273, -0.233, 0.825, 0.045], [0.523, -0.233, 0.82, 0.043], [0.773, -0.233, 0.82, 0.048], [1.023, -0.233, 0.82, 0.048], [0.023, 0.017, 0.825, 0.045], [0.273, 0.017, 0.825, 0.052], [0.523, 0.017, 0.82, 0.048], [0.773, 0.017, 0.82, 0.053], [1.023, 0.017, 0.8, 0.061], [0.023, 0.267, 0.835, 0.054], [0.273, 0.267, 0.82, 0.048], [0.523, 0.267, 0.8, 0.057], [0.773, 0.267, 0.775, 0.079], [1.023, 0.267, 0.755, 0.076]]}, AR={"1": {"test_accuracy": [0.6595, 0.6595, 0.6595, 0.6595, 0.6571], "train_accuracy": [0.6589, 0.6589, 0.6589, 0.6589, 0.6595], "test_balanced_accuracy": [0.5, 0.5, 0.5, 0.5, 0.5], "train_balanced_accuracy": [0.5, 0.5, 0.5, 0.5, 0.5], "test_recall": [1.0, 1.0, 1.0, 1.0, 1.0], "train_recall": [1.0, 1.0, 1.0, 1.0, 1.0], "test_roc_auc": [0.5515, 0.5236, 0.534, 0.5429, 0.54], "train_roc_auc": [0.5351, 0.5421, 0.5395, 0.5372, 0.538]}, "2": {"test_accuracy": [0.6595, 0.6595, 0.6595, 0.6595, 0.6571], "train_accuracy": [0.6589, 0.6589, 0.6589, 0.6589, 0.6595], "test_balanced_accuracy": [0.5, 0.5, 0.5, 0.5, 0.5], "train_balanced_accuracy": [0.5, 0.5, 0.5, 0.5, 0.5], "test_recall": [1.0, 1.0, 1.0, 1.0, 1.0], "train_recall": [1.0, 1.0, 1.0, 1.0, 1.0], "test_roc_auc": [0.5747, 0.5428, 0.5427, 0.5361, 0.5674], "train_roc_auc": [0.5601, 0.5678, 0.5676, 0.5469, 0.5614]}, "3": {"test_accuracy": [0.6595, 0.6595, 0.6595, 0.6595, 0.6548], "train_accuracy": [0.6589, 0.6589, 0.6589, 0.6589, 0.6607], "test_balanced_accuracy": [0.5, 0.5, 0.5, 0.5, 0.4982], "train_balanced_accuracy": [0.5, 0.5, 0.5, 0.5, 0.5017], "test_recall": [1.0, 1.0, 1.0, 1.0, 0.9964], "train_recall": [1.0, 1.0, 1.0, 1.0, 1.0], "test_roc_auc": [0.5697, 0.5512, 0.5392, 0.5724, 0.5649], "train_roc_auc": [0.5739, 0.5815, 0.5852, 0.5665, 0.5799]}, "4": {"test_accuracy": [0.6571, 0.6595, 0.6595, 0.6595, 0.6548], "train_accuracy": [0.6601, 0.6589, 0.6595, 0.6589, 0.6607], "test_balanced_accuracy": [0.4999, 0.5, 0.5, 0.5, 0.4982], "train_balanced_accuracy": [0.503, 0.5, 0.5013, 0.5, 0.5017], "test_recall": [0.9928, 1.0, 1.0, 1.0, 0.9964], "train_recall": [0.9973, 1.0, 0.9991, 1.0, 1.0], "test_roc_auc": [0.5664, 0.5714, 0.5494, 0.5741, 0.5947], "train_roc_auc": [0.6013, 0.6032, 0.6006, 0.5828, 0.598]}, "5": {"test_accuracy": [0.6571, 0.6595, 0.6595, 0.6619, 0.6548], "train_accuracy": [0.6619, 0.6589, 0.6601, 0.6595, 0.6607], "test_balanced_accuracy": [0.5016, 0.5, 0.5, 0.5035, 0.4982], "train_balanced_accuracy": [0.5052, 0.5, 0.5017, 0.5009, 0.5022], "test_recall": [0.9892, 1.0, 1.0, 1.0, 0.9964], "train_recall": [0.9982, 1.0, 1.0, 1.0, 0.9991], "test_roc_auc": [0.5908, 0.5765, 0.5697, 0.5839, 0.6018], "train_roc_auc": [0.6223, 0.6156, 0.6171, 0.5909, 0.6107]}, "6": {"test_accuracy": [0.65, 0.6571, 0.6619, 0.6595, 0.6548], "train_accuracy": [0.6643, 0.6613, 0.6613, 0.6613, 0.6625], "test_balanced_accuracy": [0.4979, 0.4999, 0.5035, 0.5034, 0.4982], "train_balanced_accuracy": [0.51, 0.5043, 0.5043, 0.5039, 0.5048], "test_recall": [0.9747, 0.9928, 1.0, 0.9928, 0.9964], "train_recall": [0.9955, 0.9982, 0.9982, 0.9991, 0.9991], "test_roc_auc": [0.5842, 0.5784, 0.5779, 0.6009, 0.6014], "train_roc_auc": [0.6341, 0.627, 0.6301, 0.6093, 0.6255]}, "7": {"test_accuracy": [0.6571, 0.6452, 0.6524, 0.6548, 0.6571], "train_accuracy": [0.6661, 0.6649, 0.6637, 0.6631, 0.6643], "test_balanced_accuracy": [0.5016, 0.4909, 0.498, 0.5032, 0.5017], "train_balanced_accuracy": [0.5109, 0.5113, 0.5116, 0.5078, 0.5087], "test_recall": [0.9892, 0.9747, 0.9819, 0.9783, 0.9964], "train_recall": [0.9991, 0.9946, 0.9901, 0.9964, 0.9964], "test_roc_auc": [0.5764, 0.5552, 0.5809, 0.6138, 0.5932], "train_roc_auc": [0.6444, 0.6458, 0.6467, 0.6286, 0.6402]}, "8": {"test_accuracy": [0.65, 0.65, 0.6476, 0.65, 0.6476], "train_accuracy": [0.6679, 0.669, 0.6685, 0.6661, 0.6673], "test_balanced_accuracy": [0.4995, 0.4945, 0.4927, 0.4995, 0.5011], "train_balanced_accuracy": [0.516, 0.5161, 0.5165, 0.513, 0.5177], "test_recall": [0.9711, 0.9819, 0.9783, 0.9711, 0.9674], "train_recall": [0.9937, 0.9973, 0.9946, 0.9946, 0.9865], "test_roc_auc": [0.5867, 0.5634, 0.5647, 0.614, 0.5937], "train_roc_auc": [0.6584, 0.6591, 0.6611, 0.6477, 0.6573]}, "9": {"test_accuracy": [0.6524, 0.6524, 0.6333, 0.6405, 0.65], "train_accuracy": [0.6732, 0.6726, 0.6732, 0.6708, 0.6732], "test_balanced_accuracy": [0.4997, 0.498, 0.4886, 0.494, 0.5062], "train_balanced_accuracy": [0.523, 0.523, 0.5298, 0.5208, 0.5281], "test_recall": [0.9783, 0.9819, 0.9422, 0.9531, 0.9638], "train_recall": [0.9955, 0.9937, 0.981, 0.9928, 0.9829], "test_roc_auc": [0.5879, 0.58, 0.5438, 0.6062, 0.6045], "train_roc_auc": [0.6766, 0.6762, 0.679, 0.6654, 0.6741]}, "10": {"test_accuracy": [0.6381, 0.6452, 0.6333, 0.631, 0.6381], "train_accuracy": [0.6774, 0.675, 0.6798, 0.6738, 0.675], "test_balanced_accuracy": [0.4905, 0.4926, 0.4937, 0.4953, 0.5021], "train_balanced_accuracy": [0.5304, 0.5311, 0.5402, 0.5307, 0.5341], "test_recall": [0.9531, 0.9711, 0.9314, 0.9206, 0.9348], "train_recall": [0.9928, 0.9837, 0.9792, 0.981, 0.9756], "test_roc_auc": [0.5737, 0.5655, 0.5531, 0.579, 0.5824], "train_roc_auc": [0.6946, 0.6889, 0.6935, 0.6814, 0.6878]}};
+const fmt=(x,d=3)=>x.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const num=x=>{if(x>=1)return x.toLocaleString('pt-BR');return x.toLocaleString('pt-BR',{maximumFractionDigits:3});};
+const mean=a=>a.reduce((s,v)=>s+v,0)/a.length, sd=a=>{const m=mean(a);return Math.sqrt(mean(a.map(v=>(v-m)**2)));};
+
+// curva de validação
+const gam=document.getElementById('gam');
+function desVal(){const i=+gam.value,V=SV.vc,W=460,H=340,l=48,r=16,t=14,b=46,n=V.length;
+ const X=k=>l+k/(n-1)*(W-l-r),Y=v=>t+(1-(v-.5)/.5)*(H-t-b);
+ let g='';for(const v of [.5,.6,.7,.8,.9,1])g+=`<line x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}" class="ax"/><text x="${l-6}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="var(--tinta2)">${fmt(v,1)}</text>`;
+ V.forEach((v,k)=>{if(k%2===0)g+=`<text x="${X(k)}" y="${H-b+18}" font-size="11" text-anchor="middle" fill="var(--tinta2)">${num(v[0])}</text>`;});
+ g+=`<text x="${(W+l)/2}" y="${H-6}" font-size="12" text-anchor="middle" fill="var(--tinta2)">γ (escala logarítmica)</text>`;
+ V.forEach((v,k)=>v[3].forEach(f=>{g+=`<circle cx="${X(k)}" cy="${Y(f)}" r="3" fill="var(--vermelho)" opacity=".3"/>`;}));
+ const line=(j,c)=>`<polyline points="${V.map((v,k)=>X(k)+','+Y(v[j])).join(' ')}" fill="none" stroke="${c}" stroke-width="2.5"/>`;
+ g+=line(1,'var(--tinta)')+line(2,'var(--vermelho)');
+ g+=`<line x1="${X(i)}" x2="${X(i)}" y1="${t}" y2="${H-b}" stroke="var(--tinta2)" stroke-dasharray="3 4"/><circle cx="${X(i)}" cy="${Y(V[i][1])}" r="6" fill="var(--tinta)"/><circle cx="${X(i)}" cy="${Y(V[i][2])}" r="6" fill="var(--vermelho)"/>`;
+ g+=`<text x="${l+10}" y="${t+14}" font-size="12" fill="var(--tinta)" font-weight="700">— treinamento</text><text x="${l+10}" y="${t+30}" font-size="12" fill="var(--dengue-t)" font-weight="700">— validação cruzada</text>`;
+ document.getElementById('curvaVal').innerHTML=g;
+ const v=V[i];document.getElementById('gamV').textContent=num(v[0]);
+ document.getElementById('vTr').innerHTML=`Acurácia no treinamento<b>${fmt(v[1])}</b>`;
+ document.getElementById('vCv').innerHTML=`Validação cruzada (média)<b>${fmt(v[2])}</b>`;
+ document.getElementById('vSd').innerHTML=`Desvio entre as dobras<b>${fmt(sd(v[3]))}</b>`;
+ document.getElementById('vDobras').innerHTML=`As 5 dobras<b style="font-size:1rem;line-height:1.5">${v[3].map(x=>fmt(x,2)).join(' · ')}</b>`;
+ const best=V.reduce((a,b,k)=>b[2]>V[a][2]?k:a,0);
+ document.getElementById('vTxt').textContent=i===best?'Este é o γ com a maior acurácia na validação cruzada.':v[1]-v[2]>.08?'Sobreajuste: o treinamento vai muito bem, mas a validação cai.':v[2]<.7?'Subajuste: o modelo erra no treinamento e na validação.':'Perto do melhor valor: treinamento e validação andam juntos.';}
+gam.addEventListener('input',desVal);desVal();
+
+// métrica da busca
+const MET=[['test_accuracy','Acurácia'],['test_balanced_accuracy','Acurácia balanceada'],['test_roc_auc','AUC']];
+let mi='test_accuracy';
+function desMet(){const W=460,H=300,l=48,r=16,t=14,b=44,ds=Object.keys(AR).map(Number).sort((a,c)=>a-c);
+ const vals=ds.map(d=>mean(AR[d][mi]));const lo=Math.min(...vals)-.02,hi=Math.max(...vals)+.02;
+ const X=k=>l+k/(ds.length-1)*(W-l-r),Y=v=>t+(hi-v)/(hi-lo)*(H-t-b);
+ let best=0;vals.forEach((v,k)=>{if(v>vals[best]+1e-9)best=k;});
+ let g='';const st=(hi-lo)/4;for(let k=0;k<=4;k++){const v=lo+k*st;g+=`<line x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}" class="ax"/><text x="${l-6}" y="${Y(v)+4}" font-size="11" text-anchor="end" fill="var(--tinta2)">${fmt(v,2)}</text>`;}
+ ds.forEach((d,k)=>{g+=`<text x="${X(k)}" y="${H-b+18}" font-size="11" text-anchor="middle" fill="var(--tinta2)">${d}</text>`;});
+ g+=`<text x="${(W+l)/2}" y="${H-6}" font-size="12" text-anchor="middle" fill="var(--tinta2)">profundidade máxima da árvore</text>`;
+ g+=`<polyline points="${vals.map((v,k)=>X(k)+','+Y(v)).join(' ')}" fill="none" stroke="var(--tinta)" stroke-width="2.5"/>`;
+ vals.forEach((v,k)=>{g+=`<circle cx="${X(k)}" cy="${Y(v)}" r="${k===best?8:5}" fill="${k===best?'var(--vermelho)':'var(--tinta)'}"/>`;});
+ document.getElementById('curvaMet').innerHTML=g;
+ const d=ds[best];
+ document.getElementById('mProf').innerHTML=`Profundidade escolhida<b>${d}</b>`;
+ document.getElementById('mVal').innerHTML=`Valor na validação cruzada<b>${fmt(vals[best])}</b>`;
+ document.getElementById('mRec').innerHTML=`Sensibilidade dessa árvore<b>${fmt(mean(AR[d]['test_recall']))}</b>`;
+ document.getElementById('mBal').innerHTML=`Acurácia balanceada dessa árvore<b>${fmt(mean(AR[d]['test_balanced_accuracy']))}</b>`;
+ document.getElementById('mTxt').textContent=mi==='test_accuracy'?'A acurácia premia a árvore que responde “dengue” para quase todo mundo.':mi==='test_balanced_accuracy'?'Pela acurácia balanceada, nenhuma profundidade passa de 0,50: com estes sinais, a árvore no limiar de 50% não separa as classes.':'A AUC olha para a ordenação das probabilidades, não para um limiar, e prefere uma árvore mais funda.';
+ document.getElementById('chipsM').innerHTML=MET.map(([k,n])=>`<button type="button" class="chip" data-k="${k}" aria-pressed="${k===mi}">${n}</button>`).join('');}
+document.getElementById('chipsM').addEventListener('click',e=>{const c=e.target.closest('.chip');if(c){mi=c.dataset.k;desMet();}});
+desMet();
+
+// grade
+const Cs=SV.Cs,Gs=SV.Gs,G=SV.grid;let sel=[3,2];
+const cor=v=>{const a=Math.max(0,Math.min(1,(v-.55)/(.83-.55)));return `rgba(209,22,21,${(.08+.92*a).toFixed(3)})`;};
+let bi=[0,0];G.forEach((row,i)=>row.forEach((c,j)=>{if(c[0]>G[bi[0]][bi[1]][0])bi=[i,j];}));
+function desGrade(){const W=460,H=420,l=70,t=10,cw=(W-l-10)/6,ch=(H-t-60)/6;let g='';
+ G.forEach((row,i)=>row.forEach((c,j)=>{const x=l+j*cw,y=t+(5-i)*ch,isB=i===bi[0]&&j===bi[1],isS=i===sel[0]&&j===sel[1];
+  g+=`<g data-i="${i}" data-j="${j}" style="cursor:pointer"><rect x="${x+1}" y="${y+1}" width="${cw-2}" height="${ch-2}" rx="4" fill="${cor(c[0])}" stroke="${isB?'var(--vermelho)':isS?'var(--tinta)':'none'}" stroke-width="${isB||isS?3:0}"/><text x="${x+cw/2}" y="${y+ch/2+4}" font-size="12" text-anchor="middle" fill="${c[0]>.72?'#fff':'var(--tinta)'}" font-weight="${isB?800:500}" pointer-events="none">${fmt(c[0],2)}</text></g>`;}));
+ Cs.forEach((c,j)=>{g+=`<text x="${l+j*cw+cw/2}" y="${H-38}" font-size="11" text-anchor="middle" fill="var(--tinta2)">${num(c)}</text>`;});
+ Gs.forEach((v,i)=>{g+=`<text x="${l-8}" y="${t+(5-i)*ch+ch/2+4}" font-size="11" text-anchor="end" fill="var(--tinta2)">${num(v)}</text>`;});
+ g+=`<text x="${(W+l)/2}" y="${H-12}" font-size="12" text-anchor="middle" fill="var(--tinta2)">C</text><text x="14" y="${(H-60)/2}" font-size="12" text-anchor="middle" fill="var(--tinta2)" transform="rotate(-90 14 ${(H-60)/2})">γ</text>`;
+ const s=document.getElementById('grade');s.innerHTML=g;
+ const c=G[sel[0]][sel[1]];document.getElementById('gSel').innerHTML=`Combinação<b>C = ${num(Cs[sel[1]])} · γ = ${num(Gs[sel[0]])}</b>`;
+ document.getElementById('gVal').innerHTML=`Validação cruzada<b>${fmt(c[0])} ± ${fmt(c[1])}</b>`;
+ document.getElementById('gTxt').textContent=sel[0]===bi[0]&&sel[1]===bi[1]?'A melhor combinação da grade. O número depois do ± é o desvio-padrão entre as 5 dobras.':c[0]<.6?'Perto de 0,55: o modelo responde quase sempre a mesma classe.':'O número depois do ± é o desvio-padrão entre as 5 dobras.';}
+document.getElementById('grade').addEventListener('click',e=>{const gg=e.target.closest('g[data-i]');if(gg){sel=[+gg.dataset.i,+gg.dataset.j];desGrade();}});
+desGrade();
+
+// grade × aleatória
+let modo='grade';
+function desMapa(id,modo,txtId){const W=460,H=420,l=70,t=10,w=W-l-26,h=H-t-60,lc=SV.lc,lg=SV.lg,n=lc.length;
+ const X=a=>l+(a-lc[0])/(lc[n-1]-lc[0])*w,Y=b=>t+h-(b-lg[0])/(lg[n-1]-lg[0])*h;const cw=w/n,ch=h/n;let g='';
+ SV.dense.forEach((row,i)=>row.forEach((v,j)=>{g+=`<rect x="${l+j*cw}" y="${t+h-(i+1)*ch}" width="${cw+.5}" height="${ch+.5}" fill="${cor(v)}" opacity=".55"/>`;}));
+ g+=`<rect x="${l}" y="${t}" width="${w}" height="${h}" fill="none" stroke="var(--linha)"/>`;
+ [-2,-1,0,1,2,3].forEach(a=>{g+=`<text x="${X(a)}" y="${H-38}" font-size="11" text-anchor="middle" fill="var(--tinta2)">${num(10**a)}</text>`;});
+ [-3,-2,-1,0,1,2].forEach(b=>{g+=`<text x="${l-8}" y="${Y(b)+4}" font-size="11" text-anchor="end" fill="var(--tinta2)">${num(10**b)}</text>`;});
+ g+=`<text x="${(W+l)/2}" y="${H-12}" font-size="12" text-anchor="middle" fill="var(--tinta2)">C (escala logarítmica)</text><text x="14" y="${(H-60)/2}" font-size="12" text-anchor="middle" fill="var(--tinta2)" transform="rotate(-90 14 ${(H-60)/2})">γ (escala logarítmica)</text>`;
+ let pts,best;
+ if(modo==='grade'){pts=[];G.forEach((row,i)=>row.forEach((c,j)=>pts.push([Math.log10(Cs[j]),Math.log10(Gs[i]),c[0]])));}
+ else if(modo==='aleat') pts=SV.rs;
+ else{const F=SV.fine,a0=Math.min(...F.map(f=>f[0])),a1=Math.max(...F.map(f=>f[0])),b0=Math.min(...F.map(f=>f[1])),b1=Math.max(...F.map(f=>f[1]));
+  g+=`<rect x="${X(a0)-8}" y="${Y(b1)-8}" width="${X(a1)-X(a0)+16}" height="${Y(b0)-Y(b1)+16}" fill="none" stroke="var(--tinta)" stroke-dasharray="4 4"/>`;
+  SV.rs.forEach(p=>{g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="5" fill="none" stroke="var(--tinta)" stroke-width="1.5"/>`;});
+  pts=F;}
+ best=pts.reduce((a,p)=>p[2]>a[2]?p:a,pts[0]);
+ pts.forEach(p=>{const isB=p===best;g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="${isB?9:(modo==='fina'?4.5:6)}" fill="${isB?'var(--vermelho)':'var(--tinta)'}" stroke="#fff" stroke-width="1.5"/>`;});
+ document.getElementById(id).innerHTML=g;
+ document.getElementById(txtId).textContent=modo==='fina'?`Aleatória + grade fina: os 20 sorteios (círculos vazados) e uma grade de 5 × 5 em volta do melhor deles (retângulo). Melhor: C ≈ ${fmt(10**best[0],1)} e γ ≈ ${fmt(10**best[1],2)}, com ${fmt(best[2])} na validação cruzada, mas 0,801 no teste.`:modo==='grade'?`Busca em grade: 36 combinações, só 6 valores diferentes de cada hiperparâmetro. Melhor: C = 1 e γ = 1, com ${fmt(best[2])}.`:`Busca aleatória: 20 combinações sorteadas, 20 valores diferentes de cada hiperparâmetro. Melhor: C ≈ ${fmt(10**best[0],1)} e γ ≈ ${fmt(10**best[1],2)}, com ${fmt(best[2])}.`;
+ if(id==='mapa'){document.getElementById('btGrade').className='bt'+(modo==='grade'?' sim':'');document.getElementById('btAleat').className='bt'+(modo==='aleat'?' sim':'');}}
+document.getElementById('btGrade').onclick=()=>{modo='grade';desMapa('mapa',modo,'aTxt');};document.getElementById('btAleat').onclick=()=>{modo='aleat';desMapa('mapa',modo,'aTxt');};desMapa('mapa',modo,'aTxt');
+desMapa('mapaFina','fina','fTxt');
+})();
+
+</script>
+</body></html>
