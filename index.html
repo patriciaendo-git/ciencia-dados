@@ -33,8 +33,7 @@ section{margin-top:44px}
 h2{font-size:22px;font-weight:700;margin-bottom:6px}
 .sub{color:var(--muted);max-width:none;margin-bottom:18px}
 .ordem{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
-.legend{list-style:none;padding:0;margin:0 0 44px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-@media (max-width:900px){.legend{grid-template-columns:repeat(2,1fr)}}
+.legend{list-style:none;padding:0;margin:0 0 44px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .legend li{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.45;color:var(--muted)}
 .legend .ln{flex:none;width:26px;height:26px;border-radius:50%;background:var(--red);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center}
 .legend b{display:block;color:var(--fg);font-weight:700;font-size:14px;margin-bottom:2px}
@@ -87,13 +86,12 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
 
   <section aria-labelledby="aulas">
     <h2 id="aulas">Aulas</h2>
-    <p class="sub">Materiais da disciplina, aula por aula: material da aula, slides, páginas interativas e materiais de estudo.</p>
-    <p class="ordem">Ordem sugerida de uso</p>
+    <p class="sub">Materiais da disciplina, aula por aula: material da aula, páginas interativas e materiais de estudo.</p>
+    <p class="ordem">Materiais disponíveis</p>
     <ol class="legend">
       <li><span class="ln">1</span><div><b>Material da aula</b><span>apresentação interativa usada em sala</span></div></li>
-      <li><span class="ln">2</span><div><b>Slides</b><span>que foram apresentados em aula</span></div></li>
-      <li><span class="ln">3</span><div><b>Página interativa</b><span>com visualizações para explorar e testar valores</span></div></li>
-      <li><span class="ln">4</span><div><b>Material de estudo</b><span>com texto completo para estudo aprofundado</span></div></li>
+      <li><span class="ln">2</span><div><b>Página interativa</b><span>com visualizações para explorar e testar valores</span></div></li>
+      <li><span class="ln">3</span><div><b>Material de estudo</b><span>com texto completo para estudo aprofundado</span></div></li>
     </ol>
     <div class="grupos" id="lista"></div>
     <p class="note">Os exemplos e as práticas usam dados públicos do SUS e casos dos projetos do dotLAB.</p>
@@ -104,24 +102,24 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
 </div>
 
 <script>
-/* Para publicar um material: preencha, dentro da aula, slides (PDF) / material (página interativa) / apostila (material de estudo) / colab com
+/* Para publicar um material: preencha, dentro da aula, aula (material da aula) / material (página interativa) / apostila (material de estudo) / colab com
    {arq:"aulas/<aula>/<arquivo>.pdf", pag:14, ver:"Versão 1.0 · novembro de 2026"}
    (página interativa: {pagina:"aulas/<aula>/index.html", ver:"..."})
    (no Colab, use {link:"https://colab.research.google.com/...", ver:"..."}).
    Material sem arquivo aparece como "Em preparação". Use null para "não se aplica". */
 const AULAS = [
-  {n:"01", t:"O que é ciência de dados", d:"Quem é a cientista de dados, o que dá para aprender com os dados e o processo de descoberta de conhecimento.", slides:{}, apostila:{}, colab:null},
-  {n:"02", t:"Fontes de dados", d:"Onde encontrar bases públicas, com destaque para os dados do SUS, e como avaliar se uma base serve à pergunta.", slides:{}, apostila:{}, colab:null},
-  {n:"03", t:"Mineração de dados e CRISP-DM", d:"O que é mineração de dados e as fases de um projeto: CRISP-DM, KDD e SEMMA.", slides:{}, apostila:{}, colab:null},
-  {n:"04", t:"Introdução ao aprendizado de máquina I", d:"Conceitos, tipos de aprendizado (supervisionado, não supervisionado e por reforço) e tipos de dados.", slides:{}, apostila:{}, colab:null},
-  {n:"05", t:"Introdução ao aprendizado de máquina II", d:"Treino, validação e teste; validação cruzada; subajuste e sobreajuste.", slides:{}, apostila:{}, colab:null},
-  {n:"06", t:"Árvore de decisão", d:"Entropia, ganho de informação, construção da árvore passo a passo e poda.", aula:{pagina:"aulas/arvore-de-decisao/arvore-de-decisao-material-da-aula.html", ver:"Versão 2 · novembro de 2026"}, slides:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-slides.pdf", pag:29, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/arvore-de-decisao/index.html", ver:"Versão 1.8 · novembro de 2026"}, apostila:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-material-de-estudo.pdf", pag:15, ver:"Versão 1.9 · novembro de 2026"}, colab:null},
-  {n:"07", t:"Random Forest e AdaBoost", d:"Comitês de modelos: bagging, Random Forest, boosting e AdaBoost, rodada a rodada.", aula:{pagina:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-material-da-aula.html", ver:"Versão 7 · novembro de 2026"}, slides:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-slides.pdf", pag:32, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/random-forest-e-adaboost/index.html", ver:"Versão 1.4 · novembro de 2026"}, apostila:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-material-de-estudo.pdf", pag:18, ver:"Versão 1.4 · novembro de 2026"}, colab:null},
-  {n:"08", t:"kNN", d:"Classificação pelos vizinhos mais próximos: distâncias e escolha de k.", slides:{}, apostila:{}, colab:null},
-  {n:"09", t:"SVM", d:"Hiperplano, margem, vetores de suporte, margem suave e o truque do kernel.", slides:{arq:"aulas/svm/svm-slides.pdf", pag:24, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/svm/index.html", ver:"Versão 1.0 · novembro de 2026"}, apostila:{arq:"aulas/svm/svm-material-de-estudo.pdf", pag:15, ver:"Versão 1.0 · novembro de 2026"}, colab:null},
-  {n:"10", t:"Métricas de avaliação", d:"Matriz de confusão, acurácia, sensibilidade, especificidade, precisão, limiar de decisão e curva ROC.", slides:{arq:"aulas/metricas-de-avaliacao/metricas-de-avaliacao-slides.pdf", pag:25, ver:"Versão 1.1 · novembro de 2026"}, material:{pagina:"aulas/metricas-de-avaliacao/index.html", ver:"Versão 1.1 · novembro de 2026"}, apostila:{arq:"aulas/metricas-de-avaliacao/metricas-de-avaliacao-material-de-estudo.pdf", pag:13, ver:"Versão 1.1 · novembro de 2026"}, colab:null},
-  {n:"11", t:"Configuração de hiperparâmetros", d:"Parâmetros e hiperparâmetros, vazamento de dados, validação cruzada, busca em grade e busca aleatória.", slides:{arq:"aulas/configuracao-de-hiperparametros/configuracao-de-hiperparametros-slides.pdf", pag:19, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/configuracao-de-hiperparametros/index.html", ver:"Versão 1.0 · novembro de 2026"}, apostila:{arq:"aulas/configuracao-de-hiperparametros/configuracao-de-hiperparametros-material-de-estudo.pdf", pag:13, ver:"Versão 1.0 · novembro de 2026"}, colab:null},
-  {n:"12", t:"k-means", d:"Agrupamento passo a passo e escolha do número de grupos.", slides:{}, apostila:{}, colab:null}
+  {n:"01", t:"O que é ciência de dados", d:"Quem é a cientista de dados, o que dá para aprender com os dados e o processo de descoberta de conhecimento.", aula:{}, apostila:{}, colab:null},
+  {n:"02", t:"Fontes de dados", d:"Onde encontrar bases públicas, com destaque para os dados do SUS, e como avaliar se uma base serve à pergunta.", aula:{}, apostila:{}, colab:null},
+  {n:"03", t:"Mineração de dados e CRISP-DM", d:"O que é mineração de dados e as fases de um projeto: CRISP-DM, KDD e SEMMA.", aula:{}, apostila:{}, colab:null},
+  {n:"04", t:"Introdução ao aprendizado de máquina I", d:"Conceitos, tipos de aprendizado (supervisionado, não supervisionado e por reforço) e tipos de dados.", aula:{}, apostila:{}, colab:null},
+  {n:"05", t:"Introdução ao aprendizado de máquina II", d:"Treino, validação e teste; validação cruzada; subajuste e sobreajuste.", aula:{}, apostila:{}, colab:null},
+  {n:"06", t:"Árvore de decisão", d:"Entropia, ganho de informação, construção da árvore passo a passo e poda.", aula:{pagina:"aulas/arvore-de-decisao/arvore-de-decisao-material-da-aula.html", ver:"Versão 2 · novembro de 2026"}, material:{pagina:"aulas/arvore-de-decisao/index.html", ver:"Versão 1.8 · novembro de 2026"}, apostila:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-material-de-estudo.pdf", pag:15, ver:"Versão 1.9 · novembro de 2026"}, colab:null},
+  {n:"07", t:"Random Forest e AdaBoost", d:"Comitês de modelos: bagging, Random Forest, boosting e AdaBoost, rodada a rodada.", aula:{pagina:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-material-da-aula.html", ver:"Versão 7 · novembro de 2026"}, material:{pagina:"aulas/random-forest-e-adaboost/index.html", ver:"Versão 1.4 · novembro de 2026"}, apostila:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-material-de-estudo.pdf", pag:18, ver:"Versão 1.4 · novembro de 2026"}, colab:null},
+  {n:"08", t:"kNN", d:"Classificação pelos vizinhos mais próximos: distâncias e escolha de k.", aula:{}, apostila:{}, colab:null},
+  {n:"09", t:"SVM", d:"Hiperplano, margem, vetores de suporte, margem suave e o truque do kernel.", aula:{}, material:{pagina:"aulas/svm/index.html", ver:"Versão 1.0 · novembro de 2026"}, apostila:{arq:"aulas/svm/svm-material-de-estudo.pdf", pag:15, ver:"Versão 1.0 · novembro de 2026"}, colab:null},
+  {n:"10", t:"Métricas de avaliação", d:"Matriz de confusão, acurácia, sensibilidade, especificidade, precisão, limiar de decisão e curva ROC.", aula:{}, material:{pagina:"aulas/metricas-de-avaliacao/index.html", ver:"Versão 1.1 · novembro de 2026"}, apostila:{arq:"aulas/metricas-de-avaliacao/metricas-de-avaliacao-material-de-estudo.pdf", pag:13, ver:"Versão 1.1 · novembro de 2026"}, colab:null},
+  {n:"11", t:"Configuração de hiperparâmetros", d:"Parâmetros e hiperparâmetros, vazamento de dados, validação cruzada, busca em grade e busca aleatória.", aula:{}, material:{pagina:"aulas/configuracao-de-hiperparametros/index.html", ver:"Versão 1.0 · novembro de 2026"}, apostila:{arq:"aulas/configuracao-de-hiperparametros/configuracao-de-hiperparametros-material-de-estudo.pdf", pag:13, ver:"Versão 1.0 · novembro de 2026"}, colab:null},
+  {n:"12", t:"k-means", d:"Agrupamento passo a passo e escolha do número de grupos.", aula:{}, apostila:{}, colab:null}
 ];
 const GRUPOS = [
   {t:"Fundamentos", d:"O que é ciência de dados, de onde vêm os dados e como se organiza um projeto.", ns:["01","02","03"]},
@@ -130,7 +128,7 @@ const GRUPOS = [
   {t:"Avaliação e ajuste de modelos", d:"Como medir o desempenho de um classificador e escolher os seus hiperparâmetros.", ns:["10","11"]},
   {t:"Agrupamento", d:"Aprendizado não supervisionado: encontrar grupos nos dados.", ns:["12"]}
 ];
-const TIPOS = [["aula","Material da aula"],["slides","Slides"],["material","Página interativa"],["apostila","Material de estudo"],["colab","Colab"]];
+const TIPOS = [["aula","Material da aula"],["material","Página interativa"],["apostila","Material de estudo"],["colab","Colab"]];
 
 function preencher(box, m, tipo){
   if(m.pagina){
