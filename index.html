@@ -33,7 +33,8 @@ section{margin-top:44px}
 h2{font-size:22px;font-weight:700;margin-bottom:6px}
 .sub{color:var(--muted);max-width:none;margin-bottom:18px}
 .ordem{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
-.legend{list-style:none;padding:0;margin:0 0 44px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.legend{list-style:none;padding:0;margin:0 0 44px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:900px){.legend{grid-template-columns:repeat(2,1fr)}}
 .legend li{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.45;color:var(--muted)}
 .legend .ln{flex:none;width:26px;height:26px;border-radius:50%;background:var(--red);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center}
 .legend b{display:block;color:var(--fg);font-weight:700;font-size:14px;margin-bottom:2px}
@@ -86,12 +87,13 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);display
 
   <section aria-labelledby="aulas">
     <h2 id="aulas">Aulas</h2>
-    <p class="sub">Materiais da disciplina, aula por aula: slides, páginas interativas e materiais de estudo.</p>
+    <p class="sub">Materiais da disciplina, aula por aula: material da aula, slides, páginas interativas e materiais de estudo.</p>
     <p class="ordem">Ordem sugerida de uso</p>
     <ol class="legend">
-      <li><span class="ln">1</span><div><b>Slides</b><span>que foram apresentados em aula</span></div></li>
-      <li><span class="ln">2</span><div><b>Página interativa</b><span>com visualizações para explorar e testar valores</span></div></li>
-      <li><span class="ln">3</span><div><b>Material de estudo</b><span>com texto completo para estudo aprofundado</span></div></li>
+      <li><span class="ln">1</span><div><b>Material da aula</b><span>apresentação interativa usada em sala</span></div></li>
+      <li><span class="ln">2</span><div><b>Slides</b><span>que foram apresentados em aula</span></div></li>
+      <li><span class="ln">3</span><div><b>Página interativa</b><span>com visualizações para explorar e testar valores</span></div></li>
+      <li><span class="ln">4</span><div><b>Material de estudo</b><span>com texto completo para estudo aprofundado</span></div></li>
     </ol>
     <div class="grupos" id="lista"></div>
     <p class="note">Os exemplos e as práticas usam dados públicos do SUS e casos dos projetos do dotLAB.</p>
@@ -113,8 +115,8 @@ const AULAS = [
   {n:"03", t:"Mineração de dados e CRISP-DM", d:"O que é mineração de dados e as fases de um projeto: CRISP-DM, KDD e SEMMA.", slides:{}, apostila:{}, colab:null},
   {n:"04", t:"Introdução ao aprendizado de máquina I", d:"Conceitos, tipos de aprendizado (supervisionado, não supervisionado e por reforço) e tipos de dados.", slides:{}, apostila:{}, colab:null},
   {n:"05", t:"Introdução ao aprendizado de máquina II", d:"Treino, validação e teste; validação cruzada; subajuste e sobreajuste.", slides:{}, apostila:{}, colab:null},
-  {n:"06", t:"Árvore de decisão", d:"Entropia, ganho de informação, construção da árvore passo a passo e poda.", slides:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-slides.pdf", pag:29, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/arvore-de-decisao/index.html", ver:"Versão 1.8 · novembro de 2026"}, apostila:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-material-de-estudo.pdf", pag:15, ver:"Versão 1.9 · novembro de 2026"}, colab:null},
-  {n:"07", t:"Random Forest e AdaBoost", d:"Comitês de modelos: bagging, Random Forest, boosting e AdaBoost, rodada a rodada.", slides:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-slides.pdf", pag:32, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/random-forest-e-adaboost/index.html", ver:"Versão 1.4 · novembro de 2026"}, apostila:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-material-de-estudo.pdf", pag:18, ver:"Versão 1.4 · novembro de 2026"}, colab:null},
+  {n:"06", t:"Árvore de decisão", d:"Entropia, ganho de informação, construção da árvore passo a passo e poda.", aula:{pagina:"aulas/arvore-de-decisao/arvore-de-decisao-material-da-aula.html", ver:"Versão 2 · novembro de 2026"}, slides:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-slides.pdf", pag:29, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/arvore-de-decisao/index.html", ver:"Versão 1.8 · novembro de 2026"}, apostila:{arq:"aulas/arvore-de-decisao/arvore-de-decisao-material-de-estudo.pdf", pag:15, ver:"Versão 1.9 · novembro de 2026"}, colab:null},
+  {n:"07", t:"Random Forest e AdaBoost", d:"Comitês de modelos: bagging, Random Forest, boosting e AdaBoost, rodada a rodada.", aula:{pagina:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-material-da-aula.html", ver:"Versão 7 · novembro de 2026"}, slides:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-slides.pdf", pag:32, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/random-forest-e-adaboost/index.html", ver:"Versão 1.4 · novembro de 2026"}, apostila:{arq:"aulas/random-forest-e-adaboost/random-forest-e-adaboost-material-de-estudo.pdf", pag:18, ver:"Versão 1.4 · novembro de 2026"}, colab:null},
   {n:"08", t:"kNN", d:"Classificação pelos vizinhos mais próximos: distâncias e escolha de k.", slides:{}, apostila:{}, colab:null},
   {n:"09", t:"SVM", d:"Hiperplano, margem, vetores de suporte, margem suave e o truque do kernel.", slides:{arq:"aulas/svm/svm-slides.pdf", pag:24, ver:"Versão 1.0 · novembro de 2026"}, material:{pagina:"aulas/svm/index.html", ver:"Versão 1.0 · novembro de 2026"}, apostila:{arq:"aulas/svm/svm-material-de-estudo.pdf", pag:15, ver:"Versão 1.0 · novembro de 2026"}, colab:null},
   {n:"10", t:"Métricas de avaliação", d:"Matriz de confusão, acurácia, sensibilidade, especificidade, precisão, limiar de decisão e curva ROC.", slides:{arq:"aulas/metricas-de-avaliacao/metricas-de-avaliacao-slides.pdf", pag:25, ver:"Versão 1.1 · novembro de 2026"}, material:{pagina:"aulas/metricas-de-avaliacao/index.html", ver:"Versão 1.1 · novembro de 2026"}, apostila:{arq:"aulas/metricas-de-avaliacao/metricas-de-avaliacao-material-de-estudo.pdf", pag:13, ver:"Versão 1.1 · novembro de 2026"}, colab:null},
@@ -128,13 +130,13 @@ const GRUPOS = [
   {t:"Avaliação e ajuste de modelos", d:"Como medir o desempenho de um classificador e escolher os seus hiperparâmetros.", ns:["10","11"]},
   {t:"Agrupamento", d:"Aprendizado não supervisionado: encontrar grupos nos dados.", ns:["12"]}
 ];
-const TIPOS = [["slides","Slides"],["material","Página interativa"],["apostila","Material de estudo"],["colab","Colab"]];
+const TIPOS = [["aula","Material da aula"],["slides","Slides"],["material","Página interativa"],["apostila","Material de estudo"],["colab","Colab"]];
 
 function preencher(box, m, tipo){
   if(m.pagina){
     const v=(m.ver||"").match(/Versão\s*([\d.]+)/);
     box.innerHTML=`<span class="meta2"></span><a class="btn pri">Abrir ↗</a>`;
-    box.querySelector(".meta2").textContent=(tipo==="apresentacao"?"Slides interativos":"Página interativa")+(v?` · versão ${v[1]}`:"");
+    box.querySelector(".meta2").textContent=(tipo==="aula"?"Apresentação interativa":tipo==="apresentacao"?"Slides interativos":"Página interativa")+(v?` · versão ${v[1]}`:"");
     box.querySelector("a").href=m.pagina;
     return true;
   }
